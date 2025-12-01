@@ -8,10 +8,11 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import zed.rainxch.vibeplayer.core.presentation.utils.AudioPermission
+import zed.rainxch.vibeplayer.core.presentation.utils.Permission
+import zed.rainxch.vibeplayer.core.presentation.utils.PermissionChecker
 
 class AppViewModel(
-    private val audioPermission: AudioPermission
+    private val permissionChecker: PermissionChecker
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -21,7 +22,7 @@ class AppViewModel(
         .onStart {
             if (!hasLoadedInitialData) {
                 viewModelScope.launch {
-                    val isGranted = audioPermission.isAudioPermissionGranted()
+                    val isGranted = permissionChecker.isPermissionGranted(Permission.Audio)
                     _state.update {
                         it.copy(
                             isAudioPermissionGranted = isGranted,
