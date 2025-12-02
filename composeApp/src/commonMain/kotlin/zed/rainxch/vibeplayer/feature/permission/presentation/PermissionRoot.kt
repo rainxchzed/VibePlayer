@@ -23,7 +23,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.app_logo
-import zed.rainxch.vibeplayer.core.presentation.components.PrimaryButton
+import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.utils.Permission
 import zed.rainxch.vibeplayer.core.presentation.utils.rememberPermissionLauncher

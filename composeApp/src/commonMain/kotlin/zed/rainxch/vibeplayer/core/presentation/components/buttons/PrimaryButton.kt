@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.core.presentation.components
+package zed.rainxch.vibeplayer.core.presentation.components.buttons
 
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
