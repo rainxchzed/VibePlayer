@@ -11,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,9 +51,12 @@ fun MainTopbar(
             }
         },
         actions = actions,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.onSecondary
+        ),
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 10.dp, horizontal = 16.dp)
+            .padding(vertical = 10.dp)
     )
 }
 
