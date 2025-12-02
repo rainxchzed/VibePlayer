@@ -6,6 +6,3 @@ interface PermissionChecker {
     fun isPermissionGranted(permission: Permission): IsPermissionGranted
 }
 
-enum class Permission {
-    Audio;
-}

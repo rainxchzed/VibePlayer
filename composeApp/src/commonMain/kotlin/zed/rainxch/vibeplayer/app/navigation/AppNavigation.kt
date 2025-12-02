@@ -17,6 +17,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSerializer
 import org.koin.compose.viewmodel.koinViewModel
 import zed.rainxch.vibeplayer.AppViewModel
+import zed.rainxch.vibeplayer.feature.permission.presentation.PermissionRoot
 
 @Composable
 fun AppNavigation(
@@ -46,8 +47,11 @@ fun AppNavigation(
         },
         entryProvider = entryProvider {
             entry<VibePlayerGraph.PermissionScreen> {
-                Text(
-                    text = "Permission"
+                PermissionRoot(
+                    onNavigateToMain = {
+                        navBackStack.clear()
+                        navBackStack.add(VibePlayerGraph.MainScreen)
+                    }
                 )
             }
 
