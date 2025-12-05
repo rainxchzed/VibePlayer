@@ -10,9 +10,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,6 +41,7 @@ fun AppNavigation(
     viewModel: AppViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     if (state.isLoading) {
         Box(
@@ -61,6 +65,7 @@ fun AppNavigation(
         }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             when (navBackStack.lastOrNull()) {
                 VibePlayerGraph.MainScreen -> {
@@ -118,7 +123,9 @@ fun AppNavigation(
                 }
 
                 entry<VibePlayerGraph.ScanScreen> {
-                    ScanRoot()
+                    ScanRoot(
+                        snackbarHostState = snackbarHostState,
+                    )
                 }
             },
             entryDecorators = listOf(
