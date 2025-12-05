@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
 import zed.rainxch.vibeplayer.core.presentation.components.progressbars.ScanningProgressbar
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
@@ -27,7 +29,7 @@ import zed.rainxch.vibeplayer.feature.main.presentation.components.MusicItem
 
 @Composable
 fun MainRoot(
-    viewModel: MainViewModel = viewModel()
+    viewModel: MainViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -101,6 +103,7 @@ fun MainScreen(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         items(

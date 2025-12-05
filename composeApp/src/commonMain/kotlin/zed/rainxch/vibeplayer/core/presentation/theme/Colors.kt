@@ -6,6 +6,9 @@ val ButtonPrimary = Color(0xFFDE84FF)
 val ButtonPrimary30 = Color(0xffDE84FF).copy(alpha = .3f)
 val ButtonHover = Color(0xff1A2735).copy(alpha = .28f) // 30% opacity
 
+
+val Outline = Color(0xff1A2735)
+
 val TextPrimary = Color(0xFFFFFFFF)
 val TextSecondary = Color(0xFFA7BBD1)
 val TextDisabled = Color(0xFF4C647C)

@@ -6,8 +6,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import zed.rainxch.vibeplayer.feature.main.domain.repository.MainRepository
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    private val mainRepository: MainRepository
+) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
@@ -15,7 +20,8 @@ class MainViewModel : ViewModel() {
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
-                /** Load initial data here **/
+                loadMusics()
+
                 hasLoadedInitialData = true
             }
         }
@@ -25,9 +31,44 @@ class MainViewModel : ViewModel() {
             initialValue = MainState()
         )
 
+    private fun loadMusics() {
+        viewModelScope.launch {
+            val musics = mainRepository.getMusicsWithMetadata()
+
+            _state.update {
+                it.copy(
+                    scanResultState = ScanResultState.Ready,
+                    musics = musics
+                )
+            }
+        }
+    }
+
     fun onAction(action: MainAction) {
         when (action) {
-            else -> TODO("Handle actions")
+            MainAction.OnScanAgainClick -> {
+                viewModelScope.launch {
+                    _state.update {
+                        it.copy(
+                            scanResultState = ScanResultState.Loading
+                        )
+                    }
+
+                    val musics = mainRepository.getMusicsWithMetadata()
+
+                    _state.update {
+                        it.copy(
+                            scanResultState = ScanResultState.Ready,
+                            musics = musics
+                        )
+                    }
+                }
+
+            }
+
+            is MainAction.OnMusicItemClick -> {
+                /* Handled in composable */
+            }
         }
     }
 

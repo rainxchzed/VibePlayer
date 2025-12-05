@@ -13,6 +13,7 @@ coilCompose = "3.3.0"
 composeHotReload = "1.0.0-rc02"
 composeMultiplatform = "1.9.1"
 coreSplashscreen = "1.2.0"
+jaudiotagger = "3.0.1"
 junit = "4.13.2"
 kamelImageDefault = "1.0.8"
 kotlin = "2.2.20"
@@ -28,6 +29,7 @@ kotlinxCollectionsImmutable = "0.4.0"
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
+jaudiotagger = { module = "org.jaudiotagger:jaudiotagger", version.ref = "jaudiotagger" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }
