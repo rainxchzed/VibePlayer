@@ -1,5 +1,8 @@
 package zed.rainxch.vibeplayer.app.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -37,6 +40,12 @@ fun AppNavigation(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     if (state.isLoading) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.onSecondary)
+        )
+
         return
     }
 

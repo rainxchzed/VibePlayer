@@ -65,6 +65,7 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.koin.core)
+            implementation("net.jthink:jaudiotagger:3.0.1")
         }
     }
 }
