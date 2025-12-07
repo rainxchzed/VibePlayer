@@ -8,12 +8,11 @@ import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import zed.rainxch.vibeplayer.core.domain.model.Music
-import zed.rainxch.vibeplayer.feature.main.data.data_source.MusicsDataStore
+import zed.rainxch.vibeplayer.core.data.data_source.MusicsDataStore
 import java.io.File
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.UnsupportedAudioFileException
 
-// jvmMain implementation
 class JvmMusicsDataStore : MusicsDataStore {
 
     override fun scanMusics(): ImmutableList<Music> {

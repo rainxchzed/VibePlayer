@@ -15,6 +15,7 @@ fun initDatabase(): AppDatabase {
             name = dbFilePath,
         )
         .setQueryCoroutineContext(Dispatchers.IO)
+        .fallbackToDestructiveMigration(true)
         .build()
 }
 

@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.feature.main.data.repository
+package zed.rainxch.vibeplayer.core.data.repository
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -9,16 +9,16 @@ import zed.rainxch.vibeplayer.core.data.local.db.entity.MusicEntity
 import zed.rainxch.vibeplayer.core.data.mappers.toMusic
 import zed.rainxch.vibeplayer.core.data.mappers.toMusicEntity
 import zed.rainxch.vibeplayer.core.domain.model.Music
-import zed.rainxch.vibeplayer.feature.main.data.data_source.CacheMusicsDataSource
-import zed.rainxch.vibeplayer.feature.main.data.data_source.MusicsDataStore
-import zed.rainxch.vibeplayer.feature.main.domain.repository.MainRepository
+import zed.rainxch.vibeplayer.core.data.data_source.CacheMusicsDataSource
+import zed.rainxch.vibeplayer.core.data.data_source.MusicsDataStore
+import zed.rainxch.vibeplayer.core.domain.repository.MusicRepository
 import zed.rainxch.vibeplayer.feature.scan.domain.IgnoreDuration
 import zed.rainxch.vibeplayer.feature.scan.domain.IgnoreSize
 
-class DefaultMainRepository(
+class DefaultMusicRepository(
     private val cacheMusicsDatasource: CacheMusicsDataSource,
     private val musicsDataStore: MusicsDataStore
-) : MainRepository {
+) : MusicRepository {
 
     /**
      * Main entry point for getting music list.

@@ -13,5 +13,6 @@ fun initDatabase(): AppDatabase {
         )
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
+        .fallbackToDestructiveMigration(true)
         .build()
 }

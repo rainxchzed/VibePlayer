@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.feature.main.data.data_source
+package zed.rainxch.vibeplayer.core.data.data_source
 
 import zed.rainxch.vibeplayer.core.data.local.db.dao.MusicsDao
 import zed.rainxch.vibeplayer.core.data.local.db.entity.MusicEntity

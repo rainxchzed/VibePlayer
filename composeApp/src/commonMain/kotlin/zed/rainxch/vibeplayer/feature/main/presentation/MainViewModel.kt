@@ -8,11 +8,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
-import zed.rainxch.vibeplayer.feature.main.domain.repository.MainRepository
+import zed.rainxch.vibeplayer.core.domain.repository.MusicRepository
 
 class MainViewModel(
-    private val mainRepository: MainRepository,
+    private val musicRepository: MusicRepository,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -34,7 +33,7 @@ class MainViewModel(
 
     private fun loadMusics() {
         viewModelScope.launch {
-            val musics = mainRepository.getMusicsWithMetadata()
+            val musics = musicRepository.getMusicsWithMetadata()
 
             _state.update {
                 it.copy(
@@ -55,7 +54,7 @@ class MainViewModel(
                         )
                     }
 
-                    val musics = mainRepository.getMusicsWithMetadata()
+                    val musics = musicRepository.getMusicsWithMetadata()
 
                     _state.update {
                         it.copy(
