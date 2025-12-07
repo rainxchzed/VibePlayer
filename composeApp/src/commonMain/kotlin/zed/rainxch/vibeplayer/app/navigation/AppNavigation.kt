@@ -27,7 +27,6 @@ import androidx.savedstate.compose.serialization.serializers.SnapshotStateListSe
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
-import vibeplayer.composeapp.generated.resources.ic_arrow_left
 import vibeplayer.composeapp.generated.resources.ic_scan
 import zed.rainxch.vibeplayer.AppViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.MainTopbar

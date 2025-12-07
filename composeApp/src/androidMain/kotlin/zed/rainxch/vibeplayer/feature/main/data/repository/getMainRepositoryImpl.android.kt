@@ -11,13 +11,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.feature.main.domain.repository.MainRepository
+import zed.rainxch.vibeplayer.feature.scan.domain.IgnoreDuration
+import zed.rainxch.vibeplayer.feature.scan.domain.IgnoreSize
 import java.io.File
 import java.io.FileOutputStream
 
 class DefaultMainRepository(
     private val context: Context
 ) : MainRepository {
-    override suspend fun getMusicsWithMetadata(): ImmutableList<Music> =
+    override suspend fun getMusicsWithMetadata(
+        ignoreSize: IgnoreSize,
+        ignoreDuration: IgnoreDuration
+    ): ImmutableList<Music> =
         withContext(Dispatchers.IO) {
             val audioFiles = mutableListOf<File>()
 
@@ -49,13 +54,15 @@ class DefaultMainRepository(
             query?.use { cursor ->
                 val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
                 val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
+                val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
 
                 while (cursor.moveToNext()) {
                     val filePath = cursor.getString(dataColumn)
                     val fileSize = cursor.getLong(sizeColumn)
+                    val duration = cursor.getLong(durationColumn)
 
                     // Skip files smaller than 100KB (likely corrupted or ringtones)
-                    if (fileSize > 100_000) {
+                    if (fileSize > ignoreSize.value && duration > ignoreDuration.value) {
                         val file = File(filePath)
                         if (file.exists()) {
                             audioFiles.add(file)

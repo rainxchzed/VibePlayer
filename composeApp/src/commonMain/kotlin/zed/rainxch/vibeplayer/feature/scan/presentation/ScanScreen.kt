@@ -69,7 +69,9 @@ fun ScanScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ScanningProgressbar()
+        ScanningProgressbar(
+            isAnimating = state.isScanning
+        )
 
         Spacer(Modifier.height(24.dp))
 
