@@ -8,10 +8,12 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
 import zed.rainxch.vibeplayer.feature.main.domain.repository.MainRepository
 
 class MainViewModel(
-    private val mainRepository: MainRepository
+    private val mainRepository: MainRepository,
+    private val appDatabase: AppDatabase
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -41,6 +43,8 @@ class MainViewModel(
                     musics = musics
                 )
             }
+
+            println(appDatabase.musicDao.getMusics())
         }
     }
 

@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
     kotlin("plugin.serialization") version "2.2.0"
 }
 
@@ -57,6 +59,10 @@ kotlin {
 
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
+
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.sqlite.bundled)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -65,7 +71,7 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.koin.core)
-            implementation("net.jthink:jaudiotagger:3.0.1")
+            implementation(libs.jthink.jaudiotagger)
         }
     }
 }
@@ -99,6 +105,11 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    ksp(libs.androidx.room.compiler)
+}
+
+room {
+    schemaDirectory("$projectDir/schema")
 }
 
 compose.desktop {

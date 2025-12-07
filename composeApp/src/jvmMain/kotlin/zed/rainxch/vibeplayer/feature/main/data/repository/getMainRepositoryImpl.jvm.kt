@@ -1,7 +1,6 @@
 package zed.rainxch.vibeplayer.feature.main.data.repository
 
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -12,8 +11,6 @@ import org.jaudiotagger.tag.FieldKey
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.feature.main.domain.repository.MainRepository
 import java.io.File
-import java.util.Locale
-import java.util.concurrent.TimeUnit
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.UnsupportedAudioFileException
 

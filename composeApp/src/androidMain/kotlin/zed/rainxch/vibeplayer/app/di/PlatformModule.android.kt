@@ -3,6 +3,8 @@ package zed.rainxch.vibeplayer.app.di
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
+import zed.rainxch.vibeplayer.core.data.local.db.initDatabase
 import zed.rainxch.vibeplayer.core.presentation.utils.AndroidPermissionChecker
 import zed.rainxch.vibeplayer.core.presentation.utils.PermissionChecker
 import zed.rainxch.vibeplayer.feature.main.data.repository.DefaultMainRepository
@@ -15,5 +17,9 @@ actual val platformModule: Module = module {
 
     single<MainRepository> {
         DefaultMainRepository(androidContext())
+    }
+
+    single<AppDatabase> {
+        initDatabase(androidContext())
     }
 }
