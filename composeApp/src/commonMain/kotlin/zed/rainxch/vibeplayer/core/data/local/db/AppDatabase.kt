@@ -7,7 +7,7 @@ import zed.rainxch.vibeplayer.core.data.local.db.entity.MusicEntity
 
 @Database(
     entities = [MusicEntity::class],
-    version = 1
+    version = 2
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract val musicDao: MusicsDao

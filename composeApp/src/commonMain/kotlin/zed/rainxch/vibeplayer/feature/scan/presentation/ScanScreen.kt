@@ -9,18 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
@@ -33,19 +29,19 @@ import zed.rainxch.vibeplayer.feature.scan.domain.IgnoreSize
 
 @Composable
 fun ScanRoot(
-    snackbarHostState: SnackbarHostState,
+    onShowSnackbar: (message: String) -> Unit,
+    navigateBack: () -> Unit,
     viewModel: ScanViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val coroutineScope = rememberCoroutineScope()
     ObserveAsEvents(viewModel.event) {
         when (it) {
             is ScanEvent.SnackbarMessage -> {
-                coroutineScope.launch {
-                    snackbarHostState.currentSnackbarData?.dismiss()
-                    snackbarHostState.showSnackbar(message = it.message)
-                }
+                onShowSnackbar(it.message)
+            }
+            ScanEvent.NavigateBack -> {
+                navigateBack()
             }
         }
     }

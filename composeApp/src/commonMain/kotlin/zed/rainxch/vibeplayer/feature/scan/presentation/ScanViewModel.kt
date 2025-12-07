@@ -11,22 +11,16 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import zed.rainxch.vibeplayer.core.domain.repository.MusicRepository
 
-class ScanViewModel : ViewModel() {
-
-    private var hasLoadedInitialData = false
-
+class ScanViewModel(
+    val musicRepository: MusicRepository
+) : ViewModel() {
     private val _event = Channel<ScanEvent>()
     val event = _event.receiveAsFlow()
 
     private val _state = MutableStateFlow(ScanState())
     val state = _state
-        .onStart {
-            if (!hasLoadedInitialData) {
-                /** Load initial data here **/
-                hasLoadedInitialData = true
-            }
-        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
@@ -52,10 +46,10 @@ class ScanViewModel : ViewModel() {
     private fun startScan() {
         _state.update { it.copy(isScanning = true) }
         viewModelScope.launch {
-            delay(1000)
-            // TODO: scan here
-            _event.send(ScanEvent.SnackbarMessage("Scan complete — 128 songs found."))
+            val music = musicRepository.performFullScanAndCache(ignoreSize = state.value.ignoreSize, ignoreDuration = state.value.ignoreDuration)
             _state.update { it.copy(isScanning = false) }
+            _event.send(ScanEvent.SnackbarMessage("Scan complete — ${music.size} songs found."))
+            _event.send(ScanEvent.NavigateBack)
         }
     }
 
