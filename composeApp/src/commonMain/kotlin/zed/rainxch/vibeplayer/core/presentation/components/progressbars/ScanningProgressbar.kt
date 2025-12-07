@@ -47,12 +47,15 @@ import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 @Composable
 fun ScanningProgressbar(
     laps: Int = 4,
+    isAnimating: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val rotationInfinityTransition = rememberInfiniteTransition()
     val stickRotation = rotationInfinityTransition.animateFloat(
         initialValue = 0f,
-        targetValue = 360f,
+        targetValue = if(isAnimating) {
+            360f
+        } else 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(
                 durationMillis = 2000,
