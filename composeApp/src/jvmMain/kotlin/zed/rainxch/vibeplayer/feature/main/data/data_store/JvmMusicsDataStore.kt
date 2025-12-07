@@ -1,38 +1,40 @@
-package zed.rainxch.vibeplayer.feature.main.data.repository
+package zed.rainxch.vibeplayer.feature.main.data.data_store
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import zed.rainxch.vibeplayer.core.domain.model.Music
-import zed.rainxch.vibeplayer.feature.main.domain.repository.MainRepository
+import zed.rainxch.vibeplayer.feature.main.data.data_source.MusicsDataStore
 import java.io.File
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.UnsupportedAudioFileException
 
+// jvmMain implementation
+class JvmMusicsDataStore : MusicsDataStore {
 
-class DefaultMainRepository() : MainRepository {
-    override suspend fun getMusicsWithMetadata(): ImmutableList<Music> = coroutineScope {
-        val audioFiles = async { scanForAudioFiles() }
-
-        audioFiles
-            .await()
-            .mapNotNull {
-                getMetadata(it.absolutePath)
+    override fun scanMusics(): ImmutableList<Music> {
+        return runBlocking {
+            withContext(Dispatchers.IO) {
+                scanForAudioFiles()
             }
-            .toImmutableList()
+        }
     }
 
-    suspend fun scanForAudioFiles(
+    override fun checkIfMusicExist(music: Music): Boolean {
+        val file = File(music.musicUrl)
+        return file.exists() && file.canRead() && file.length() > 0
+    }
+
+    private suspend fun scanForAudioFiles(
         directories: List<String> = getDefaultMusicPaths(),
         onProgress: (Int, String) -> Unit = { _, _ -> }
-    ): List<File> = withContext(Dispatchers.IO) {
+    ): ImmutableList<Music> = withContext(Dispatchers.IO) {
         val audioExtensions = setOf("mp3", "wav", "flac", "m4a", "ogg", "aac", "wma", "opus")
-        val audioFiles = mutableListOf<File>()
+        val musics = mutableListOf<Music>()
         var count = 0
 
         directories.forEach { path ->
@@ -41,18 +43,21 @@ class DefaultMainRepository() : MainRepository {
                 try {
                     directory.walkTopDown()
                         .onEnter { dir ->
-                            // Skip hidden directories
                             !dir.name.startsWith(".")
                         }
                         .filter { file ->
                             file.isFile &&
                                     file.extension.lowercase() in audioExtensions &&
-                                    !file.name.startsWith(".")
+                                    !file.name.startsWith(".") &&
+                                    file.length() > 100_000 // > 100KB
                         }
                         .forEach { file ->
-                            audioFiles.add(file)
-                            count++
-                            onProgress(count, file.name)
+                            val metadata = getMetadata(file.absolutePath)
+                            if (metadata != null) {
+                                musics.add(metadata)
+                                count++
+                                onProgress(count, file.name)
+                            }
                         }
                 } catch (e: Exception) {
                     println("Error scanning directory $path: ${e.message}")
@@ -60,10 +65,10 @@ class DefaultMainRepository() : MainRepository {
             }
         }
 
-        audioFiles
+        musics.toImmutableList()
     }
 
-    fun getDefaultMusicPaths(): List<String> {
+    private fun getDefaultMusicPaths(): List<String> {
         val userHome = System.getProperty("user.home")
         val os = System.getProperty("os.name").lowercase()
 
@@ -72,12 +77,10 @@ class DefaultMainRepository() : MainRepository {
                 "$userHome\\Music",
                 "$userHome\\Downloads"
             )
-
             "mac" in os -> listOf(
                 "$userHome/Music",
                 "$userHome/Downloads"
             )
-
             else -> listOf(
                 "$userHome/Music",
                 "$userHome/music",
@@ -86,7 +89,7 @@ class DefaultMainRepository() : MainRepository {
         }
     }
 
-    fun getMetadata(filePath: String): Music? {
+    private fun getMetadata(filePath: String): Music? {
         return try {
             val file = File(filePath)
 

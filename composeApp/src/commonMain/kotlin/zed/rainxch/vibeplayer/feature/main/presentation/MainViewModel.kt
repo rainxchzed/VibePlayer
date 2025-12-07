@@ -13,7 +13,6 @@ import zed.rainxch.vibeplayer.feature.main.domain.repository.MainRepository
 
 class MainViewModel(
     private val mainRepository: MainRepository,
-    private val appDatabase: AppDatabase
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -43,8 +42,6 @@ class MainViewModel(
                     musics = musics
                 )
             }
-
-            println(appDatabase.musicDao.getMusics())
         }
     }
 

@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.feature.main.data.repository
+package zed.rainxch.vibeplayer.feature.main.data.data_sources
 
 import android.content.Context
 import android.database.Cursor
@@ -8,23 +8,34 @@ import android.provider.MediaStore
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import zed.rainxch.vibeplayer.core.domain.model.Music
-import zed.rainxch.vibeplayer.feature.main.domain.repository.MainRepository
-import zed.rainxch.vibeplayer.feature.scan.domain.IgnoreDuration
-import zed.rainxch.vibeplayer.feature.scan.domain.IgnoreSize
+import zed.rainxch.vibeplayer.feature.main.data.data_source.MusicsDataStore
 import java.io.File
 import java.io.FileOutputStream
+import java.util.Locale
 
-class DefaultMainRepository(
+class AndroidMusicsDataStore(
     private val context: Context
-) : MainRepository {
-    override suspend fun getMusicsWithMetadata(
-        ignoreSize: IgnoreSize,
-        ignoreDuration: IgnoreDuration
-    ): ImmutableList<Music> =
+) : MusicsDataStore {
+
+    override fun scanMusics(): ImmutableList<Music> {
+        return runBlocking {
+            withContext(Dispatchers.IO) {
+                scanForAudioFiles()
+            }
+        }
+    }
+
+    override fun checkIfMusicExist(music: Music): Boolean {
+        val file = File(music.musicUrl)
+        return file.exists() && file.canRead() && file.length() > 0
+    }
+
+    private suspend fun scanForAudioFiles(): ImmutableList<Music> =
         withContext(Dispatchers.IO) {
-            val audioFiles = mutableListOf<File>()
+            val musics = mutableListOf<Music>()
 
             val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
@@ -61,24 +72,23 @@ class DefaultMainRepository(
                     val fileSize = cursor.getLong(sizeColumn)
                     val duration = cursor.getLong(durationColumn)
 
-                    // Skip files smaller than 100KB (likely corrupted or ringtones)
-                    if (fileSize > ignoreSize.value && duration > ignoreDuration.value) {
+                    // Skip files smaller than 100KB or shorter than 30s
+                    if (fileSize > 100_000 && duration > 30_000) {
                         val file = File(filePath)
                         if (file.exists()) {
-                            audioFiles.add(file)
+                            val metadata = getMetadata(filePath)
+                            if (metadata != null) {
+                                musics.add(metadata)
+                            }
                         }
                     }
                 }
             }
 
-            audioFiles
-                .mapNotNull {
-                    getMetadata(it.absolutePath)
-                }
-                .toImmutableList()
+            musics.toImmutableList()
         }
 
-    fun getMetadata(filePath: String): Music? {
+    private fun getMetadata(filePath: String): Music? {
         val retriever = MediaMetadataRetriever()
         return try {
             retriever.setDataSource(filePath)
@@ -115,7 +125,6 @@ class DefaultMainRepository(
         return try {
             val artBytes = retriever.embeddedPicture ?: return null
 
-            // Save to app's cache directory
             val cacheDir = File(context.cacheDir, "album_art")
             cacheDir.mkdirs()
 
@@ -135,6 +144,10 @@ class DefaultMainRepository(
     private fun formatDuration(seconds: Int): String {
         val minutes = seconds / 60
         val secs = seconds % 60
-        return String.format("%d:%02d", minutes, secs)
+        return String.format(
+            Locale.getDefault(),
+            "%d:%02d",
+            minutes, secs
+        )
     }
 }
