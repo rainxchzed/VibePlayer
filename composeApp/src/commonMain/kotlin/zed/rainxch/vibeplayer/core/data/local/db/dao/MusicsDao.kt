@@ -5,10 +5,14 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
 import zed.rainxch.vibeplayer.core.data.local.db.entity.MusicEntity
 
 @Dao
 interface MusicsDao {
+    @Query("SELECT * FROM musics ORDER BY title ASC")
+    fun getMusicsFlow(): Flow<List<MusicEntity>>
+
     @Query("SELECT * FROM musics ORDER BY title ASC")
     suspend fun getMusics(): List<MusicEntity>
 
@@ -20,6 +24,9 @@ interface MusicsDao {
 
     @Query("SELECT COUNT(*) FROM musics")
     suspend fun getMusicCount(): Int
+
+    @Query("SELECT COUNT(*) FROM musics")
+    fun getMusicCountFlow(): Flow<Int>
 
     @Query("DELETE FROM musics")
     suspend fun clearAll()

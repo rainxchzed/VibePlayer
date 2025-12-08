@@ -25,7 +25,6 @@ val sharedModule = module {
 
     single<CacheMusicsDataSource> {
         CacheMusicsDataSource(
-            musicsDataStore = get(),
             musicsDao = get()
         )
     }

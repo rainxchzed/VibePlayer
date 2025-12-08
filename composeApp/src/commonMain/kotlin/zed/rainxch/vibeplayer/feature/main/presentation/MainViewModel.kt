@@ -33,13 +33,15 @@ class MainViewModel(
 
     private fun loadMusics() {
         viewModelScope.launch {
-            val musics = musicRepository.getMusicsWithMetadata()
+            val musics = musicRepository.getMusicsWithMetadataFlow()
 
-            _state.update {
-                it.copy(
-                    scanResultState = ScanResultState.Ready,
-                    musics = musics
-                )
+            musics.collect { musics ->
+                _state.update {
+                    it.copy(
+                        scanResultState = ScanResultState.Ready,
+                        musics = musics
+                    )
+                }
             }
         }
     }

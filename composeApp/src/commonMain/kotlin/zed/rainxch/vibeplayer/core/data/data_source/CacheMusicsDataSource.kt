@@ -1,15 +1,22 @@
 package zed.rainxch.vibeplayer.core.data.data_source
 
+import kotlinx.coroutines.flow.Flow
 import zed.rainxch.vibeplayer.core.data.local.db.dao.MusicsDao
 import zed.rainxch.vibeplayer.core.data.local.db.entity.MusicEntity
-import zed.rainxch.vibeplayer.core.data.mappers.toMusic
 
 class CacheMusicsDataSource(
-    private val musicsDao: MusicsDao,
-    private val musicsDataStore: MusicsDataStore
+    private val musicsDao: MusicsDao
 ) {
+    fun getMusicsFlow(): Flow<List<MusicEntity>> {
+        return musicsDao.getMusicsFlow()
+    }
+
     suspend fun getMusics(): List<MusicEntity> {
         return musicsDao.getMusics()
+    }
+
+    fun getMusicCountFlow(): Flow<Int> {
+        return musicsDao.getMusicCountFlow()
     }
 
     suspend fun getMusicByPath(path: String): MusicEntity? {
@@ -18,10 +25,6 @@ class CacheMusicsDataSource(
 
     suspend fun cacheMusics(list: List<MusicEntity>) {
         musicsDao.insertMusics(list)
-    }
-
-    suspend fun cacheMusic(music: MusicEntity) {
-        musicsDao.insertMusic(music)
     }
 
     suspend fun removeMusic(music: MusicEntity) {
@@ -36,11 +39,4 @@ class CacheMusicsDataSource(
         musicsDao.clearAll()
     }
 
-    fun checkIfMusicExist(music: MusicEntity): Boolean {
-        return musicsDataStore.checkIfMusicExist(music.toMusic())
-    }
-
-    suspend fun getMusicCount(): Int {
-        return musicsDao.getMusicCount()
-    }
 }
