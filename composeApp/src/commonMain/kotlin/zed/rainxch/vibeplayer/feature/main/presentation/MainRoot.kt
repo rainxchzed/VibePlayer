@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
@@ -29,13 +28,21 @@ import zed.rainxch.vibeplayer.feature.main.presentation.components.MusicItem
 
 @Composable
 fun MainRoot(
-    viewModel: MainViewModel = koinViewModel()
+    viewModel: MainViewModel = koinViewModel(),
+    onNavigateToNowPlaying: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     MainScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = { action ->
+            if (action is MainAction.OnMusicItemClick) {
+                val music = action.music
+                onNavigateToNowPlaying()
+            } else {
+                viewModel.onAction(action)
+            }
+        }
     )
 }
 
@@ -113,7 +120,7 @@ fun MainScreen(
                             MusicItem(
                                 music = music,
                                 onClick = {
-                                    MainAction.OnMusicItemClick(music)
+                                   onAction(MainAction.OnMusicItemClick(music))
                                 }
                             )
                         }

@@ -11,4 +11,7 @@ sealed interface VibePlayerGraph {
     data object MainScreen : VibePlayerGraph
     @Serializable
     data object ScanScreen : VibePlayerGraph
+
+    @Serializable
+    data object NowPlayingScreen : VibePlayerGraph
 }

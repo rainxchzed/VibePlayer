@@ -10,7 +10,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -32,9 +31,11 @@ import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_scan
 import zed.rainxch.vibeplayer.AppViewModel
+import zed.rainxch.vibeplayer.core.presentation.components.topbars.BackNavButtonTopBar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.MainTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.ScanTopbar
 import zed.rainxch.vibeplayer.feature.main.presentation.MainRoot
+import zed.rainxch.vibeplayer.feature.now_playing.presentation.NowPlayingRoot
 import zed.rainxch.vibeplayer.feature.permission.presentation.PermissionRoot
 import zed.rainxch.vibeplayer.feature.scan.presentation.ScanRoot
 
@@ -102,6 +103,10 @@ fun AppNavigation(
 
 
                 VibePlayerGraph.PermissionScreen, null -> {}
+
+                VibePlayerGraph.NowPlayingScreen -> {
+                    BackNavButtonTopBar ( onBackPressed = {navBackStack.removeLastOrNull()})
+                }
             }
         },
         containerColor = MaterialTheme.colorScheme.onSecondary
@@ -122,7 +127,9 @@ fun AppNavigation(
                 }
 
                 entry<VibePlayerGraph.MainScreen> {
-                    MainRoot()
+                    MainRoot(onNavigateToNowPlaying = {
+                        navBackStack.add(VibePlayerGraph.NowPlayingScreen)
+                    })
                 }
 
                 entry<VibePlayerGraph.ScanScreen> {
@@ -139,6 +146,10 @@ fun AppNavigation(
                             navBackStack.removeLastOrNull()
                         }
                     )
+                }
+
+                entry<VibePlayerGraph.NowPlayingScreen>{
+                    NowPlayingRoot()
                 }
             },
             entryDecorators = listOf(
