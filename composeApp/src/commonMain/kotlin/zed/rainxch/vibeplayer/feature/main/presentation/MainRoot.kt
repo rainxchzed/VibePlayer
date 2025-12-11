@@ -29,7 +29,7 @@ import zed.rainxch.vibeplayer.feature.main.presentation.components.MusicItem
 @Composable
 fun MainRoot(
     viewModel: MainViewModel = koinViewModel(),
-    onNavigateToNowPlaying: () -> Unit,
+    onNavigateToNowPlaying: (musicId: Int) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -38,7 +38,7 @@ fun MainRoot(
         onAction = { action ->
             if (action is MainAction.OnMusicItemClick) {
                 val music = action.music
-                onNavigateToNowPlaying()
+                onNavigateToNowPlaying(music.id)
             } else {
                 viewModel.onAction(action)
             }
@@ -120,7 +120,7 @@ fun MainScreen(
                             MusicItem(
                                 music = music,
                                 onClick = {
-                                   onAction(MainAction.OnMusicItemClick(music))
+                                    onAction(MainAction.OnMusicItemClick(music))
                                 }
                             )
                         }

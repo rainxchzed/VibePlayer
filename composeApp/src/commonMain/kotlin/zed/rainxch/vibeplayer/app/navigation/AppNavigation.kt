@@ -71,6 +71,7 @@ fun AppNavigation(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
+            val current = navBackStack.lastOrNull()
             when (navBackStack.lastOrNull()) {
                 VibePlayerGraph.MainScreen -> {
                     MainTopbar(
@@ -102,11 +103,12 @@ fun AppNavigation(
                 }
 
 
-                VibePlayerGraph.PermissionScreen, null -> {}
 
-                VibePlayerGraph.NowPlayingScreen -> {
+                is VibePlayerGraph.NowPlayingScreen -> {
                     BackNavButtonTopBar ( onBackPressed = {navBackStack.removeLastOrNull()})
                 }
+                VibePlayerGraph.PermissionScreen, null -> {}
+
             }
         },
         containerColor = MaterialTheme.colorScheme.onSecondary
@@ -127,8 +129,8 @@ fun AppNavigation(
                 }
 
                 entry<VibePlayerGraph.MainScreen> {
-                    MainRoot(onNavigateToNowPlaying = {
-                        navBackStack.add(VibePlayerGraph.NowPlayingScreen)
+                    MainRoot(onNavigateToNowPlaying = { musicId ->
+                        navBackStack.add(VibePlayerGraph.NowPlayingScreen(musicId = musicId))
                     })
                 }
 
@@ -148,8 +150,10 @@ fun AppNavigation(
                     )
                 }
 
-                entry<VibePlayerGraph.NowPlayingScreen>{
-                    NowPlayingRoot()
+                entry<VibePlayerGraph.NowPlayingScreen>{ screenArgs ->
+                    val musicId = screenArgs.musicId
+
+                    NowPlayingRoot(musicId = musicId)
                 }
             },
             entryDecorators = listOf(

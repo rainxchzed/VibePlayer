@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.core.domain.repository.MusicRepository
 
 class MainViewModel(
@@ -30,6 +32,18 @@ class MainViewModel(
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = MainState()
         )
+
+
+    private val _selectedMusic = MutableStateFlow<Music?>(null)
+    val selectedMusic = _selectedMusic.asStateFlow()
+
+    fun loadSelectedMusic(selectedMusicId: Int) {
+        _selectedMusic.value = getMusicById(selectedMusicId)
+    }
+
+    fun getMusicById(musicId: Int): Music? {
+        return _state.value.musics.find { it.id == musicId }
+    }
 
     private fun loadMusics() {
         viewModelScope.launch {
