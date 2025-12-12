@@ -17,7 +17,14 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
     private val _state = MutableStateFlow(MusicPlaybackState())
     val state = _state.asStateFlow()
 
+    private val _playlist = MutableStateFlow<List<Music>>(emptyList())
+
     private var progressJob: Job? = null
+
+
+    fun createPlayList(musicsList: List<Music>) {
+        _playlist.value = musicsList
+    }
 
     fun loadSelectedMusic(selectedMusic: Music?) {
         _state.update {
@@ -69,6 +76,23 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
         progressJob?.cancel()
     }
 
+
+    fun skipToNext() {
+        val currentIndex = _playlist.value.indexOfFirst { it.id == _state.value.selectedMusic?.id }
+        if (currentIndex < _playlist.value.lastIndex) {
+            val nextMusic = _playlist.value[currentIndex + 1]
+            loadSelectedMusic(nextMusic)
+        }
+    }
+
+    fun skipToPrevious() {
+        val currentIndex = _playlist.value.indexOfFirst { it.id == _state.value.selectedMusic?.id }
+        if (currentIndex > 0) {
+            val prevMusic = _playlist.value[currentIndex - 1]
+            loadSelectedMusic(prevMusic)
+        }
+    }
+
     fun onAction(musicPlaybackAction: MusicPlaybackAction) {
         when (musicPlaybackAction) {
             MusicPlaybackAction.onPlayClick -> {
@@ -86,15 +110,15 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
                 _state.update {
                     it.copy(isPlaying = false)
                 }
-               stopProgressTracking()
+                stopProgressTracking()
             }
 
             MusicPlaybackAction.onNextClick -> {
-
+                skipToNext()
             }
 
             MusicPlaybackAction.onPreviousClick -> {
-
+                skipToPrevious()
             }
         }
     }

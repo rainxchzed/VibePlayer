@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
@@ -50,6 +53,10 @@ fun NowPlayingRoot(
         musicPlaybackViewModel.loadSelectedMusic(selectedMusic)
     }
 
+    LaunchedEffect(state) {
+        musicPlaybackViewModel.createPlayList(state.musics)
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             musicPlaybackViewModel.stopProgressTracking()
@@ -73,19 +80,26 @@ fun NowPlayingScreen(
     } else {
         0f
     }
-
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.onSecondary)
-
+            .windowInsetsPadding(WindowInsets.safeDrawing) // Handle system bars
     ) {
-        if (state.selectedMusic != null)
-            MusicContentItem(state.selectedMusic, modifier = Modifier.align(Alignment.Center))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .background(MaterialTheme.colorScheme.onSecondary),
+            contentAlignment = Alignment.Center
 
+        ) {
+            if (state.selectedMusic != null)
+                MusicContentItem(state.selectedMusic)
+        }
         Column(
-            modifier = Modifier.fillMaxWidth(0.9f).wrapContentHeight().padding(bottom = 16.dp)
-                .align(Alignment.BottomCenter),
+            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                .padding(start = 16.dp, end = 16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -103,7 +117,7 @@ fun NowPlayingScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 IconButton(
-                    onClick = {},
+                    onClick = { onAction(MusicPlaybackAction.onPreviousClick) },
                     shape = CircleShape,
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryFixed,
@@ -137,7 +151,7 @@ fun NowPlayingScreen(
                 }
 
                 IconButton(
-                    onClick = {}, shape = CircleShape,
+                    onClick = { onAction(MusicPlaybackAction.onNextClick) }, shape = CircleShape,
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primaryFixed,
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -151,5 +165,6 @@ fun NowPlayingScreen(
                 }
             }
         }
+
     }
 }
