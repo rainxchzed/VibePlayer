@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.core
+package zed.rainxch.vibeplayer.core.domain
 
 interface MediaPlayerController {
 
@@ -6,5 +6,7 @@ interface MediaPlayerController {
     fun pause()
     fun resume()
     fun stop()
+    fun getCurrentPosition(): Long
+    fun getDuration(): Long
 
 }

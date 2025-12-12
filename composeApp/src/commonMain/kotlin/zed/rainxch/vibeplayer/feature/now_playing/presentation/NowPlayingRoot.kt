@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -49,6 +50,13 @@ fun NowPlayingRoot(
         musicPlaybackViewModel.loadSelectedMusic(selectedMusic)
     }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            musicPlaybackViewModel.stopProgressTracking()
+            musicPlaybackViewModel.stopMusic()
+        }
+    }
+
     NowPlayingScreen(state = musicPlaybackState, onAction = { action ->
         musicPlaybackViewModel.onAction(action)
     })
@@ -59,6 +67,13 @@ fun NowPlayingScreen(
     state: MusicPlaybackState,
     onAction: (MusicPlaybackAction) -> Unit
 ) {
+
+    val progressFactor = if (state.duration > 0) {
+        state.currentProgress.toFloat() / state.duration.toFloat()
+    } else {
+        0f
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -75,7 +90,7 @@ fun NowPlayingScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LinearProgressIndicator(
-                progress = { 0.57f },
+                progress = { progressFactor },
                 modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(bottom = 8.dp),
                 color = MaterialTheme.colorScheme.onSurface,
                 trackColor = MaterialTheme.colorScheme.outline,
