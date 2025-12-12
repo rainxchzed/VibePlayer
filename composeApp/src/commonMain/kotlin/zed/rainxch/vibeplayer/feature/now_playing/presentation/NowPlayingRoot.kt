@@ -27,30 +27,37 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
+import vibeplayer.composeapp.generated.resources.pause
 import vibeplayer.composeapp.generated.resources.play
 import vibeplayer.composeapp.generated.resources.skip_next
 import vibeplayer.composeapp.generated.resources.skip_previous
-import zed.rainxch.vibeplayer.core.domain.model.Music
-import zed.rainxch.vibeplayer.feature.main.presentation.MainState
 import zed.rainxch.vibeplayer.feature.main.presentation.MainViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.MusicContentItem
 
 @Composable
-fun NowPlayingRoot(musicId: Int, viewModel: MainViewModel = koinViewModel()) {
+fun NowPlayingRoot(
+    musicId: Int,
+    viewModel: MainViewModel = koinViewModel(),
+    musicPlaybackViewModel: MusicPlaybackViewModel = koinViewModel()
+) {
+
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val selectedMusic by viewModel.selectedMusic.collectAsStateWithLifecycle()
+    val musicPlaybackState by musicPlaybackViewModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(musicId) {
-        viewModel.loadSelectedMusic(musicId)
+        val selectedMusic = viewModel.getMusicById(musicId)
+        musicPlaybackViewModel.loadSelectedMusic(selectedMusic)
     }
 
-    NowPlayingScreen(state = state, selectedMusic = selectedMusic)
+    NowPlayingScreen(state = musicPlaybackState, onAction = { action ->
+        musicPlaybackViewModel.onAction(action)
+    })
 }
 
 @Composable
 fun NowPlayingScreen(
-    state: MainState,
-    selectedMusic: Music?
+    state: MusicPlaybackState,
+    onAction: (MusicPlaybackAction) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -58,11 +65,11 @@ fun NowPlayingScreen(
             .background(MaterialTheme.colorScheme.onSecondary)
 
     ) {
-        if (selectedMusic != null)
-            MusicContentItem(selectedMusic, modifier = Modifier.align(Alignment.Center))
+        if (state.selectedMusic != null)
+            MusicContentItem(state.selectedMusic, modifier = Modifier.align(Alignment.Center))
 
         Column(
-            modifier = Modifier.fillMaxWidth(0.9f).wrapContentHeight().padding(bottom = 16.dp )
+            modifier = Modifier.fillMaxWidth(0.9f).wrapContentHeight().padding(bottom = 16.dp)
                 .align(Alignment.BottomCenter),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -75,8 +82,11 @@ fun NowPlayingScreen(
                 drawStopIndicator = {})
 
 
-            Row(modifier = Modifier.wrapContentSize().padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.wrapContentSize().padding(top = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 IconButton(
                     onClick = {},
                     shape = CircleShape,
@@ -92,12 +102,21 @@ fun NowPlayingScreen(
                     )
                 }
 
-                IconButton(onClick = {}, shape = CircleShape, colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.onSurface,
+                IconButton(
+                    onClick = {
+                        if (state.isPlaying) onAction(MusicPlaybackAction.onPauseClick)
+                        else onAction(
+                            MusicPlaybackAction.onPlayClick
+                        )
+                    }, shape = CircleShape, colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.onSurface,
 
-                ), modifier = Modifier.size(60.dp)) {
+                        ), modifier = Modifier.size(60.dp)
+                ) {
                     Icon(
-                        painter = painterResource(Res.drawable.play),
+                        painter = if (state.isPlaying) painterResource(Res.drawable.pause) else painterResource(
+                            Res.drawable.play
+                        ),
                         contentDescription = "play/pause"
                     )
                 }
