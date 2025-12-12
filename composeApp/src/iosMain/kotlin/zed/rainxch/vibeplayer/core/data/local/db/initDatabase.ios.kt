@@ -2,20 +2,17 @@ package zed.rainxch.vibeplayer.core.data.local.db
 
 import androidx.room.Room
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
 fun initDatabase(): AppDatabase {
     val dbFilePath = documentDirectory() + "/my_room.db"
-    return Room
-        .databaseBuilder<AppDatabase>(
-            name = dbFilePath,
-        )
-        .setQueryCoroutineContext(Dispatchers.IO)
-        .fallbackToDestructiveMigration(true)
+    return Room.databaseBuilder<AppDatabase>(
+        name = dbFilePath,
+        factory = { AppDatabaseConstructor.initialize() }
+    )
+        .setDriver(androidx.sqlite.driver.bundled.BundledSQLiteDriver())
         .build()
 }
 
