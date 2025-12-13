@@ -74,6 +74,18 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.koin.core)
             implementation(libs.jthink.jaudiotagger)
+            val osName = System.getProperty("os.name").lowercase()
+            val platform = when {
+                osName.contains("win") -> "win"
+                osName.contains("mac") -> "mac"
+                osName.contains("linux") -> "linux"
+                else -> "linux"
+            }
+
+            implementation("org.openjfx:javafx-base:21.0.1:$platform")
+            implementation("org.openjfx:javafx-graphics:21.0.1:$platform")
+            implementation("org.openjfx:javafx-media:21.0.1:$platform")
+            implementation("org.openjfx:javafx-swing:21.0.1:$platform")
         }
     }
 }
@@ -117,6 +129,10 @@ room {
 compose.desktop {
     application {
         mainClass = "zed.rainxch.vibeplayer.MainKt"
+
+        jvmArgs += listOf(
+            "--add-opens", "javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
+        )
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)

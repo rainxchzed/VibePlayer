@@ -15,6 +15,9 @@ composeMultiplatform = "1.9.1"
 coreSplashscreen = "1.2.0"
 jaudiotagger = "3.0.1"
 jaudiotaggerVersion = "3.0.1"
+javafxMedia = "25.0.1"
+javafxMediaVersion = "25.0.1"
+jlayer = "1.0.1.4"
 junit = "4.13.2"
 kamelImageDefault = "1.0.8"
 kotlin = "2.2.21"
@@ -24,10 +27,12 @@ androidxNavigation3UI = "1.0.0-alpha04"
 koin = "4.1.1"
 koinComposeMultiplatform = "4.1.1"
 kotlinxCollectionsImmutable = "0.4.0"
+mp3spi = "1.9.5.4"
 room = "2.8.4"
 sqlite = "2.6.2"
 ksp = "2.3.2"
 exoPlayer = "1.8.0"
+tritonusShare = "0.3.7.4"
 
 
 
@@ -36,6 +41,9 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
 jaudiotagger = { module = "org.jaudiotagger:jaudiotagger", version.ref = "jaudiotagger" }
+javafx-controls = { module = "org.openjfx:javafx-controls", version.ref = "javafxMedia" }
+javafx-media = { module = "org.openjfx:javafx-media", version.ref = "javafxMedia" }
+javafx-media-v2001 = { module = "org.openjfx:javafx-media", version.ref = "javafxMediaVersion" }
 jthink-jaudiotagger = { module = "net.jthink:jaudiotagger", version.ref = "jaudiotaggerVersion" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
