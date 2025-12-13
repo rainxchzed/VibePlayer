@@ -14,7 +14,9 @@ private val VibeDarkColorScheme = darkColorScheme(
     inverseOnSurface = TextDisabled,
 
     secondary = AccentYellow,
-    onSecondary = SurfaceBG
+    onSecondary = SurfaceBG,
+
+    outline = Outline
 )
 
 @Composable

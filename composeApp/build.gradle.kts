@@ -7,6 +7,9 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
+    kotlin("plugin.serialization") version "2.2.0"
 }
 
 kotlin {
@@ -32,16 +35,36 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.core.splashscreen)
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose)
+            implementation(libs.androidx.media3.exoplayer)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.kotlinx.serializable)
+            implementation(libs.androidx.navigation3.ui)
+
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+
+            implementation(libs.kotlinx.collections.immutable)
+
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
+
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.sqlite.bundled)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -49,6 +72,20 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.koin.core)
+            implementation(libs.jthink.jaudiotagger)
+            val osName = System.getProperty("os.name").lowercase()
+            val platform = when {
+                osName.contains("win") -> "win"
+                osName.contains("mac") -> "mac"
+                osName.contains("linux") -> "linux"
+                else -> "linux"
+            }
+
+            implementation("org.openjfx:javafx-base:21.0.1:$platform")
+            implementation("org.openjfx:javafx-graphics:21.0.1:$platform")
+            implementation("org.openjfx:javafx-media:21.0.1:$platform")
+            implementation("org.openjfx:javafx-swing:21.0.1:$platform")
         }
     }
 }
@@ -82,11 +119,20 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    ksp(libs.androidx.room.compiler)
+}
+
+room {
+    schemaDirectory("$projectDir/schema")
 }
 
 compose.desktop {
     application {
         mainClass = "zed.rainxch.vibeplayer.MainKt"
+
+        jvmArgs += listOf(
+            "--add-opens", "javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
+        )
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
