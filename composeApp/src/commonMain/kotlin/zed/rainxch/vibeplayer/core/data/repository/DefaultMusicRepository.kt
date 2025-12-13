@@ -5,6 +5,8 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -26,19 +28,23 @@ class DefaultMusicRepository(
     override fun getMusicsWithMetadataFlow(
         ignoreSize: IgnoreSize,
         ignoreDuration: IgnoreDuration
-    ): Flow<ImmutableList<Music>> = cacheMusicsDatasource.getMusicsFlow()
-        .map { entities ->
-            entities.mapNotNull { entity ->
-                val music = entity.toMusic()
-                if (musicsDataStore.checkIfMusicExist(music)) {
-                    music
-                } else {
-                    cacheMusicsDatasource.removeMusic(entity)
-                    null
-                }
-            }.toImmutableList()
+    ): Flow<ImmutableList<Music>> = flow {
+        if (cacheMusicsDatasource.getMusics().isEmpty()) {
+            emit(getMusicsWithMetadata(ignoreSize, ignoreDuration))
         }
-        .flowOn(Dispatchers.IO)
+        emitAll(cacheMusicsDatasource.getMusicsFlow()
+            .map { entities ->
+                entities.mapNotNull { entity ->
+                    val music = entity.toMusic()
+                    if (musicsDataStore.checkIfMusicExist(music)) {
+                        music
+                    } else {
+                        cacheMusicsDatasource.removeMusic(entity)
+                        null
+                    }
+                }.toImmutableList()
+            })
+    }.flowOn(Dispatchers.IO)
 
     override suspend fun getMusicsWithMetadata(
         ignoreSize: IgnoreSize,
