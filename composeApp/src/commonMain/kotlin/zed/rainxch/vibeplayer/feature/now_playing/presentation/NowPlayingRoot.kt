@@ -126,6 +126,7 @@ fun NowPlayingScreen(
                     modifier = Modifier.size(44.dp)
                 ) {
                     Icon(
+                        modifier = Modifier.size(16.dp),
                         painter = painterResource(Res.drawable.skip_previous),
                         contentDescription = "previous"
                     )
@@ -143,6 +144,7 @@ fun NowPlayingScreen(
                         ), modifier = Modifier.size(60.dp)
                 ) {
                     Icon(
+                        modifier = Modifier.size(24.dp),
                         painter = if (state.isPlaying) painterResource(Res.drawable.pause) else painterResource(
                             Res.drawable.play
                         ),
@@ -159,6 +161,7 @@ fun NowPlayingScreen(
                     modifier = Modifier.size(44.dp)
                 ) {
                     Icon(
+                        modifier = Modifier.size(16.dp),
                         painter = painterResource(Res.drawable.skip_next),
                         contentDescription = "next"
                     )

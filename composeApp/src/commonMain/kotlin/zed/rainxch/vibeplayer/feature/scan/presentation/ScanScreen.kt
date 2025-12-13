@@ -1,17 +1,22 @@
 package zed.rainxch.vibeplayer.feature.scan.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -54,51 +59,56 @@ fun ScanScreen(
     state: ScanState,
     onAction: (ScanAction) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-        ,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        ScanningProgressbar(
-            isAnimating = state.isScanning
-        )
+        Column(
+            modifier = Modifier
+                .widthIn(max = 400.dp)
+                .padding(horizontal = 16.dp)
+            ,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ScanningProgressbar(
+                isAnimating = state.isScanning
+            )
 
-        Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(24.dp))
 
-        RadioGroup(
-            modifier = Modifier.fillMaxWidth(),
-            options = listOf("30s", "60s"),
-            selectedOptionIndex = IgnoreDuration.entries.indexOf(state.ignoreDuration),
-            label = "Ignore duration less than",
-            onOptionSelected = {
-                onAction(ScanAction.ChangeIgnoreDuration(IgnoreDuration.entries[it]))
-            }
-        )
-        Spacer(Modifier.height(16.dp))
-        RadioGroup(
-            modifier = Modifier.fillMaxWidth(),
-            options = listOf("100KB", "500KB"),
-            selectedOptionIndex = IgnoreSize.entries.indexOf(state.ignoreSize),
-            label = "Ignore size less than",
-            onOptionSelected = {
-                onAction(ScanAction.ChangeIgnoreSize(IgnoreSize.entries[it]))
-            }
-        )
-        Spacer(Modifier.height(24.dp))
-        PrimaryButton(
-            modifier = Modifier.fillMaxWidth(),
-            text = if (state.isScanning) "Scanning" else "Scan",
-            enabled = state.isScanning.not(),
-            isLoading = state.isScanning,
-            onClick = {
-                onAction(ScanAction.StartScan)
-            }
-        )
+            RadioGroup(
+                modifier = Modifier.fillMaxWidth(),
+                options = listOf("30s", "60s"),
+                selectedOptionIndex = IgnoreDuration.entries.indexOf(state.ignoreDuration),
+                label = "Ignore duration less than",
+                onOptionSelected = {
+                    onAction(ScanAction.ChangeIgnoreDuration(IgnoreDuration.entries[it]))
+                }
+            )
+            Spacer(Modifier.height(16.dp))
+            RadioGroup(
+                modifier = Modifier.fillMaxWidth(),
+                options = listOf("100KB", "500KB"),
+                selectedOptionIndex = IgnoreSize.entries.indexOf(state.ignoreSize),
+                label = "Ignore size less than",
+                onOptionSelected = {
+                    onAction(ScanAction.ChangeIgnoreSize(IgnoreSize.entries[it]))
+                }
+            )
+            Spacer(Modifier.height(24.dp))
+            PrimaryButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = if (state.isScanning) "Scanning" else "Scan",
+                enabled = state.isScanning.not(),
+                isLoading = state.isScanning,
+                onClick = {
+                    onAction(ScanAction.StartScan)
+                }
+            )
 
+        }
     }
+
 }
 
 @Preview
