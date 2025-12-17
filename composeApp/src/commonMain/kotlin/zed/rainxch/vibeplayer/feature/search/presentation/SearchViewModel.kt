@@ -3,6 +3,8 @@ package zed.rainxch.vibeplayer.feature.search.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,10 +13,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import zed.rainxch.vibeplayer.feature.search.domain.repository.SearchRepository
+import kotlin.time.Duration.Companion.milliseconds
 
 class SearchViewModel(
     private val searchRepository: SearchRepository
 ) : ViewModel() {
+
+    private var searchJob: Job? = null
 
     private val _state = MutableStateFlow(SearchState())
     val state = _state.asStateFlow()
@@ -52,20 +57,23 @@ class SearchViewModel(
     }
 
     private fun performSearch() {
-        viewModelScope.launch {
-            val query = _state.value.searchQuery
+        val query = _state.value.searchQuery
 
-            if (query.isBlank()) {
-                _state.update {
-                    it.copy(
-                        isClearQueryVisible = false,
-                        isLoading = false,
-                        musics = persistentListOf()
-                    )
-                }
-
-                return@launch
+        if (query.isBlank()) {
+            _state.update {
+                it.copy(
+                    isClearQueryVisible = false,
+                    isLoading = false,
+//                    musics = persistentListOf()
+                )
             }
+
+            return
+        }
+
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay((200..500).random().milliseconds)
 
             _state.update {
                 it.copy(
