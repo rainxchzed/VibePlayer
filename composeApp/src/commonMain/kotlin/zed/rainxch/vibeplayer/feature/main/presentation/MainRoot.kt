@@ -1,10 +1,7 @@
 package zed.rainxch.vibeplayer.feature.main.presentation
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +18,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
@@ -43,7 +38,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
 import zed.rainxch.vibeplayer.core.presentation.components.progressbars.ScanningProgressbar
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
-import zed.rainxch.vibeplayer.feature.main.presentation.components.MusicItem
+import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
 
 @Composable
 fun MainRoot(

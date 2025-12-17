@@ -11,18 +11,28 @@ import zed.rainxch.vibeplayer.core.domain.repository.MusicRepository
 import zed.rainxch.vibeplayer.feature.main.presentation.MainViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
 import zed.rainxch.vibeplayer.feature.scan.presentation.ScanViewModel
+import zed.rainxch.vibeplayer.feature.search.data.repository.SearchRepositoryImpl
+import zed.rainxch.vibeplayer.feature.search.domain.repository.SearchRepository
+import zed.rainxch.vibeplayer.feature.search.presentation.SearchViewModel
 
 val sharedModule = module {
     viewModelOf(::AppViewModel)
     viewModelOf(::ScanViewModel)
     viewModelOf(::MainViewModel)
     viewModelOf(::MusicPlaybackViewModel)
+    viewModelOf(::SearchViewModel)
 
 
     single<MusicRepository> {
         DefaultMusicRepository(
             cacheMusicsDatasource = get(),
             musicsDataStore = get()
+        )
+    }
+
+    single<SearchRepository> {
+        SearchRepositoryImpl(
+            cacheMusicsDatasource = get(),
         )
     }
 

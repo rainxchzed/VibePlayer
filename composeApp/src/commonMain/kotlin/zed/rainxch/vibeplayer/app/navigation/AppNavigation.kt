@@ -1,10 +1,14 @@
 package zed.rainxch.vibeplayer.app.navigation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -18,6 +22,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSerializable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,6 +43,7 @@ import zed.rainxch.vibeplayer.feature.main.presentation.MainRoot
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.NowPlayingRoot
 import zed.rainxch.vibeplayer.feature.permission.presentation.PermissionRoot
 import zed.rainxch.vibeplayer.feature.scan.presentation.ScanRoot
+import zed.rainxch.vibeplayer.feature.search.presentation.SearchRoot
 
 @Composable
 fun AppNavigation(
@@ -71,29 +77,50 @@ fun AppNavigation(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            val current = navBackStack.lastOrNull()
             when (navBackStack.lastOrNull()) {
                 VibePlayerGraph.MainScreen -> {
                     MainTopbar(
                         actions = {
-                            IconButton(
-                                onClick = {
-                                    navBackStack.add(VibePlayerGraph.ScanScreen)
-                                },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryFixed,
-                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_scan),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                IconButton(
+                                    onClick = {
+                                        navBackStack.add(VibePlayerGraph.ScanScreen)
+                                    },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryFixed,
+                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_scan),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = {
+                                        navBackStack.add(VibePlayerGraph.SearchScreen)
+                                    },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryFixed,
+                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                             }
                         }
                     )
                 }
+
                 VibePlayerGraph.ScanScreen -> {
                     ScanTopbar(
                         onBackPressed = {
@@ -102,13 +129,11 @@ fun AppNavigation(
                     )
                 }
 
-
-
                 is VibePlayerGraph.NowPlayingScreen -> {
-                    BackNavButtonTopBar ( onBackPressed = {navBackStack.removeLastOrNull()})
+                    BackNavButtonTopBar(onBackPressed = { navBackStack.removeLastOrNull() })
                 }
-                VibePlayerGraph.PermissionScreen, null -> {}
 
+                VibePlayerGraph.PermissionScreen, VibePlayerGraph.SearchScreen, null -> {}
             }
         },
         containerColor = MaterialTheme.colorScheme.onSecondary
@@ -150,10 +175,25 @@ fun AppNavigation(
                     )
                 }
 
-                entry<VibePlayerGraph.NowPlayingScreen>{ screenArgs ->
+                entry<VibePlayerGraph.NowPlayingScreen> { screenArgs ->
                     val musicId = screenArgs.musicId
 
                     NowPlayingRoot(musicId = musicId)
+                }
+
+                entry<VibePlayerGraph.SearchScreen> {
+                    SearchRoot(
+                        onBackClick = {
+                            navBackStack.removeLastOrNull()
+                        },
+                        onNavigateToNowPlayingScreen = {
+                            navBackStack.add(
+                                VibePlayerGraph.NowPlayingScreen(
+                                    musicId = it.id
+                                )
+                            )
+                        }
+                    )
                 }
             },
             entryDecorators = listOf(
