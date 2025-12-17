@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import zed.rainxch.vibeplayer.feature.search.domain.repository.SearchRepository
 import kotlin.time.Duration.Companion.milliseconds
@@ -59,35 +60,47 @@ class SearchViewModel(
     private fun performSearch() {
         val query = _state.value.searchQuery
 
+        _state.update {
+            it.copy(
+                isClearQueryVisible = query.isNotBlank()
+            )
+        }
+
         if (query.isBlank()) {
             _state.update {
                 it.copy(
-                    isClearQueryVisible = false,
+                    musics = persistentListOf(),
                     isLoading = false,
-//                    musics = persistentListOf()
                 )
             }
-
             return
         }
 
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            delay((200..500).random().milliseconds)
+            delay(300.milliseconds)
 
-            _state.update {
-                it.copy(
-                    isLoading = true
-                )
-            }
+            _state.update { it.copy(isLoading = true) }
 
-            val musics = searchRepository.performSearch(query)
+            try {
+                val musics = searchRepository.performSearch(query)
 
-            _state.update {
-                it.copy(
-                    musics = musics,
-                    isLoading = false
-                )
+                if (isActive) {
+                    _state.update {
+                        it.copy(
+                            musics = musics,
+                            isLoading = false
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                if (isActive) {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                        )
+                    }
+                }
             }
         }
     }
