@@ -14,12 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,6 +32,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
+import vibeplayer.composeapp.generated.resources.cd_minimize
 import vibeplayer.composeapp.generated.resources.cd_next_track_button
 import vibeplayer.composeapp.generated.resources.cd_play_pause_button
 import vibeplayer.composeapp.generated.resources.cd_previous_track_button
@@ -52,7 +54,8 @@ import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.Player
 fun NowPlayingRoot(
     musicId: Int,
     viewModel: MainViewModel = koinViewModel(),
-    musicPlaybackViewModel: MusicPlaybackViewModel = koinViewModel()
+    musicPlaybackViewModel: MusicPlaybackViewModel,
+    onMinimize: () -> Unit
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -67,15 +70,19 @@ fun NowPlayingRoot(
         musicPlaybackViewModel.createPlayList(state.musics)
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            musicPlaybackViewModel.stopProgressTracking()
-            musicPlaybackViewModel.stopMusic()
-        }
-    }
+    /*  DisposableEffect(Unit) {
+          onDispose {
+              musicPlaybackViewModel.stopProgressTracking()
+              musicPlaybackViewModel.stopMusic()
+          }
+      }*/
 
     NowPlayingScreen(state = musicPlaybackState, onAction = { action ->
-        musicPlaybackViewModel.onAction(action)
+        if (action == MusicPlaybackAction.OnMinimizeClick) {
+            onMinimize()
+        } else {
+            musicPlaybackViewModel.onAction(action)
+        }
     })
 }
 
@@ -105,8 +112,10 @@ fun NowPlayingScreen(
         MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    val shuffleContainerColor = if (state.shuffleMode == ShuffleMode.INACTIVE) Color.Transparent else MaterialTheme.colorScheme.primaryFixed
-    val shuffleContentColor =  if (state.shuffleMode == ShuffleMode.INACTIVE) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onSurfaceVariant
+    val shuffleContainerColor =
+        if (state.shuffleMode == ShuffleMode.INACTIVE) Color.Transparent else MaterialTheme.colorScheme.primaryFixed
+    val shuffleContentColor =
+        if (state.shuffleMode == ShuffleMode.INACTIVE) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onSurfaceVariant
 
 
     Column(
@@ -115,6 +124,19 @@ fun NowPlayingScreen(
             .background(MaterialTheme.colorScheme.onSecondary)
             .windowInsetsPadding(WindowInsets.safeDrawing) // Handle system bars
     ) {
+        IconButton(
+            onClick = { onAction(MusicPlaybackAction.OnMinimizeClick) },
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryFixed,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            modifier = Modifier.padding(start = 10.dp, top = 10.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown, // Your downward arrow
+                contentDescription = stringResource(Res.string.cd_minimize)
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -143,16 +165,17 @@ fun NowPlayingScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth()
-                    .padding(top = 16.dp, start = 10.dp, end = 10.dp),
+                    .padding(top = 16.dp, start = 10.dp, end = 10.dp, bottom = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     IconButton(
-                        onClick = { onAction(MusicPlaybackAction.OnShuffleClick)},
+                        onClick = { onAction(MusicPlaybackAction.OnShuffleClick) },
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = shuffleContainerColor,
-                            contentColor = shuffleContentColor )
+                            contentColor = shuffleContentColor
+                        )
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.shuffle),

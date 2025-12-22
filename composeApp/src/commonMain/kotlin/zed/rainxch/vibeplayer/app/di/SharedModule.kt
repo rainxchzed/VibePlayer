@@ -19,9 +19,9 @@ val sharedModule = module {
     viewModelOf(::AppViewModel)
     viewModelOf(::ScanViewModel)
     viewModelOf(::MainViewModel)
-    viewModelOf(::MusicPlaybackViewModel)
     viewModelOf(::SearchViewModel)
 
+    single {  MusicPlaybackViewModel(get()) }
 
     single<MusicRepository> {
         DefaultMusicRepository(

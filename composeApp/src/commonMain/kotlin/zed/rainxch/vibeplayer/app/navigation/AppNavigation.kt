@@ -1,5 +1,9 @@
 package zed.rainxch.vibeplayer.app.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,9 +23,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSerializable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,10 +42,10 @@ import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_scan
 import zed.rainxch.vibeplayer.AppViewModel
-import zed.rainxch.vibeplayer.core.presentation.components.topbars.BackNavButtonTopBar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.MainTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.ScanTopbar
 import zed.rainxch.vibeplayer.feature.main.presentation.MainRoot
+import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.NowPlayingRoot
 import zed.rainxch.vibeplayer.feature.permission.presentation.PermissionRoot
 import zed.rainxch.vibeplayer.feature.scan.presentation.ScanRoot
@@ -50,8 +56,12 @@ fun AppNavigation(
     viewModel: AppViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    val musicPlaybackViewModel: MusicPlaybackViewModel = koinViewModel()// Track whether the player is expanded or minimized
+    var currentMusicId by remember { mutableStateOf<Int?>(null) }
+    var isPlayerExpanded by remember { mutableStateOf(false) }
 
     if (state.isLoading) {
         Box(
@@ -74,8 +84,10 @@ fun AppNavigation(
             )
         }
 
+
+Box(modifier = Modifier.fillMaxSize()){
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
             when (navBackStack.lastOrNull()) {
                 VibePlayerGraph.MainScreen -> {
@@ -129,10 +141,6 @@ fun AppNavigation(
                     )
                 }
 
-                is VibePlayerGraph.NowPlayingScreen -> {
-                    BackNavButtonTopBar(onBackPressed = { navBackStack.removeLastOrNull() })
-                }
-
                 VibePlayerGraph.PermissionScreen, VibePlayerGraph.SearchScreen, null -> {}
             }
         },
@@ -155,16 +163,16 @@ fun AppNavigation(
 
                 entry<VibePlayerGraph.MainScreen> {
                     MainRoot(onNavigateToNowPlaying = { musicId ->
-                        navBackStack.add(VibePlayerGraph.NowPlayingScreen(musicId = musicId))
-                    })
+                        currentMusicId = musicId
+                        isPlayerExpanded = true })
                 }
 
                 entry<VibePlayerGraph.ScanScreen> {
                     ScanRoot(
                         onShowSnackbar = { message ->
                             coroutineScope.launch {
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar(
+                                snackBarHostState.currentSnackbarData?.dismiss()
+                                snackBarHostState.showSnackbar(
                                     message = message,
                                 )
                             }
@@ -175,23 +183,14 @@ fun AppNavigation(
                     )
                 }
 
-                entry<VibePlayerGraph.NowPlayingScreen> { screenArgs ->
-                    val musicId = screenArgs.musicId
-
-                    NowPlayingRoot(musicId = musicId)
-                }
-
                 entry<VibePlayerGraph.SearchScreen> {
                     SearchRoot(
                         onBackClick = {
                             navBackStack.removeLastOrNull()
                         },
                         onNavigateToNowPlayingScreen = {
-                            navBackStack.add(
-                                VibePlayerGraph.NowPlayingScreen(
-                                    musicId = it.id
-                                )
-                            )
+                            currentMusicId = it.id
+                            isPlayerExpanded = true
                         }
                     )
                 }
@@ -202,4 +201,25 @@ fun AppNavigation(
             modifier = Modifier.padding(innerPadding)
         )
     }
+
+    AnimatedVisibility(
+        visible = isPlayerExpanded,
+        enter = slideInVertically(
+            initialOffsetY = { it }, // Starts from bottom
+            animationSpec = tween(durationMillis = 500)
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { it }, // Slides to bottom
+            animationSpec = tween(durationMillis = 500)
+        )
+    ) {
+        currentMusicId?.let { id ->
+            NowPlayingRoot(
+                musicId = id,
+                musicPlaybackViewModel = musicPlaybackViewModel,
+                onMinimize = { isPlayerExpanded = false }
+            )
+        }
+    }
+}
 }
