@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,6 +36,7 @@ import vibeplayer.composeapp.generated.resources.skip_next
 import vibeplayer.composeapp.generated.resources.skip_previous
 import zed.rainxch.vibeplayer.feature.main.presentation.MainViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.MusicContentItem
+import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.PlayerControlSlider
 
 @Composable
 fun NowPlayingRoot(
@@ -99,17 +99,23 @@ fun NowPlayingScreen(
         }
         Column(
             modifier = Modifier.fillMaxWidth().wrapContentHeight()
-                .padding(start = 16.dp, end = 16.dp),
+                .padding(start = 10.dp, end = 10.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LinearProgressIndicator(
-                progress = { progressFactor },
-                modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(bottom = 8.dp),
-                color = MaterialTheme.colorScheme.onSurface,
-                trackColor = MaterialTheme.colorScheme.outline,
-                drawStopIndicator = {})
 
+            PlayerControlSlider(
+                state = state,
+                modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(bottom = 8.dp),
+                onSeek = { positionMs ->
+                    onAction(MusicPlaybackAction.OnSeek(positionMs))
+                })
+            /*  LinearProgressIndicator(
+                  progress = { progressFactor },
+                  modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(bottom = 8.dp),
+                  color = MaterialTheme.colorScheme.onSurface,
+                  trackColor = MaterialTheme.colorScheme.outline,
+                  drawStopIndicator = {})*/
 
             Row(
                 modifier = Modifier.wrapContentSize().padding(top = 16.dp),

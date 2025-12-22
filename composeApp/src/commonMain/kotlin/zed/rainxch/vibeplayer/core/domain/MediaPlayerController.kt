@@ -8,5 +8,6 @@ interface MediaPlayerController {
     fun stop()
     fun getCurrentPosition(): Long
     fun getDuration(): Long
+    fun seekTo(positionMs: Long)
 
 }

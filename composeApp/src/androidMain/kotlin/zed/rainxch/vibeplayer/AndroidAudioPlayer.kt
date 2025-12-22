@@ -37,4 +37,9 @@ class AndroidAudioPlayer(context: Context) : MediaPlayerController {
         val duration = exoPlayer.duration
         return if (duration < 0) 0L else duration
     }
+
+    override fun seekTo(positionMs: Long) {
+        return exoPlayer.seekTo(positionMs)
+
+    }
 }

@@ -59,15 +59,15 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
 
             while (isActive) {
                 val currentPosition = playerController.getCurrentPosition()
-                _state.update {
-                    it.copy(currentProgress = currentPosition)
-                }
-
                 val duration = playerController.getDuration()
+
                 _state.update {
-                    it.copy(duration = duration)
+                    it.copy(
+                        currentProgress = currentPosition,
+                        duration = duration
+                    )
                 }
-                delay(1000L)
+                delay(500L) // Smoother updates than 1000L
             }
         }
     }
@@ -91,6 +91,10 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
             val prevMusic = _playlist.value[currentIndex - 1]
             loadSelectedMusic(prevMusic)
         }
+    }
+
+    fun seekTo(positionMs: Long) {
+        playerController.seekTo(positionMs)
     }
 
     fun onAction(musicPlaybackAction: MusicPlaybackAction) {
@@ -119,6 +123,14 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
 
             MusicPlaybackAction.onPreviousClick -> {
                 skipToPrevious()
+            }
+
+            is MusicPlaybackAction.OnSeek -> {
+                seekTo(musicPlaybackAction.positionMs)
+                _state.update {
+                    it.copy(currentProgress = musicPlaybackAction.positionMs)
+                }
+
             }
         }
     }
