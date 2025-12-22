@@ -7,11 +7,17 @@ data class MusicPlaybackState(
     val isPlaying: Boolean = false,
     val currentProgress: Long = 0L,
     val duration : Long = 0L,
-    val repeatMode: RepeatMode = RepeatMode.NONE
+    val repeatMode: RepeatMode = RepeatMode.NONE,
+    val shuffleMode: ShuffleMode = ShuffleMode.INACTIVE
 )
 
 enum class RepeatMode{
     NONE,
     REPEAT_ALL,
     REPEAT_ONE
+}
+
+enum class ShuffleMode {
+    INACTIVE,
+    ACTIVE
 }

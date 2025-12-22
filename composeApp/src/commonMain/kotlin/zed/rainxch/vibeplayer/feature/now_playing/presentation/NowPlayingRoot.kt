@@ -41,6 +41,7 @@ import vibeplayer.composeapp.generated.resources.play
 import vibeplayer.composeapp.generated.resources.repeat_all
 import vibeplayer.composeapp.generated.resources.repeat_none
 import vibeplayer.composeapp.generated.resources.repeat_one
+import vibeplayer.composeapp.generated.resources.shuffle
 import vibeplayer.composeapp.generated.resources.skip_next
 import vibeplayer.composeapp.generated.resources.skip_previous
 import zed.rainxch.vibeplayer.feature.main.presentation.MainViewModel
@@ -104,6 +105,9 @@ fun NowPlayingScreen(
         MaterialTheme.colorScheme.onSurfaceVariant
     }
 
+    val shuffleContainerColor = if (state.shuffleMode == ShuffleMode.INACTIVE) Color.Transparent else MaterialTheme.colorScheme.primaryFixed
+    val shuffleContentColor =  if (state.shuffleMode == ShuffleMode.INACTIVE) MaterialTheme.colorScheme.inverseOnSurface else MaterialTheme.colorScheme.onSurfaceVariant
+
 
     Column(
         modifier = Modifier
@@ -145,14 +149,13 @@ fun NowPlayingScreen(
 
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                     IconButton(
-                        onClick = {},
+                        onClick = { onAction(MusicPlaybackAction.OnShuffleClick)},
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = if (state.repeatMode == RepeatMode.NONE) Color.Transparent else MaterialTheme.colorScheme.primaryFixed,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                            containerColor = shuffleContainerColor,
+                            contentColor = shuffleContentColor )
                     ) {
                         Icon(
-                            painter = painterResource(Res.drawable.repeat_all),
+                            painter = painterResource(Res.drawable.shuffle),
                             contentDescription = stringResource(Res.string.cd_shuffle_button),
                         )
                     }

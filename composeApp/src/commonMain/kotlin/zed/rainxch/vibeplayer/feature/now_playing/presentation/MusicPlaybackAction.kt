@@ -7,4 +7,5 @@ interface MusicPlaybackAction {
     data object OnPreviousClick : MusicPlaybackAction
     data class OnSeek(val positionMs: Long) : MusicPlaybackAction
     data object OnRepeatClick: MusicPlaybackAction
+    data object OnShuffleClick: MusicPlaybackAction
 }
