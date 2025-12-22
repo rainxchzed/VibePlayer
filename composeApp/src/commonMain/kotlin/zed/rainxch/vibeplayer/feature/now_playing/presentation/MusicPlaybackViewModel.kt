@@ -43,7 +43,10 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
         playerController.play(url)
         startProgressTracking()
     }
-
+    fun resumeMusic() {
+        playerController.resume()
+        startProgressTracking()
+    }
     fun pauseMusic() {
         playerController.pause()
     }
@@ -76,21 +79,18 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
         progressJob?.cancel()
     }
 
-
     fun skipToNext() {
         val currentIndex = _playlist.value.indexOfFirst { it.id == _state.value.selectedMusic?.id }
-        if (currentIndex < _playlist.value.lastIndex) {
-            val nextMusic = _playlist.value[currentIndex + 1]
-            loadSelectedMusic(nextMusic)
-        }
+        val nextIndex = (currentIndex + 1) % _playlist.value.size
+        val nextMusic = _playlist.value[nextIndex]
+        loadSelectedMusic(nextMusic)
     }
 
     fun skipToPrevious() {
         val currentIndex = _playlist.value.indexOfFirst { it.id == _state.value.selectedMusic?.id }
-        if (currentIndex > 0) {
-            val prevMusic = _playlist.value[currentIndex - 1]
-            loadSelectedMusic(prevMusic)
-        }
+        val previousIndex = if (currentIndex <= 0) _playlist.value.lastIndex else currentIndex - 1
+        val prevMusic = _playlist.value[previousIndex]
+        loadSelectedMusic(prevMusic)
     }
 
     fun seekTo(positionMs: Long) {
@@ -101,9 +101,14 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
         when (musicPlaybackAction) {
             MusicPlaybackAction.onPlayClick -> {
 
-                _state.value.selectedMusic?.let {
-                    playMusic(it.musicUrl)
+                if (_state.value.selectedMusic != null){
+                    resumeMusic()
+                } else {
+                    _state.value.selectedMusic?.let {
+                        playMusic(it.musicUrl)
+                    }
                 }
+
                 _state.update {
                     it.copy(isPlaying = true)
                 }

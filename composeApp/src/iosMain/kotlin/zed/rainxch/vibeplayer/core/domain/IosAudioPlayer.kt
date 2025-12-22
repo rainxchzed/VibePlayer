@@ -6,21 +6,22 @@ import platform.AVFoundation.pause
 import platform.AVFoundation.play
 import platform.Foundation.NSURL
 
-class IosAudioPlayer : MediaPlayerController{
+class IosAudioPlayer : MediaPlayerController {
 
- private var avPlayer: AVPlayer? = null
+    private var avPlayer: AVPlayer? = null
 
 
     override fun play(url: String) {
-    val url = NSURL.URLWithString(url) ?: return
-    val playerItem = AVPlayerItem(uRL = url)
+        val url = NSURL.URLWithString(url) ?: return
+        val playerItem = AVPlayerItem(uRL = url)
 
         avPlayer = AVPlayer(playerItem = playerItem)
         avPlayer?.play()
-   }
+    }
 
     override fun pause() {
-   avPlayer?.pause() }
+        avPlayer?.pause()
+    }
 
     override fun resume() {
         avPlayer?.play()
@@ -36,6 +37,10 @@ class IosAudioPlayer : MediaPlayerController{
     }
 
     override fun getDuration(): Long {
+        TODO("Not yet implemented")
+    }
+
+    override fun seekTo(positionMs: Long) {
         TODO("Not yet implemented")
     }
 }
