@@ -21,7 +21,11 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
 
     private var progressJob: Job? = null
 
-
+init {
+    playerController.setOnCompletionListener {
+        handleTrackCompletion()
+    }
+}
     fun createPlayList(musicsList: List<Music>) {
         _playlist.value = musicsList
     }
@@ -97,9 +101,38 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
         playerController.seekTo(positionMs)
     }
 
+    fun handleTrackCompletion() {
+
+        val currentMusic = _state.value.selectedMusic ?: return
+        val currentIndex = _playlist.value.indexOfFirst { it.id == currentMusic.id }
+
+        when (_state.value.repeatMode) {
+            RepeatMode.REPEAT_ONE -> {
+                loadSelectedMusic(currentMusic)
+            }
+
+            RepeatMode.REPEAT_ALL -> {
+                skipToNext()
+            }
+
+            RepeatMode.NONE -> {
+                // Off: Play next if available, otherwise STOP
+                if (currentIndex < _playlist.value.lastIndex) {
+                    skipToNext()
+                } else {
+                    // Last track reached: Stop and reset progress
+                    pauseMusic()
+                    _state.update {
+                        it.copy(isPlaying = false, currentProgress = 0L)
+                    }
+                }
+            }
+        }
+    }
+
     fun onAction(musicPlaybackAction: MusicPlaybackAction) {
         when (musicPlaybackAction) {
-            MusicPlaybackAction.onPlayClick -> {
+            MusicPlaybackAction.OnPlayClick -> {
 
                 if (_state.value.selectedMusic != null){
                     resumeMusic()
@@ -114,7 +147,7 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
                 }
             }
 
-            MusicPlaybackAction.onPauseClick -> {
+            MusicPlaybackAction.OnPauseClick -> {
                 pauseMusic()
                 _state.update {
                     it.copy(isPlaying = false)
@@ -122,11 +155,11 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
                 stopProgressTracking()
             }
 
-            MusicPlaybackAction.onNextClick -> {
+            MusicPlaybackAction.OnNextClick -> {
                 skipToNext()
             }
 
-            MusicPlaybackAction.onPreviousClick -> {
+            MusicPlaybackAction.OnPreviousClick -> {
                 skipToPrevious()
             }
 
@@ -136,6 +169,17 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
                     it.copy(currentProgress = musicPlaybackAction.positionMs)
                 }
 
+            }
+
+            MusicPlaybackAction.OnRepeatClick -> {
+                val nextMode = when (_state.value.repeatMode) {
+                    RepeatMode.NONE -> RepeatMode.REPEAT_ALL
+                    RepeatMode.REPEAT_ALL -> RepeatMode.REPEAT_ONE
+                    RepeatMode.REPEAT_ONE -> RepeatMode.NONE
+                }
+                _state.update {
+                    it.copy(repeatMode = nextMode)
+                }
             }
         }
     }

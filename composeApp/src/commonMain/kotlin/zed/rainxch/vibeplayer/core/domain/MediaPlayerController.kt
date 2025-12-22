@@ -9,5 +9,6 @@ interface MediaPlayerController {
     fun getCurrentPosition(): Long
     fun getDuration(): Long
     fun seekTo(positionMs: Long)
+    fun setOnCompletionListener(callback: () -> Unit)
 
 }

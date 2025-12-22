@@ -2,8 +2,12 @@ package zed.rainxch.vibeplayer.core.domain
 
 import platform.AVFoundation.AVPlayer
 import platform.AVFoundation.AVPlayerItem
+import platform.AVFoundation.AVPlayerItemDidPlayToEndTimeNotification
+import platform.AVFoundation.currentItem
 import platform.AVFoundation.pause
 import platform.AVFoundation.play
+import platform.Foundation.NSNotificationCenter
+import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSURL
 
 class IosAudioPlayer : MediaPlayerController {
@@ -43,4 +47,14 @@ class IosAudioPlayer : MediaPlayerController {
     override fun seekTo(positionMs: Long) {
         TODO("Not yet implemented")
     }
+    override fun setOnCompletionListener(callback: () -> Unit) {
+        NSNotificationCenter.defaultCenter.addObserverForName(
+            name = AVPlayerItemDidPlayToEndTimeNotification,
+            `object` = avPlayer?.currentItem,
+            queue = NSOperationQueue.mainQueue
+        ) { _ ->
+            callback()
+        }
+    }
+
 }

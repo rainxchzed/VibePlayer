@@ -6,5 +6,12 @@ data class MusicPlaybackState(
     val selectedMusic: Music? = null,
     val isPlaying: Boolean = false,
     val currentProgress: Long = 0L,
-    val duration : Long = 0L
+    val duration : Long = 0L,
+    val repeatMode: RepeatMode = RepeatMode.NONE
 )
+
+enum class RepeatMode{
+    NONE,
+    REPEAT_ALL,
+    REPEAT_ONE
+}

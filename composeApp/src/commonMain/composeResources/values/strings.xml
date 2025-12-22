@@ -1,0 +1,9 @@
+<resources>
+    <string name="cd_shuffle_button">Shuffle button</string>
+    <string name="cd_repeat_button">Repeat button</string>
+    <string name="cd_next_track_button">Next track</string>
+    <string name="cd_play_pause_button">Play/pause</string>
+    <string name="cd_previous_track_button">Previous track</string>
+
+
+</resources>
