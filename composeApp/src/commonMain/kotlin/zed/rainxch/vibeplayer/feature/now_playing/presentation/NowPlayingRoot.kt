@@ -150,7 +150,7 @@ fun NowPlayingScreen(
         }
         Column(
             modifier = Modifier.fillMaxWidth().wrapContentHeight()
-                .padding(start = 10.dp, end = 10.dp),
+                .padding(start = 20.dp, end = 20.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

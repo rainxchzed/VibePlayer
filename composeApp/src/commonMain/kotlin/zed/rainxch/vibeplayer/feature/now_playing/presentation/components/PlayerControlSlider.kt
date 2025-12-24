@@ -3,10 +3,13 @@ package zed.rainxch.vibeplayer.feature.now_playing.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,9 +47,12 @@ fun PlayerControlSlider(
         activeTrackColor = MaterialTheme.colorScheme.onSurface,
         inactiveTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
     )
-    Column(
+    BoxWithConstraints(
         modifier = modifier
     ) {
+
+        val fullWidth = maxWidth // This is the width of the blue parent
+
         Slider(
             value = progressFraction,
             onValueChange = { fraction ->
@@ -63,14 +69,34 @@ fun PlayerControlSlider(
                 inactiveTrackColor = MaterialTheme.colorScheme.outline // Unplayed part
             ),
             track = { sliderState ->
-                SliderDefaults.Track(
-                    colors = sliderColors,
-                    enabled = true,
-                    sliderState = sliderState,
-                    modifier = Modifier.fillMaxWidth(),
-                    thumbTrackGapSize = 0.dp,
-                    drawStopIndicator = null
-                )
+
+
+                Box(
+                    modifier = Modifier
+                        .requiredWidth(fullWidth)
+                        .height(12.dp)
+                        .background(MaterialTheme.colorScheme.outline, RoundedCornerShape(100)),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progressFraction)
+                            .fillMaxHeight()
+                            .background(
+                                MaterialTheme.colorScheme.onSurface,
+                                RoundedCornerShape(100)
+                            )
+                    )
+                }
+
+                /*    SliderDefaults.Track(
+                        colors = sliderColors,
+                        enabled = true,
+                        sliderState = sliderState,
+                        modifier = Modifier.fillMaxWidth().height(12.dp).padding((-20).dp),
+                        thumbTrackGapSize = 0.dp,
+                        drawStopIndicator = null
+                    )*/
             },
             thumb = {
 
@@ -87,24 +113,18 @@ fun PlayerControlSlider(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
+
                         Text(
-                            text = formatMilliseconds(state.currentProgress),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSecondary,
-                        )
-                        Text(
-                            text = " / ",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSecondary
-                        )
-                        Text(
-                            text = formatMilliseconds(state.duration),
+                            text = "${formatMilliseconds(state.currentProgress)} / ${
+                                formatMilliseconds(
+                                    state.duration
+                                )
+                            }",
                             style = MaterialTheme.typography.bodySmall,
                             fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSecondary
                         )
+
                     }
                 }
             }
