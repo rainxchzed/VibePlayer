@@ -1,5 +1,8 @@
 package zed.rainxch.vibeplayer.feature.now_playing.presentation.components
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -29,60 +33,83 @@ import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 @Composable
 fun MusicContentItem(
     music: Music,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(0.9f).wrapContentHeight(),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
-    ) {
-
-        if (music.bannerUrl == null) {
-            Image(
-                painter = painterResource(Res.drawable.ic_music),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(240.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(
-                        brush = Brush.linearGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.secondary,
-                                MaterialTheme.colorScheme.secondary.copy(alpha = .2f),
-                            )
-                        )
-                    )
-                    .padding(12.dp),
-            )
-
-        } else {
-            AsyncImage(
-                model = music.bannerUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(240.dp)
-                    .clip(RoundedCornerShape(10.dp))
-            )
-
-        }
+    with (sharedTransitionScope) {
 
         Column(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(top = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = modifier.fillMaxWidth(0.9f).wrapContentHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = music.title,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
 
-            Text(
-                text = music.artist,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (music.bannerUrl == null) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_music),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState(key = "banner-placeholder-${music.id}"),
+                            animatedVisibilityScope = animatedContentScope
+                        )
+                        .size(240.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            brush = Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.secondary,
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = .2f),
+                                )
+                            )
+                        )
+                        .padding(12.dp)
+                    ,
+                )
+
+            } else {
+                AsyncImage(
+                    model = music.bannerUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(240.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState(key = "banner-image-${music.id}"),
+                            animatedVisibilityScope = animatedContentScope
+                        )
+                )
+
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth().wrapContentHeight().padding(top = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier.sharedElement(
+                        sharedTransitionScope.rememberSharedContentState(key = "title-${music.id}"),
+                        animatedVisibilityScope = animatedContentScope
+                    ),
+                    text = music.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Text(
+                    modifier = Modifier.sharedElement(
+                        sharedTransitionScope.rememberSharedContentState(key = "artist-${music.id}"),
+                        animatedVisibilityScope = animatedContentScope
+                    ),
+                    text = music.artist,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
@@ -91,14 +118,19 @@ fun MusicContentItem(
 @Composable
 fun MusicItemPreview() {
     VibePlayerTheme {
-        MusicContentItem(
-            music = Music(
-                title = "505",
-                duration = "4:14",
-                artist = "Arctic Monkeys",
-                bannerUrl = null,
-                musicUrl = ""
+        SharedTransitionLayout {
+            MusicContentItem(
+                music = Music(
+                    title = "505",
+                    duration = "4:14",
+                    artist = "Arctic Monkeys",
+                    bannerUrl = null,
+                    musicUrl = ""
+                ),
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedContentScope = LocalNavAnimatedContentScope.current
             )
-        )
+        }
+
     }
 }

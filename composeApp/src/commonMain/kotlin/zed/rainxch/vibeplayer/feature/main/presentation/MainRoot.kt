@@ -1,6 +1,9 @@
 package zed.rainxch.vibeplayer.feature.main.presentation
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -32,18 +35,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
 import zed.rainxch.vibeplayer.core.presentation.components.progressbars.ScanningProgressbar
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
+import zed.rainxch.vibeplayer.feature.mini_player.MiniPlayer
 
 @Composable
 fun MainRoot(
     viewModel: MainViewModel = koinViewModel(),
     onNavigateToNowPlaying: (musicId: Int) -> Unit,
+    onExpandPlayer: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -56,7 +66,10 @@ fun MainRoot(
             } else {
                 viewModel.onAction(action)
             }
-        }
+        },
+        onExpandPlayer = onExpandPlayer,
+        sharedTransitionScope = sharedTransitionScope,
+        animatedContentScope = animatedContentScope
     )
 }
 
@@ -64,6 +77,9 @@ fun MainRoot(
 fun MainScreen(
     state: MainState,
     onAction: (MainAction) -> Unit,
+    onExpandPlayer: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
     Box(
         modifier = Modifier
@@ -79,7 +95,13 @@ fun MainScreen(
                 if (state.musics.isEmpty()) {
                     NoMusicContent(onAction)
                 } else {
-                    MainContent(state, onAction)
+                    MainContent(
+                        state = state,
+                        onAction = onAction,
+                        onExpandPlayer = onExpandPlayer,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedContentScope = animatedContentScope
+                    )
                 }
             }
         }
@@ -142,7 +164,10 @@ private fun NoMusicContent(onAction: (MainAction) -> Unit) {
 @Composable
 private fun MainContent(
     state: MainState,
-    onAction: (MainAction) -> Unit
+    onAction: (MainAction) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    onExpandPlayer: () -> Unit
 ) {
     val listState = rememberLazyListState()
     val shouldShowScrollTop by remember {
@@ -202,6 +227,13 @@ private fun MainContent(
                 )
             }
         }
+
+        MiniPlayer(
+            onExpand = onExpandPlayer,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope
+        )
     }
 }
 
@@ -209,10 +241,15 @@ private fun MainContent(
 @Composable
 private fun Preview() {
     VibePlayerTheme {
-        MainScreen(
-            state = MainState(),
-            onAction = {}
-        )
+        SharedTransitionLayout {
+            MainScreen(
+                state = MainState(),
+                onAction = {},
+                onExpandPlayer = {},
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedContentScope = LocalNavAnimatedContentScope.current
+            )
+        }
     }
 }
 
@@ -220,9 +257,39 @@ private fun Preview() {
 @Composable
 private fun Preview2() {
     VibePlayerTheme {
-        MainScreen(
-            state = MainState(scanResultState = ScanResultState.Ready),
-            onAction = {}
-        )
+        SharedTransitionLayout {
+            MainScreen(
+                state = MainState(scanResultState = ScanResultState.Ready),
+                onAction = {},
+                onExpandPlayer = {},
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedContentScope = LocalNavAnimatedContentScope.current
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewMiniPlayer() {
+    VibePlayerTheme {
+        SharedTransitionLayout {
+            MainScreen(
+                state = MainState(
+                    scanResultState = ScanResultState.Ready,
+                    musics = persistentListOf(
+                        Music(
+                            title = "505",
+                            duration = "4:14",
+                            artist = "Arctic Monkeys",
+                            musicUrl = "music")
+                    )
+                ),
+                onAction = {},
+                onExpandPlayer = {},
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedContentScope = LocalNavAnimatedContentScope.current
+            )
+        }
     }
 }

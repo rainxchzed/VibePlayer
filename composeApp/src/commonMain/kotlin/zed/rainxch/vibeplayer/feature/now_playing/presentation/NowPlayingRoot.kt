@@ -1,5 +1,7 @@
 package zed.rainxch.vibeplayer.feature.now_playing.presentation
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,8 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -32,7 +32,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
-import vibeplayer.composeapp.generated.resources.cd_minimize
 import vibeplayer.composeapp.generated.resources.cd_next_track_button
 import vibeplayer.composeapp.generated.resources.cd_play_pause_button
 import vibeplayer.composeapp.generated.resources.cd_previous_track_button
@@ -52,19 +51,14 @@ import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.Player
 
 @Composable
 fun NowPlayingRoot(
-    musicId: Int,
     viewModel: MainViewModel = koinViewModel(),
     musicPlaybackViewModel: MusicPlaybackViewModel,
-    onMinimize: () -> Unit
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val musicPlaybackState by musicPlaybackViewModel.state.collectAsStateWithLifecycle()
-
-    LaunchedEffect(musicId) {
-        val selectedMusic = viewModel.getMusicById(musicId)
-        musicPlaybackViewModel.loadSelectedMusic(selectedMusic)
-    }
 
     LaunchedEffect(state) {
         musicPlaybackViewModel.createPlayList(state.musics)
@@ -77,19 +71,20 @@ fun NowPlayingRoot(
           }
       }*/
 
-    NowPlayingScreen(state = musicPlaybackState, onAction = { action ->
-        if (action == MusicPlaybackAction.OnMinimizeClick) {
-            onMinimize()
-        } else {
-            musicPlaybackViewModel.onAction(action)
-        }
-    })
+    NowPlayingScreen(
+        state = musicPlaybackState,
+        onAction = musicPlaybackViewModel::onAction,
+        sharedTransitionScope = sharedTransitionScope,
+        animatedContentScope = animatedContentScope
+    )
 }
 
 @Composable
 fun NowPlayingScreen(
     state: MusicPlaybackState,
-    onAction: (MusicPlaybackAction) -> Unit
+    onAction: (MusicPlaybackAction) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
 
     val repeatIcon = when (state.repeatMode) {
@@ -124,19 +119,6 @@ fun NowPlayingScreen(
             .background(MaterialTheme.colorScheme.onSecondary)
             .windowInsetsPadding(WindowInsets.safeDrawing) // Handle system bars
     ) {
-        IconButton(
-            onClick = { onAction(MusicPlaybackAction.OnMinimizeClick) },
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primaryFixed,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-            modifier = Modifier.padding(start = 10.dp, top = 10.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowDown, // Your downward arrow
-                contentDescription = stringResource(Res.string.cd_minimize)
-            )
-        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -146,114 +128,141 @@ fun NowPlayingScreen(
 
         ) {
             if (state.selectedMusic != null)
-                MusicContentItem(state.selectedMusic)
+                MusicContentItem(
+                    state.selectedMusic,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope
+                )
         }
-        Column(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight()
-                .padding(start = 20.dp, end = 20.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
 
-            PlayerControlSlider(
-                state = state,
-                modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(bottom = 8.dp),
-                onSeek = { positionMs ->
-                    onAction(MusicPlaybackAction.OnSeek(positionMs))
-                })
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(top = 16.dp, start = 10.dp, end = 10.dp, bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+        with(sharedTransitionScope) {
+            Column(
+                modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                    .padding(start = 20.dp, end = 20.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                    IconButton(
-                        onClick = { onAction(MusicPlaybackAction.OnShuffleClick) },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = shuffleContainerColor,
-                            contentColor = shuffleContentColor
+                PlayerControlSlider(
+                    state = state,
+                    modifier = Modifier
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState(key = "progress-bar-${state.selectedMusic?.id}"),
+                            animatedContentScope
                         )
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.shuffle),
-                            contentDescription = stringResource(Res.string.cd_shuffle_button),
-                        )
+                        .fillMaxWidth().wrapContentHeight().padding(bottom = 8.dp),
+                    onSeek = { positionMs ->
+                        onAction(MusicPlaybackAction.OnSeek(positionMs))
                     }
-                }
+                )
+
                 Row(
-                    modifier = Modifier.weight(3f),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 16.dp, start = 10.dp, end = 10.dp, bottom = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = { onAction(MusicPlaybackAction.OnPreviousClick) },
-                        shape = CircleShape,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryFixed,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                        modifier = Modifier.size(44.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(16.dp),
-                            painter = painterResource(Res.drawable.skip_previous),
-                            contentDescription = stringResource(Res.string.cd_previous_track_button)
-                        )
-                    }
 
-                    IconButton(
-                        onClick = {
-                            if (state.isPlaying) onAction(MusicPlaybackAction.OnPauseClick)
-                            else onAction(
-                                MusicPlaybackAction.OnPlayClick
-                            )
-                        }, shape = CircleShape, colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.onSurface,
-
-                            ), modifier = Modifier.size(60.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = if (state.isPlaying) painterResource(Res.drawable.pause) else painterResource(
-                                Res.drawable.play
-                            ),
-                            contentDescription = stringResource(Res.string.cd_play_pause_button)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = { onAction(MusicPlaybackAction.OnNextClick) },
-                        shape = CircleShape,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryFixed,
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        ),
-                        modifier = Modifier.size(44.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(16.dp),
-                            painter = painterResource(Res.drawable.skip_next),
-                            contentDescription = stringResource(Res.string.cd_next_track_button)
-                        )
-                    }
-
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-
-
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                         IconButton(
-                            onClick = { onAction(MusicPlaybackAction.OnRepeatClick) },
+                            onClick = { onAction(MusicPlaybackAction.OnShuffleClick) },
                             colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = repeatContainerColor,
-                                contentColor = repeatContentColor
+                                containerColor = shuffleContainerColor,
+                                contentColor = shuffleContentColor
                             )
                         ) {
                             Icon(
-                                painter = repeatIcon,
-                                contentDescription = stringResource(Res.string.cd_repeat_button)
+                                painter = painterResource(Res.drawable.shuffle),
+                                contentDescription = stringResource(Res.string.cd_shuffle_button),
                             )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.weight(3f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        IconButton(
+                            onClick = { onAction(MusicPlaybackAction.OnPreviousClick) },
+                            shape = CircleShape,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryFixed,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
+                            modifier = Modifier.size(44.dp)
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(16.dp),
+                                painter = painterResource(Res.drawable.skip_previous),
+                                contentDescription = stringResource(Res.string.cd_previous_track_button)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                if (state.isPlaying) onAction(MusicPlaybackAction.OnPauseClick)
+                                else onAction(
+                                    MusicPlaybackAction.OnPlayClick
+                                )
+                            },
+                            shape = CircleShape,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.onSurface,
+                            ),
+                            modifier = Modifier
+                                .sharedElement(
+                                    sharedTransitionScope.rememberSharedContentState(key = "play-pause-button-${state.selectedMusic?.id}"),
+                                    animatedContentScope,
+                                )
+                                .size(60.dp)
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = if (state.isPlaying) painterResource(Res.drawable.pause) else painterResource(
+                                    Res.drawable.play
+                                ),
+                                contentDescription = stringResource(Res.string.cd_play_pause_button)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { onAction(MusicPlaybackAction.OnNextClick) },
+                            shape = CircleShape,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryFixed,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
+                            modifier = Modifier
+                                .sharedElement(
+                                    sharedContentState = sharedTransitionScope.rememberSharedContentState(
+                                        key = "next-button-${state.selectedMusic?.id}"
+                                    ),
+                                    animatedVisibilityScope = animatedContentScope
+                                )
+                                .size(44.dp)
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(16.dp),
+                                painter = painterResource(Res.drawable.skip_next),
+                                contentDescription = stringResource(Res.string.cd_next_track_button)
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            IconButton(
+                                onClick = { onAction(MusicPlaybackAction.OnRepeatClick) },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = repeatContainerColor,
+                                    contentColor = repeatContentColor
+                                )
+                            ) {
+                                Icon(
+                                    painter = repeatIcon,
+                                    contentDescription = stringResource(Res.string.cd_repeat_button)
+                                )
+                            }
                         }
                     }
                 }

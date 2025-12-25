@@ -15,7 +15,6 @@ class AndroidAudioPlayer(context: Context) : MediaPlayerController {
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
         exoPlayer.play()
-
     }
 
     override fun pause() {

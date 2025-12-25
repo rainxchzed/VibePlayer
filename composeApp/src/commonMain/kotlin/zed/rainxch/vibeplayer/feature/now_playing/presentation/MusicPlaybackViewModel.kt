@@ -225,6 +225,4 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
             }
         }
     }
-
-
 }
