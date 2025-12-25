@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,19 +34,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import vibeplayer.composeapp.generated.resources.Res
+import vibeplayer.composeapp.generated.resources.main_screen_songs_count
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
 import zed.rainxch.vibeplayer.core.presentation.components.progressbars.ScanningProgressbar
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
+import zed.rainxch.vibeplayer.feature.main.presentation.components.QuickPlayBar
 import zed.rainxch.vibeplayer.feature.mini_player.MiniPlayer
 
 @Composable
@@ -186,6 +193,22 @@ private fun MainContent(
             contentPadding = PaddingValues(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            item {
+                QuickPlayBar(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                    onPlayClick = {},
+                    onShuffleClick = {}
+                )
+            }
+            item {
+                Text(
+                    text = pluralStringResource(Res.plurals.main_screen_songs_count, state.musics.size, state.musics.size),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             items(
                 items = state.musics,
                 key = { it.musicUrl }
@@ -212,6 +235,7 @@ private fun MainContent(
                 .align(Alignment.BottomEnd)
         ) {
             FloatingActionButton(
+                modifier = Modifier.navigationBarsPadding(),
                 onClick = {
                     coroutineScope.launch {
                         listState.animateScrollToItem(0)

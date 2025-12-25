@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -164,7 +165,8 @@ fun AppNavigation(
                     else -> {}
                 }
             },
-            containerColor = MaterialTheme.colorScheme.onSecondary
+            containerColor = MaterialTheme.colorScheme.onSecondary,
+            contentWindowInsets = WindowInsets(0.dp)
         ) { innerPadding ->
             SharedTransitionLayout {
                 NavDisplay(
