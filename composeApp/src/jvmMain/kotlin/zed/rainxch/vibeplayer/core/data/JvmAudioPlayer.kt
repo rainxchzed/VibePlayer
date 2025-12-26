@@ -3,7 +3,7 @@ package zed.rainxch.vibeplayer.core.data
 import javafx.application.Platform
 import javafx.scene.media.Media
 import javafx.scene.media.MediaPlayer
-import kotlinx.coroutines.*
+import kotlinx.coroutines.runBlocking
 import zed.rainxch.vibeplayer.core.domain.MediaPlayerController
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean

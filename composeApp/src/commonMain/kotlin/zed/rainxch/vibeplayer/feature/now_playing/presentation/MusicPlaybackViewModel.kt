@@ -223,6 +223,31 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
                 }
 
             }
+
+            MusicPlaybackAction.OnPlayAllClick -> {
+                // Ensure shuffle is disabled
+                _state.update {
+                    it.copy(shuffleMode = ShuffleMode.INACTIVE)
+                }
+
+                // Start playing first track from normal playlist
+                _playlist.value.firstOrNull()?.let { firstTrack ->
+                    loadSelectedMusic(firstTrack)
+                }
+            }
+
+            MusicPlaybackAction.OnShuffleAndPlayClick -> {
+                // Enable shuffle and regenerate shuffled playlist
+                _shuffledPlaylist.value = _playlist.value.shuffled()
+                _state.update {
+                    it.copy(shuffleMode = ShuffleMode.ACTIVE)
+                }
+
+                // Start playing first track from shuffled playlist
+                _shuffledPlaylist.value.firstOrNull()?.let { firstTrack ->
+                    loadSelectedMusic(firstTrack)
+                }
+            }
         }
     }
 }

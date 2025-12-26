@@ -1,6 +1,5 @@
 package zed.rainxch.vibeplayer.feature.main.presentation.components
 
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
@@ -20,9 +19,7 @@ import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_play_outlined
 import vibeplayer.composeapp.generated.resources.main_screen_play_button
 import vibeplayer.composeapp.generated.resources.main_screen_shuffle_button
-import vibeplayer.composeapp.generated.resources.play
 import vibeplayer.composeapp.generated.resources.repeat_all
-import vibeplayer.composeapp.generated.resources.shuffle
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 
@@ -59,7 +56,7 @@ fun QuickPlayBar(
         }
         AppOutlinedButton(
             modifier = Modifier.weight(1f),
-            onClick = onShuffleClick,
+            onClick = onPlayClick,
         ) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),

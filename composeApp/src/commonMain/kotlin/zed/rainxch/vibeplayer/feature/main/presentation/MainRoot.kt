@@ -47,16 +47,18 @@ import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.main_screen_songs_count
 import zed.rainxch.vibeplayer.core.domain.model.Music
+import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
 import zed.rainxch.vibeplayer.core.presentation.components.progressbars.ScanningProgressbar
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
-import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
 import zed.rainxch.vibeplayer.feature.main.presentation.components.QuickPlayBar
 import zed.rainxch.vibeplayer.feature.mini_player.MiniPlayer
+import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackAction
 
 @Composable
 fun MainRoot(
     viewModel: MainViewModel = koinViewModel(),
+    musicPlaybackViewModel: zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel = koinViewModel(),
     onNavigateToNowPlaying: (musicId: Int) -> Unit,
     onExpandPlayer: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
@@ -66,6 +68,16 @@ fun MainRoot(
 
     MainScreen(
         state = state,
+        onPlayAllClick = {
+            musicPlaybackViewModel.createPlayList(state.musics)
+            musicPlaybackViewModel.onAction(MusicPlaybackAction.OnPlayAllClick)
+            onExpandPlayer()
+        },
+        onShuffleAndPlayClick = {
+            musicPlaybackViewModel.createPlayList(state.musics)
+            musicPlaybackViewModel.onAction(MusicPlaybackAction.OnShuffleAndPlayClick)
+            onExpandPlayer()
+        },
         onAction = { action ->
             if (action is MainAction.OnMusicItemClick) {
                 val music = action.music
@@ -83,6 +95,8 @@ fun MainRoot(
 @Composable
 fun MainScreen(
     state: MainState,
+    onPlayAllClick: () -> Unit,
+    onShuffleAndPlayClick: () -> Unit,
     onAction: (MainAction) -> Unit,
     onExpandPlayer: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
@@ -104,6 +118,8 @@ fun MainScreen(
                 } else {
                     MainContent(
                         state = state,
+                        onPlayAllClick = onPlayAllClick,
+                        onShuffleAndPlayClick = onShuffleAndPlayClick,
                         onAction = onAction,
                         onExpandPlayer = onExpandPlayer,
                         sharedTransitionScope = sharedTransitionScope,
@@ -171,6 +187,8 @@ private fun NoMusicContent(onAction: (MainAction) -> Unit) {
 @Composable
 private fun MainContent(
     state: MainState,
+    onPlayAllClick: () -> Unit,
+    onShuffleAndPlayClick: () -> Unit,
     onAction: (MainAction) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
@@ -184,20 +202,23 @@ private fun MainContent(
     }
     val coroutineScope = rememberCoroutineScope()
 
+    // MiniPlayer height: 64dp (content) + 32dp (padding) = 96dp
+    val miniPlayerBottomPadding = if (state.miniPlayerVisible) 96.dp else 0.dp
+
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 16.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = miniPlayerBottomPadding),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             item {
                 QuickPlayBar(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                    onPlayClick = {},
-                    onShuffleClick = {}
+                    onPlayClick = onPlayAllClick,
+                    onShuffleClick = onShuffleAndPlayClick
                 )
             }
             item {
@@ -231,7 +252,7 @@ private fun MainContent(
                 it
             }),
             modifier = Modifier
-                .padding(end = 8.dp, bottom = 12.dp)
+                .padding(end = 8.dp, bottom = 12.dp + miniPlayerBottomPadding)
                 .align(Alignment.BottomEnd)
         ) {
             FloatingActionButton(
@@ -252,12 +273,16 @@ private fun MainContent(
             }
         }
 
-        MiniPlayer(
-            onExpand = onExpandPlayer,
-            modifier = Modifier.align(Alignment.BottomCenter),
-            sharedTransitionScope = sharedTransitionScope,
-            animatedContentScope = animatedContentScope
-        )
+        AnimatedVisibility(
+            visible = state.miniPlayerVisible,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            MiniPlayer(
+                onExpand = onExpandPlayer,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope
+            )
+        }
     }
 }
 
@@ -268,6 +293,8 @@ private fun Preview() {
         SharedTransitionLayout {
             MainScreen(
                 state = MainState(),
+                onPlayAllClick = {},
+                onShuffleAndPlayClick = {},
                 onAction = {},
                 onExpandPlayer = {},
                 sharedTransitionScope = this@SharedTransitionLayout,
@@ -284,6 +311,8 @@ private fun Preview2() {
         SharedTransitionLayout {
             MainScreen(
                 state = MainState(scanResultState = ScanResultState.Ready),
+                onPlayAllClick = {},
+                onShuffleAndPlayClick = {},
                 onAction = {},
                 onExpandPlayer = {},
                 sharedTransitionScope = this@SharedTransitionLayout,
@@ -309,6 +338,8 @@ private fun PreviewMiniPlayer() {
                             musicUrl = "music")
                     )
                 ),
+                onPlayAllClick = {},
+                onShuffleAndPlayClick = {},
                 onAction = {},
                 onExpandPlayer = {},
                 sharedTransitionScope = this@SharedTransitionLayout,

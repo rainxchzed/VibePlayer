@@ -7,7 +7,7 @@ import zed.rainxch.vibeplayer.core.domain.model.Music
 data class MainState(
     val scanResultState: ScanResultState = ScanResultState.Loading,
     val musics: ImmutableList<Music> = persistentListOf(),
-    val miniPlayerVisible: Boolean = true
+    val miniPlayerVisible: Boolean = false
 )
 
 enum class ScanResultState {

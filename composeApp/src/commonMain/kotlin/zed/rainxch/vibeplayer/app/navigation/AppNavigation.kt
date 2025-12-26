@@ -1,10 +1,8 @@
 package zed.rainxch.vibeplayer.app.navigation
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -157,6 +155,7 @@ fun AppNavigation(
                     is VibePlayerGraph.NowPlayingScreen -> {
                         NowPlayingTopbar(
                             onMinimizeClick = {
+                                mainViewModel.onAction(zed.rainxch.vibeplayer.feature.main.presentation.MainAction.OnMinimizeNowPlaying)
                                 navBackStack.removeLastOrNull()
                             }
                         )

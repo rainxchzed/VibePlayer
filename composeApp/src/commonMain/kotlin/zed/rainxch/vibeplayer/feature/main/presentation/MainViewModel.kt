@@ -77,6 +77,12 @@ class MainViewModel(
             is MainAction.OnMusicItemClick -> {
                 /* Handled in composable */
             }
+
+            MainAction.OnMinimizeNowPlaying -> {
+                _state.update {
+                    it.copy(miniPlayerVisible = true)
+                }
+            }
         }
     }
 
