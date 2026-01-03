@@ -111,7 +111,8 @@ class AndroidMusicsDataStore(
                 duration = duration,
                 artist = artist,
                 bannerUrl = bannerUrl,
-                musicUrl = filePath
+                musicUrl = filePath,
+                isFavourite = false
             )
         } catch (e: Exception) {
             println("Error reading metadata for $filePath: ${e.message}")

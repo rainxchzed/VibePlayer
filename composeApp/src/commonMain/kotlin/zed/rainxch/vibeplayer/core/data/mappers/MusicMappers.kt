@@ -11,6 +11,7 @@ fun MusicEntity.toMusic(): Music {
         artist = this.artist,
         bannerUrl = this.bannerUrl,
         musicUrl = this.musicUrl,
+        isFavourite = this.isFavourite
     )
 }
 
@@ -22,5 +23,6 @@ fun Music.toMusicEntity(): MusicEntity {
         artist = this.artist,
         bannerUrl = this.bannerUrl,
         musicUrl = this.musicUrl,
+        isFavourite = this.isFavourite
     )
 }

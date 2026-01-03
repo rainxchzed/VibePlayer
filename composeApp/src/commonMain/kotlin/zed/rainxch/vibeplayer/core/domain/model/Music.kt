@@ -6,5 +6,6 @@ data class Music(
     val duration: String,
     val artist: String,
     val bannerUrl: String? = null,
-    val musicUrl: String
+    val musicUrl: String,
+    val isFavourite: Boolean
 )
