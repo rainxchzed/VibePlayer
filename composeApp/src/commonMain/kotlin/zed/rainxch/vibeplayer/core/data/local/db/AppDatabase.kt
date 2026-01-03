@@ -1,5 +1,6 @@
 package zed.rainxch.vibeplayer.core.data.local.db
 
+import androidx.room.AutoMigration
 import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -9,7 +10,7 @@ import zed.rainxch.vibeplayer.core.data.local.db.entity.MusicEntity
 
 @Database(
     entities = [MusicEntity::class],
-    version = 2
+    version = 3
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {

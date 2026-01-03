@@ -118,7 +118,8 @@ fun MusicItemPreview() {
                 duration = "4:14",
                 artist = "Arctic Monkeys",
                 bannerUrl = null,
-                musicUrl = ""
+                musicUrl = "",
+                isFavourite = false
             ),
             onClick = { }
         )

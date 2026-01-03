@@ -275,7 +275,8 @@ private fun Preview() {
                             artist = "Artist",
                             bannerUrl = null,
                             duration = "3:00",
-                            musicUrl = ""
+                            musicUrl = "",
+                            isFavourite = false
                         )
                     ),
                     onAction = {},

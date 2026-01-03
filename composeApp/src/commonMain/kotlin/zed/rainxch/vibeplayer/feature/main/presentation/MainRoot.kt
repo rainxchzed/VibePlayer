@@ -211,7 +211,11 @@ private fun MainContent(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = miniPlayerBottomPadding),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                bottom = miniPlayerBottomPadding
+            ),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             item {
@@ -223,7 +227,11 @@ private fun MainContent(
             }
             item {
                 Text(
-                    text = pluralStringResource(Res.plurals.main_screen_songs_count, state.musics.size, state.musics.size),
+                    text = pluralStringResource(
+                        Res.plurals.main_screen_songs_count,
+                        state.musics.size,
+                        state.musics.size
+                    ),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Medium
                     ),
@@ -335,7 +343,9 @@ private fun PreviewMiniPlayer() {
                             title = "505",
                             duration = "4:14",
                             artist = "Arctic Monkeys",
-                            musicUrl = "music")
+                            musicUrl = "music",
+                            isFavourite = false
+                        )
                     )
                 ),
                 onPlayAllClick = {},

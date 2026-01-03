@@ -125,7 +125,8 @@ fun MusicItemPreview() {
                     duration = "4:14",
                     artist = "Arctic Monkeys",
                     bannerUrl = null,
-                    musicUrl = ""
+                    musicUrl = "",
+                    isFavourite = false
                 ),
                 sharedTransitionScope = this@SharedTransitionLayout,
                 animatedContentScope = LocalNavAnimatedContentScope.current
