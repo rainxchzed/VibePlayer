@@ -8,7 +8,13 @@ sealed interface VibePlayerGraph {
     data object PermissionScreen : VibePlayerGraph
 
     @Serializable
-    data object MainScreen : VibePlayerGraph
+    data object SongsScreen : VibePlayerGraph
+
+    @Serializable
+    data object PlaylistScreen : VibePlayerGraph
+
+    @Serializable
+    data object MainControllerScreen : VibePlayerGraph
 
     @Serializable
     data object ScanScreen : VibePlayerGraph

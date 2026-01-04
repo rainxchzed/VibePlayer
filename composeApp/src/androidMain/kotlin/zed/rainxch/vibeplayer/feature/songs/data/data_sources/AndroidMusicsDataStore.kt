@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.feature.main.data.data_sources
+package zed.rainxch.vibeplayer.feature.songs.data.data_sources
 
 import android.content.Context
 import android.database.Cursor

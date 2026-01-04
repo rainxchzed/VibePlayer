@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.feature.main.presentation
+package zed.rainxch.vibeplayer.feature.songs.presentation
 
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
@@ -45,19 +45,19 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
-import vibeplayer.composeapp.generated.resources.main_screen_songs_count
+import vibeplayer.composeapp.generated.resources.songs_screen_songs_count
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
 import zed.rainxch.vibeplayer.core.presentation.components.progressbars.ScanningProgressbar
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
-import zed.rainxch.vibeplayer.feature.main.presentation.components.QuickPlayBar
+import zed.rainxch.vibeplayer.feature.songs.presentation.components.QuickPlayBar
 import zed.rainxch.vibeplayer.feature.mini_player.MiniPlayer
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackAction
 
 @Composable
-fun MainRoot(
-    viewModel: MainViewModel = koinViewModel(),
+fun SongsRoot(
+    viewModel: SongsViewModel = koinViewModel(),
     musicPlaybackViewModel: zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel = koinViewModel(),
     onNavigateToNowPlaying: (musicId: Int) -> Unit,
     onExpandPlayer: () -> Unit,
@@ -66,7 +66,7 @@ fun MainRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    MainScreen(
+    SongsScreen(
         state = state,
         onPlayAllClick = {
             musicPlaybackViewModel.createPlayList(state.musics)
@@ -79,7 +79,7 @@ fun MainRoot(
             onExpandPlayer()
         },
         onAction = { action ->
-            if (action is MainAction.OnMusicItemClick) {
+            if (action is SongsAction.OnMusicItemClick) {
                 val music = action.music
                 onNavigateToNowPlaying(music.id)
             } else {
@@ -93,11 +93,11 @@ fun MainRoot(
 }
 
 @Composable
-fun MainScreen(
-    state: MainState,
+fun SongsScreen(
+    state: SongsState,
     onPlayAllClick: () -> Unit,
     onShuffleAndPlayClick: () -> Unit,
-    onAction: (MainAction) -> Unit,
+    onAction: (SongsAction) -> Unit,
     onExpandPlayer: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
@@ -116,7 +116,7 @@ fun MainScreen(
                 if (state.musics.isEmpty()) {
                     NoMusicContent(onAction)
                 } else {
-                    MainContent(
+                    SongsMainContent(
                         state = state,
                         onPlayAllClick = onPlayAllClick,
                         onShuffleAndPlayClick = onShuffleAndPlayClick,
@@ -152,7 +152,7 @@ private fun LoadingContainer() {
 }
 
 @Composable
-private fun NoMusicContent(onAction: (MainAction) -> Unit) {
+private fun NoMusicContent(onAction: (SongsAction) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -178,18 +178,18 @@ private fun NoMusicContent(onAction: (MainAction) -> Unit) {
         PrimaryButton(
             text = "Scan again",
             onClick = {
-                onAction(MainAction.OnScanAgainClick)
+                onAction(SongsAction.OnScanAgainClick)
             }
         )
     }
 }
 
 @Composable
-private fun MainContent(
-    state: MainState,
+private fun SongsMainContent(
+    state: SongsState,
     onPlayAllClick: () -> Unit,
     onShuffleAndPlayClick: () -> Unit,
-    onAction: (MainAction) -> Unit,
+    onAction: (SongsAction) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     onExpandPlayer: () -> Unit
@@ -228,7 +228,7 @@ private fun MainContent(
             item {
                 Text(
                     text = pluralStringResource(
-                        Res.plurals.main_screen_songs_count,
+                        Res.plurals.songs_screen_songs_count,
                         state.musics.size,
                         state.musics.size
                     ),
@@ -245,7 +245,7 @@ private fun MainContent(
                 MusicItem(
                     music = music,
                     onClick = {
-                        onAction(MainAction.OnMusicItemClick(music))
+                        onAction(SongsAction.OnMusicItemClick(music))
                     }
                 )
             }
@@ -299,8 +299,8 @@ private fun MainContent(
 private fun Preview() {
     VibePlayerTheme {
         SharedTransitionLayout {
-            MainScreen(
-                state = MainState(),
+            SongsScreen(
+                state = SongsState(),
                 onPlayAllClick = {},
                 onShuffleAndPlayClick = {},
                 onAction = {},
@@ -317,8 +317,8 @@ private fun Preview() {
 private fun Preview2() {
     VibePlayerTheme {
         SharedTransitionLayout {
-            MainScreen(
-                state = MainState(scanResultState = ScanResultState.Ready),
+            SongsScreen(
+                state = SongsState(scanResultState = ScanResultState.Ready),
                 onPlayAllClick = {},
                 onShuffleAndPlayClick = {},
                 onAction = {},
@@ -335,8 +335,8 @@ private fun Preview2() {
 private fun PreviewMiniPlayer() {
     VibePlayerTheme {
         SharedTransitionLayout {
-            MainScreen(
-                state = MainState(
+            SongsScreen(
+                state = SongsState(
                     scanResultState = ScanResultState.Ready,
                     musics = persistentListOf(
                         Music(

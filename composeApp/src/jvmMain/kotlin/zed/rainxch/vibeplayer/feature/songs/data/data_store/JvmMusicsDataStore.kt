@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.feature.main.data.data_store
+package zed.rainxch.vibeplayer.feature.songs.data.data_store
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList

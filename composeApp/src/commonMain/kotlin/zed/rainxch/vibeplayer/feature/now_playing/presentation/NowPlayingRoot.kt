@@ -45,13 +45,13 @@ import vibeplayer.composeapp.generated.resources.repeat_one
 import vibeplayer.composeapp.generated.resources.shuffle
 import vibeplayer.composeapp.generated.resources.skip_next
 import vibeplayer.composeapp.generated.resources.skip_previous
-import zed.rainxch.vibeplayer.feature.main.presentation.MainViewModel
+import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.MusicContentItem
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.PlayerControlSlider
 
 @Composable
 fun NowPlayingRoot(
-    viewModel: MainViewModel = koinViewModel(),
+    viewModel: SongsViewModel = koinViewModel(),
     musicPlaybackViewModel: MusicPlaybackViewModel,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,

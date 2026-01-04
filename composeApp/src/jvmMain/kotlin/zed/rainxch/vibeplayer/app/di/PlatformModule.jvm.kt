@@ -9,7 +9,7 @@ import zed.rainxch.vibeplayer.core.data.local.db.initDatabase
 import zed.rainxch.vibeplayer.core.domain.MediaPlayerController
 import zed.rainxch.vibeplayer.core.presentation.utils.JvmPermissionChecker
 import zed.rainxch.vibeplayer.core.presentation.utils.PermissionChecker
-import zed.rainxch.vibeplayer.feature.main.data.data_store.JvmMusicsDataStore
+import zed.rainxch.vibeplayer.feature.songs.data.data_store.JvmMusicsDataStore
 
 actual val platformModule: Module = module {
     single<PermissionChecker> {

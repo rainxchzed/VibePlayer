@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.feature.main.presentation.components
+package zed.rainxch.vibeplayer.feature.songs.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

@@ -6,7 +6,7 @@
     <string name="cd_previous_track_button">Previous track</string>
     <string name="cd_minimize">Minimize</string>
 
-    <plurals name="main_screen_songs_count">
+    <plurals name="songs_screen_songs_count">
         <item quantity="one">%1$d song</item>
         <item quantity="other">%1$d songs</item>
     </plurals>

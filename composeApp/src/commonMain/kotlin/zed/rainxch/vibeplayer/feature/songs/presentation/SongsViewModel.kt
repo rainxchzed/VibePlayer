@@ -1,4 +1,4 @@
-package zed.rainxch.vibeplayer.feature.main.presentation
+package zed.rainxch.vibeplayer.feature.songs.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,13 +11,13 @@ import kotlinx.coroutines.launch
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.core.domain.repository.MusicRepository
 
-class MainViewModel(
+class SongsViewModel(
     private val musicRepository: MusicRepository,
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
-    private val _state = MutableStateFlow(MainState())
+    private val _state = MutableStateFlow(SongsState())
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
@@ -29,7 +29,7 @@ class MainViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = MainState()
+            initialValue = SongsState()
         )
 
 
@@ -52,9 +52,9 @@ class MainViewModel(
         }
     }
 
-    fun onAction(action: MainAction) {
+    fun onAction(action: SongsAction) {
         when (action) {
-            MainAction.OnScanAgainClick -> {
+            SongsAction.OnScanAgainClick -> {
                 viewModelScope.launch {
                     _state.update {
                         it.copy(
@@ -74,11 +74,11 @@ class MainViewModel(
 
             }
 
-            is MainAction.OnMusicItemClick -> {
+            is SongsAction.OnMusicItemClick -> {
                 /* Handled in composable */
             }
 
-            MainAction.OnMinimizeNowPlaying -> {
+            SongsAction.OnMinimizeNowPlaying -> {
                 _state.update {
                     it.copy(miniPlayerVisible = true)
                 }

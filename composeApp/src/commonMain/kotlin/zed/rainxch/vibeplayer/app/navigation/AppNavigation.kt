@@ -51,8 +51,8 @@ import zed.rainxch.vibeplayer.AppViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.MainTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.NowPlayingTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.ScanTopbar
-import zed.rainxch.vibeplayer.feature.main.presentation.MainRoot
-import zed.rainxch.vibeplayer.feature.main.presentation.MainViewModel
+import zed.rainxch.vibeplayer.feature.songs.presentation.SongsRoot
+import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.NowPlayingRoot
 import zed.rainxch.vibeplayer.feature.permission.presentation.PermissionRoot
@@ -69,7 +69,7 @@ fun AppNavigation(
 
     val musicPlaybackViewModel: MusicPlaybackViewModel =
         koinViewModel()// Track whether the player is expanded or minimized
-    val mainViewModel: MainViewModel = koinViewModel()
+    val songsViewModel: SongsViewModel = koinViewModel()
 
     var currentMusicId by remember { mutableStateOf<Int?>(null) }
     var isPlayerExpanded by remember { mutableStateOf(false) }
@@ -88,7 +88,7 @@ fun AppNavigation(
         rememberSerializable(serializer = SnapshotStateListSerializer()) {
             mutableStateListOf(
                 if (state.isAudioPermissionGranted) {
-                    VibePlayerGraph.MainScreen
+                    VibePlayerGraph.SongsScreen
                 } else {
                     VibePlayerGraph.PermissionScreen
                 }
@@ -101,7 +101,7 @@ fun AppNavigation(
             snackbarHost = { SnackbarHost(snackBarHostState) },
             topBar = {
                 when (navBackStack.lastOrNull()) {
-                    VibePlayerGraph.MainScreen -> {
+                    VibePlayerGraph.SongsScreen -> {
                         MainTopbar(
                             actions = {
                                 Row(
@@ -155,7 +155,7 @@ fun AppNavigation(
                     is VibePlayerGraph.NowPlayingScreen -> {
                         NowPlayingTopbar(
                             onMinimizeClick = {
-                                mainViewModel.onAction(zed.rainxch.vibeplayer.feature.main.presentation.MainAction.OnMinimizeNowPlaying)
+                                songsViewModel.onAction(zed.rainxch.vibeplayer.feature.songs.presentation.SongsAction.OnMinimizeNowPlaying)
                                 navBackStack.removeLastOrNull()
                             }
                         )
@@ -178,13 +178,13 @@ fun AppNavigation(
                             PermissionRoot(
                                 onNavigateToMain = {
                                     navBackStack.clear()
-                                    navBackStack.add(VibePlayerGraph.MainScreen)
+                                    navBackStack.add(VibePlayerGraph.SongsScreen)
                                 }
                             )
                         }
 
-                        entry<VibePlayerGraph.MainScreen> {
-                            MainRoot(
+                        entry<VibePlayerGraph.SongsScreen> {
+                            SongsRoot(
                                 onNavigateToNowPlaying = { musicId ->
                                     navBackStack.add(VibePlayerGraph.NowPlayingScreen(musicId))
                                 },
@@ -248,7 +248,7 @@ fun AppNavigation(
                         ) { route ->
                             LaunchedEffect(route.id) {
                                 route.id?.let {
-                                    val selectedMusic = mainViewModel.getMusicById(it)
+                                    val selectedMusic = songsViewModel.getMusicById(it)
                                     musicPlaybackViewModel.loadSelectedMusic(selectedMusic)
                                 }
                             }
