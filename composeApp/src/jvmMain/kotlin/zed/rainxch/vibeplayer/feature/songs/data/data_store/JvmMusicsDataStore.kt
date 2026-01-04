@@ -105,7 +105,8 @@ class JvmMusicsDataStore : MusicsDataStore {
                     artist = tag?.getFirst(FieldKey.ARTIST)?.takeIf { it.isNotBlank() }
                         ?: "Unknown Artist",
                     bannerUrl = extractAlbumArt(tag),
-                    musicUrl = file.absolutePath
+                    musicUrl = file.absolutePath,
+                    isFavourite = false
                 )
             } catch (audioException: Exception) {
                 // Fallback: Try Java Sound API for duration
@@ -120,7 +121,8 @@ class JvmMusicsDataStore : MusicsDataStore {
                     duration = duration,
                     artist = "Unknown Artist",
                     bannerUrl = null,
-                    musicUrl = file.absolutePath
+                    musicUrl = file.absolutePath,
+                    isFavourite = false
                 )
             }
         } catch (e: Exception) {

@@ -12,6 +12,7 @@ import kotlin.coroutines.suspendCoroutine
 
 class JvmAudioPlayer : MediaPlayerController {
     private var mediaPlayer: MediaPlayer? = null
+    private var completionCallback: (() -> Unit)? = null
 
     companion object {
         private val isInitialized = AtomicBoolean(false)
@@ -34,7 +35,7 @@ class JvmAudioPlayer : MediaPlayerController {
     override fun play(url: String) {
         Platform.runLater {
             try {
-                // Stop any existing player
+                // Stop and dispose any existing player
                 mediaPlayer?.apply {
                     stop()
                     dispose()
@@ -46,23 +47,17 @@ class JvmAudioPlayer : MediaPlayerController {
                     File(url).toURI().toString()
                 }
 
-                println("Playing: $mediaUrl")
-
                 val media = Media(mediaUrl)
                 mediaPlayer = MediaPlayer(media).apply {
                     setOnReady {
-                        println("Media ready, starting playback")
                         play()
                     }
                     setOnError {
                         println("Media error: ${error?.message}")
                         error?.printStackTrace()
                     }
-                    setOnPlaying {
-                        println("Media is playing")
-                    }
                     setOnEndOfMedia {
-                        println("Media ended")
+                        completionCallback?.invoke()
                     }
                 }
             } catch (e: Exception) {
@@ -76,7 +71,6 @@ class JvmAudioPlayer : MediaPlayerController {
         Platform.runLater {
             try {
                 mediaPlayer?.pause()
-                println("Paused")
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -87,7 +81,6 @@ class JvmAudioPlayer : MediaPlayerController {
         Platform.runLater {
             try {
                 mediaPlayer?.play()
-                println("Resumed")
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -102,7 +95,6 @@ class JvmAudioPlayer : MediaPlayerController {
                     dispose()
                 }
                 mediaPlayer = null
-                println("Stopped")
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -138,5 +130,19 @@ class JvmAudioPlayer : MediaPlayerController {
                 }
             }
         }
+    }
+
+    override fun seekTo(positionMs: Long) {
+        Platform.runLater {
+            try {
+                mediaPlayer?.seek(javafx.util.Duration.millis(positionMs.toDouble()))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    override fun setOnCompletionListener(callback: () -> Unit) {
+        completionCallback = callback
     }
 }
