@@ -3,6 +3,7 @@ package zed.rainxch.vibeplayer.app.navigation
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -51,6 +52,7 @@ import zed.rainxch.vibeplayer.AppViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.MainTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.NowPlayingTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.ScanTopbar
+import zed.rainxch.vibeplayer.feature.main_controller.presentation.MainControllerRoot
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsRoot
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
@@ -88,7 +90,7 @@ fun AppNavigation(
         rememberSerializable(serializer = SnapshotStateListSerializer()) {
             mutableStateListOf(
                 if (state.isAudioPermissionGranted) {
-                    VibePlayerGraph.SongsScreen
+                    VibePlayerGraph.MainControllerScreen
                 } else {
                     VibePlayerGraph.PermissionScreen
                 }
@@ -101,7 +103,7 @@ fun AppNavigation(
             snackbarHost = { SnackbarHost(snackBarHostState) },
             topBar = {
                 when (navBackStack.lastOrNull()) {
-                    VibePlayerGraph.SongsScreen -> {
+                    VibePlayerGraph.MainControllerScreen -> {
                         MainTopbar(
                             actions = {
                                 Row(
@@ -178,21 +180,19 @@ fun AppNavigation(
                             PermissionRoot(
                                 onNavigateToMain = {
                                     navBackStack.clear()
-                                    navBackStack.add(VibePlayerGraph.SongsScreen)
+                                    navBackStack.add(VibePlayerGraph.MainControllerScreen)
                                 }
                             )
                         }
 
-                        entry<VibePlayerGraph.SongsScreen> {
-                            SongsRoot(
+                        entry<VibePlayerGraph.MainControllerScreen> {
+                            MainControllerRoot(
                                 onNavigateToNowPlaying = { musicId ->
                                     navBackStack.add(VibePlayerGraph.NowPlayingScreen(musicId))
                                 },
                                 onExpandPlayer = {
                                     navBackStack.add(VibePlayerGraph.NowPlayingScreen())
                                 },
-                                sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedContentScope = LocalNavAnimatedContentScope.current
                             )
                         }
 
