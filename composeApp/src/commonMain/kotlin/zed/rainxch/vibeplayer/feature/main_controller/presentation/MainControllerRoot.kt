@@ -30,6 +30,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import zed.rainxch.vibeplayer.app.navigation.VibePlayerGraph
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.feature.main_controller.presentation.model.MainControllerTabs
+import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistRoot
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsRoot
 
 @Composable
@@ -111,7 +112,7 @@ fun SharedTransitionScope.MainControllerScreen(
             }
 
             MainControllerTabs.Playlist -> {
-
+                PlaylistRoot()
             }
         }
     }
