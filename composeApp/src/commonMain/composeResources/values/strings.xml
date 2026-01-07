@@ -17,4 +17,12 @@
         <item quantity="one">%1$d Playlist</item>
         <item quantity="other">%1$d Playlists</item>
     </plurals>
+
+    <plurals name="playlists_songs_count">
+        <item quantity="one">%1$d song</item>
+        <item quantity="other">%1$d songs</item>
+    </plurals>
+
+    <string name="playlists_favourites_title">Favourites</string>
+
 </resources>

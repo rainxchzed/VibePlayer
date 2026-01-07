@@ -18,3 +18,4 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 /composeApp/schema/zed.rainxch.vibeplayer.core.data.local.db.AppDatabase/*.json
+/*.log

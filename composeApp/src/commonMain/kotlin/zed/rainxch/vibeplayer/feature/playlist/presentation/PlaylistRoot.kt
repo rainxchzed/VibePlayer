@@ -25,12 +25,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import vibeplayer.composeapp.generated.resources.Res
+import vibeplayer.composeapp.generated.resources.ic_heart
 import vibeplayer.composeapp.generated.resources.ic_plus
+import vibeplayer.composeapp.generated.resources.playlists_favourites_title
 import vibeplayer.composeapp.generated.resources.playlists_total_count_title
 import vibeplayer.composeapp.generated.resources.songs_screen_songs_count
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
+import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistCard
+import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistsHeader
 
 @Composable
 fun PlaylistRoot(
@@ -53,42 +58,21 @@ fun PlaylistScreen(
         contentPadding = PaddingValues(16.dp)
     ) {
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Text(
-                    modifier = Modifier.weight(1f).padding(end = 4.dp),
-                    text = pluralStringResource(
-                        Res.plurals.playlists_total_count_title,
-                        state.totalCount,
-                        state.totalCount
-                    ),
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Medium
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                IconButton(
-                    modifier = Modifier.size(36.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryFixed,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    shape = CircleShape,
-                    onClick = {
-                        onAction(PlaylistAction.OnCreatePlaylistClick)
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_plus),
-                        contentDescription = "Add playlist",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+            PlaylistsHeader(
+                totalCount = state.totalCount,
+                onCreatePlaylistClick = {
+                    onAction(PlaylistAction.OnCreatePlaylistClick)
                 }
-            }
-
+            )
+        }
+        item {
+            PlaylistCard(
+                state = PlaylistCardUi(
+                    title = stringResource(Res.string.playlists_favourites_title),
+                    songsCount = state.favouritesCount,
+                ),
+                defaultImage = Res.drawable.ic_heart
+            )
         }
     }
 }

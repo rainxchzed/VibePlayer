@@ -1,7 +1,9 @@
 package zed.rainxch.vibeplayer.feature.playlist.presentation
 
+import androidx.compose.runtime.Stable
 import org.jetbrains.compose.resources.DrawableResource
 
+@Stable
 data class PlaylistState(
     val totalCount: Int = 1,
     val favouritesCount: Int = 0,
