@@ -99,8 +99,6 @@ fun SharedTransitionScope.MainControllerScreen(
             }
         )
 
-        Spacer(Modifier.height(16.dp))
-
         when (state.selectedTab) {
             MainControllerTabs.Songs -> {
                 SongsRoot(

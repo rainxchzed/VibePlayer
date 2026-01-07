@@ -13,4 +13,8 @@
     <string name="main_screen_shuffle_button">Shuffle</string>
     <string name="main_screen_play_button">Play</string>
 
+    <plurals name="playlists_total_count_title">
+        <item quantity="one">%1$d Playlist</item>
+        <item quantity="other">%1$d Playlists</item>
+    </plurals>
 </resources>

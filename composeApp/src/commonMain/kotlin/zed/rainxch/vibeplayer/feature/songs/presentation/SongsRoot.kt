@@ -214,6 +214,7 @@ private fun SongsMainContent(
             contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
+                top = 16.dp,
                 bottom = miniPlayerBottomPadding
             ),
             verticalArrangement = Arrangement.spacedBy(4.dp)

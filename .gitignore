@@ -17,4 +17,4 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
-/composeApp/schema/zed.rainxch.vibeplayer.core.data.local.db.AppDatabase/2.json
+/composeApp/schema/zed.rainxch.vibeplayer.core.data.local.db.AppDatabase/*.json
