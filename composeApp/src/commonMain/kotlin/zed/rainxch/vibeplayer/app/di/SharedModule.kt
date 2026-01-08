@@ -6,10 +6,15 @@ import zed.rainxch.vibeplayer.AppViewModel
 import zed.rainxch.vibeplayer.core.data.data_source.CacheMusicsDataSource
 import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
 import zed.rainxch.vibeplayer.core.data.local.db.dao.MusicsDao
+import zed.rainxch.vibeplayer.core.data.local.db.dao.PlaylistDao
 import zed.rainxch.vibeplayer.core.data.repository.DefaultMusicRepository
 import zed.rainxch.vibeplayer.core.domain.repository.MusicRepository
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
+import zed.rainxch.vibeplayer.feature.playlist.data.DefaultPlaylistsRepository
+import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
+import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistRoot
+import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistViewModel
 import zed.rainxch.vibeplayer.feature.scan.presentation.ScanViewModel
 import zed.rainxch.vibeplayer.feature.search.data.repository.SearchRepositoryImpl
 import zed.rainxch.vibeplayer.feature.search.domain.repository.SearchRepository
@@ -20,6 +25,7 @@ val sharedModule = module {
     viewModelOf(::ScanViewModel)
     viewModelOf(::SongsViewModel)
     viewModelOf(::SearchViewModel)
+    viewModelOf(::PlaylistViewModel)
 
     single {  MusicPlaybackViewModel(get()) }
 
@@ -36,6 +42,12 @@ val sharedModule = module {
         )
     }
 
+    single<PlaylistsRepository> {
+        DefaultPlaylistsRepository(
+            dao = get()
+        )
+    }
+
     single<CacheMusicsDataSource> {
         CacheMusicsDataSource(
             musicsDao = get()
@@ -44,5 +56,9 @@ val sharedModule = module {
 
     single<MusicsDao> {
         get<AppDatabase>().musicDao
+    }
+
+    single<PlaylistDao> {
+        get<AppDatabase>().playlistDao
     }
 }

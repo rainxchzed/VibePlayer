@@ -10,6 +10,7 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistEntity
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistMusicCrossRef
+import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistWithCount
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistWithMusics
 import zed.rainxch.vibeplayer.core.domain.model.MusicId
 
@@ -26,6 +27,17 @@ interface PlaylistDao {
 
     @Query("SELECT * FROM playlists ORDER BY createdAt DESC")
     fun getPlaylists(): Flow<List<PlaylistEntity>>
+
+    @Query(
+        """
+        SELECT p.*, COUNT(pm.musicId) as musicCount
+        FROM playlists p
+        LEFT JOIN playlist_music pm ON p.id = pm.playlistId
+        GROUP BY p.id
+        ORDER BY p.createdAt DESC
+        """
+    )
+    fun getPlaylistsWithCount(): Flow<List<PlaylistWithCount>>
 
     @Transaction
     @Query("SELECT * FROM playlists WHERE id = :playlistId")

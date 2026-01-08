@@ -15,3 +15,15 @@ data class Playlist(
     val musics: ImmutableList<MusicId>,
     val coverImage: String? = null
 )
+
+/**
+ * Lightweight model for displaying playlist in lists
+ * @param title is title of the playlist (max length - 40)
+ * @param musicCount number of songs in the playlist
+ * @param coverImage is used for representing the cover of playlist (nullable)
+ */
+data class PlaylistInfo(
+    val title: String,
+    val musicCount: Int,
+    val coverImage: String? = null
+)

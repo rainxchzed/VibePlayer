@@ -1,7 +1,8 @@
 package zed.rainxch.vibeplayer.feature.playlist.presentation
 
 import androidx.compose.runtime.Stable
-import org.jetbrains.compose.resources.DrawableResource
+import zed.rainxch.vibeplayer.core.domain.model.Playlist
+import zed.rainxch.vibeplayer.core.domain.model.PlaylistInfo
 
 @Stable
 data class PlaylistState(
@@ -13,5 +14,19 @@ data class PlaylistState(
 data class PlaylistCardUi(
     val title: String,
     val songsCount: Int,
-    val albumArtUrl: String? = null,
+    val coverImage: String? = null,
 )
+
+fun Playlist.toUi(): PlaylistCardUi =
+    PlaylistCardUi(
+        title = title,
+        songsCount = musics.size,
+        coverImage = coverImage
+    )
+
+fun PlaylistInfo.toUi(): PlaylistCardUi =
+    PlaylistCardUi(
+        title = title,
+        songsCount = musicCount,
+        coverImage = coverImage
+    )

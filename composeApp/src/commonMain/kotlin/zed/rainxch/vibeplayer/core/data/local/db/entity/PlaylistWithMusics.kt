@@ -19,3 +19,9 @@ data class PlaylistWithMusics(
     )
     val musics: List<MusicEntity>
 )
+
+data class PlaylistWithCount(
+    @Embedded
+    val playlist: PlaylistEntity,
+    val musicCount: Int
+)

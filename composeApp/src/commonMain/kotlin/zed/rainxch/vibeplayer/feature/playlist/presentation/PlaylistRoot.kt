@@ -28,6 +28,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_heart
 import vibeplayer.composeapp.generated.resources.ic_playlist
@@ -44,7 +45,7 @@ import zed.rainxch.vibeplayer.feature.playlist.presentation.components.Playlists
 
 @Composable
 fun PlaylistRoot(
-    viewModel: PlaylistViewModel = viewModel()
+    viewModel: PlaylistViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

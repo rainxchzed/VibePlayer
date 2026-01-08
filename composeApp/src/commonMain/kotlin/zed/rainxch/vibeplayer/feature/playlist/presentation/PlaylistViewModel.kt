@@ -6,8 +6,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
 
-class PlaylistViewModel : ViewModel() {
+class PlaylistViewModel(
+    private val repository: PlaylistsRepository
+) : ViewModel() {
 
     private var hasLoadedInitialData = false
 
@@ -15,7 +19,7 @@ class PlaylistViewModel : ViewModel() {
     val state = _state
         .onStart {
             if (!hasLoadedInitialData) {
-                /** Load initial data here **/
+                loadPlaylists()
                 hasLoadedInitialData = true
             }
         }
@@ -24,6 +28,17 @@ class PlaylistViewModel : ViewModel() {
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = PlaylistState()
         )
+
+    private fun loadPlaylists() {
+        viewModelScope.launch {
+            repository.getPlaylistsInfo().collect { playlists ->
+                _state.value = _state.value.copy(
+                    totalCount = playlists.size,
+                    userPlaylists = playlists.map { it.toUi() }
+                )
+            }
+        }
+    }
 
     fun onAction(action: PlaylistAction) {
         when (action) {
