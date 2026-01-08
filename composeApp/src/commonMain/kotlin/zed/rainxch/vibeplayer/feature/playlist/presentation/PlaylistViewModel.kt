@@ -33,7 +33,7 @@ class PlaylistViewModel(
         viewModelScope.launch {
             repository.getPlaylistsInfo().collect { playlists ->
                 _state.value = _state.value.copy(
-                    totalCount = playlists.size,
+                    totalCount = playlists.size + 1,
                     userPlaylists = playlists.map { it.toUi() }
                 )
             }
