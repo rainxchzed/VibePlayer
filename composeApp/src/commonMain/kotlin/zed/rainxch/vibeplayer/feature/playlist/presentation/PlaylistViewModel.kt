@@ -42,7 +42,11 @@ class PlaylistViewModel(
 
     fun onAction(action: PlaylistAction) {
         when (action) {
-            else -> TODO("Handle actions")
+            PlaylistAction.OnCreatePlaylistClick -> {
+                viewModelScope.launch {
+                    repository.createTestPlaylist()
+                }
+            }
         }
     }
 
