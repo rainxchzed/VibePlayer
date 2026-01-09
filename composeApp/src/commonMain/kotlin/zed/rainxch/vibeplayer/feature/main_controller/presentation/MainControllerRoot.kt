@@ -2,13 +2,8 @@ package zed.rainxch.vibeplayer.feature.main_controller.presentation
 
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
@@ -18,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,7 +21,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import zed.rainxch.vibeplayer.app.navigation.VibePlayerGraph
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.feature.main_controller.presentation.model.MainControllerTabs
 import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistRoot
@@ -35,6 +28,7 @@ import zed.rainxch.vibeplayer.feature.songs.presentation.SongsRoot
 
 @Composable
 fun SharedTransitionScope.MainControllerRoot(
+    onShowSnackbar: (message: String) -> Unit,
     onNavigateToNowPlaying: (musicId: Int) -> Unit,
     onExpandPlayer: () -> Unit,
     viewModel: MainControllerViewModel = viewModel()
@@ -44,6 +38,7 @@ fun SharedTransitionScope.MainControllerRoot(
     MainControllerScreen(
         state = state,
         onAction = viewModel::onAction,
+        onShowSnackbar = onShowSnackbar,
         onNavigateToNowPlaying = onNavigateToNowPlaying,
         onExpandPlayer = onExpandPlayer
     )
@@ -53,6 +48,7 @@ fun SharedTransitionScope.MainControllerRoot(
 fun SharedTransitionScope.MainControllerScreen(
     state: MainControllerState,
     onAction: (MainControllerAction) -> Unit,
+    onShowSnackbar: (message: String) -> Unit,
     onNavigateToNowPlaying: (musicId: Int) -> Unit,
     onExpandPlayer: () -> Unit,
 ) {
@@ -110,7 +106,9 @@ fun SharedTransitionScope.MainControllerScreen(
             }
 
             MainControllerTabs.Playlist -> {
-                PlaylistRoot()
+                PlaylistRoot(
+                    onShowSnackbar = onShowSnackbar
+                )
             }
         }
     }
@@ -124,8 +122,9 @@ private fun Preview() {
             MainControllerScreen(
                 state = MainControllerState(),
                 onAction = {},
-                {},
-                {}
+                onShowSnackbar = {},
+                onNavigateToNowPlaying = {},
+                onExpandPlayer = {}
             )
         }
     }

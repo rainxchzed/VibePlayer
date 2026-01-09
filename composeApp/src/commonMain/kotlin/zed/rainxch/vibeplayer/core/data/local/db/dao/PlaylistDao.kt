@@ -72,4 +72,7 @@ interface PlaylistDao {
     suspend fun clearPlaylist(
         playlistId: Int
     )
+
+    @Query("SELECT EXISTS(SELECT 1 FROM playlists WHERE title = :title LIMIT 1)")
+    suspend fun isPlaylistExists(title: String): Boolean
 }

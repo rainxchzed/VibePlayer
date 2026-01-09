@@ -42,8 +42,23 @@ class DefaultPlaylistsRepository(
         }
     }
 
-    override suspend fun createTestPlaylist() {
-        val playlistsCount = dao.getPlaylists().first().count()
-        dao.insertPlaylist(PlaylistEntity(title = "Test Playlist ${playlistsCount}"))
+    override suspend fun createPlaylist(name: String): Result<Unit> {
+        return try {
+            val trimmedName = name.trim()
+
+            if (trimmedName.isBlank()) {
+                return Result.failure(Exception("Playlist name cannot be empty"))
+            }
+
+            val exists = dao.isPlaylistExists(trimmedName)
+            if (exists) {
+                return Result.failure(Exception("Playlist with this name already exists"))
+            }
+
+            dao.insertPlaylist(PlaylistEntity(title = trimmedName))
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

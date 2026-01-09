@@ -1,31 +1,48 @@
 package zed.rainxch.vibeplayer.feature.playlist.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
@@ -36,18 +53,31 @@ import vibeplayer.composeapp.generated.resources.ic_plus
 import vibeplayer.composeapp.generated.resources.playlists_create_playlist_button
 import vibeplayer.composeapp.generated.resources.playlists_favourites_title
 import vibeplayer.composeapp.generated.resources.playlists_my_playlists_title
-import vibeplayer.composeapp.generated.resources.playlists_total_count_title
-import vibeplayer.composeapp.generated.resources.songs_screen_songs_count
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
+import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
+import zed.rainxch.vibeplayer.core.presentation.components.textFields.PrimaryTextField
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
+import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
+import zed.rainxch.vibeplayer.feature.playlist.presentation.components.CreateNewPlaylistBottomSheet
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistCard
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistsHeader
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistRoot(
+    onShowSnackbar: (message: String) -> Unit,
     viewModel: PlaylistViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+
+    ObserveAsEvents(events = viewModel.events) { event ->
+        when (event) {
+            is PlaylistEvent.ShowSnackbar -> {
+                onShowSnackbar(event.message)
+            }
+        }
+    }
 
     PlaylistScreen(
         state = state,
@@ -55,80 +85,147 @@ fun PlaylistRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistScreen(
     state: PlaylistState,
     onAction: (PlaylistAction) -> Unit,
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(16.dp)
-    ) {
-        item {
-            PlaylistsHeader(
-                totalCount = state.totalCount,
-                onCreatePlaylistClick = {
-                    onAction(PlaylistAction.OnCreatePlaylistClick)
+    val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val bottomSheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        skipHiddenState = false
+    )
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = bottomSheetState
+    )
+
+    LaunchedEffect(state.showBottomSheet) {
+        if (state.showBottomSheet == null) {
+            if (bottomSheetState.currentValue != SheetValue.Hidden) {
+                keyboardController?.hide()
+                bottomSheetState.hide()
+            }
+        } else {
+            bottomSheetState.expand()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { bottomSheetState.targetValue }
+            .collect { currentValue ->
+                if (currentValue == SheetValue.Hidden && state.showBottomSheet != null) {
+                    keyboardController?.hide()
+                    onAction(PlaylistAction.OnDismissBottomSheet)
+                }
+            }
+    }
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetDragHandle = null,
+        sheetContent = {
+            CreateNewPlaylistBottomSheet(
+                playlistName = state.newPlaylistName,
+                onPlaylistNameChange = { name ->
+                    onAction(PlaylistAction.OnPlaylistNameChange(name))
+                },
+                onCancel = {
+                    scope.launch {
+                        bottomSheetState.hide()
+                    }
+                },
+                onCreate = {
+                    onAction(PlaylistAction.OnConfirmCreatePlaylist)
                 }
             )
-            PlaylistCard(
-                state = PlaylistCardUi(
-                    title = stringResource(Res.string.playlists_favourites_title),
-                    songsCount = state.favouritesCount,
-                ),
-                defaultImage = Res.drawable.ic_heart
-            )
-            Text(
-                modifier = Modifier
-                    .padding(top = 16.dp, bottom = 8.dp)
-                    .fillMaxWidth(),
-                text = stringResource(
-                    Res.string.playlists_my_playlists_title,
-                    state.userPlaylists.size,
-                    state.userPlaylists.size
-                ),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Medium
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (state.userPlaylists.isEmpty()) {
-                AppOutlinedButton(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    onClick = {
+        },
+        sheetPeekHeight = 0.dp,
+        sheetShape = RoundedCornerShape(
+            topStart = 12.dp,
+            topEnd = 12.dp
+        ),
+        sheetContainerColor = MaterialTheme.colorScheme.onSecondary,
+        sheetTonalElevation = 4.dp
+    ) { paddingValues ->
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            modifier = Modifier
+                .padding(paddingValues)
+                .consumeWindowInsets(paddingValues)
+        ) {
+            item {
+                PlaylistsHeader(
+                    totalCount = state.totalCount,
+                    onCreatePlaylistClick = {
                         onAction(PlaylistAction.OnCreatePlaylistClick)
                     }
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)
+                )
+                PlaylistCard(
+                    state = PlaylistCardUi(
+                        title = stringResource(Res.string.playlists_favourites_title),
+                        songsCount = state.favouritesCount,
+                    ),
+                    defaultImage = Res.drawable.ic_heart
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(top = 16.dp, bottom = 8.dp)
+                        .fillMaxWidth(),
+                    text = stringResource(
+                        Res.string.playlists_my_playlists_title,
+                        state.userPlaylists.size,
+                        state.userPlaylists.size
+                    ),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (state.userPlaylists.isEmpty()) {
+                    AppOutlinedButton(
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        onClick = {
+                            onAction(PlaylistAction.OnCreatePlaylistClick)
+                        }
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_plus),
-                            contentDescription = "Add playlist",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            modifier = Modifier,
-                            text = stringResource(Res.string.playlists_create_playlist_button),
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(
+                                4.dp,
+                                Alignment.CenterHorizontally
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_plus),
+                                contentDescription = "Add playlist",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                modifier = Modifier,
+                                text = stringResource(Res.string.playlists_create_playlist_button),
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        items(state.userPlaylists) {
-            PlaylistCard(
-                state = it,
-                defaultImage = Res.drawable.ic_playlist
-            )
+            items(state.userPlaylists) {
+                PlaylistCard(
+                    state = it,
+                    defaultImage = Res.drawable.ic_playlist
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun Preview() {
@@ -152,7 +249,7 @@ private fun Preview() {
                             songsCount = 10,
                         ),
 
-                    )
+                        )
                 ),
                 onAction = {}
             )
