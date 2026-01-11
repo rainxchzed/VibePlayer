@@ -3,7 +3,6 @@ package zed.rainxch.vibeplayer.app.navigation
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -54,13 +53,13 @@ import zed.rainxch.vibeplayer.core.presentation.components.topbars.MainTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.NowPlayingTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.ScanTopbar
 import zed.rainxch.vibeplayer.feature.main_controller.presentation.MainControllerRoot
-import zed.rainxch.vibeplayer.feature.songs.presentation.SongsRoot
-import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.NowPlayingRoot
 import zed.rainxch.vibeplayer.feature.permission.presentation.PermissionRoot
+import zed.rainxch.vibeplayer.feature.playlist.add_songs.presentation.AddSongsRoot
 import zed.rainxch.vibeplayer.feature.scan.presentation.ScanRoot
 import zed.rainxch.vibeplayer.feature.search.presentation.SearchRoot
+import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
 
 @Composable
 fun AppNavigation(
@@ -207,6 +206,10 @@ fun AppNavigation(
                                 onExpandPlayer = {
                                     navBackStack.add(VibePlayerGraph.NowPlayingScreen())
                                 },
+                                onNavigateToAddSongs = {
+                                    navBackStack.add(VibePlayerGraph.AddSongsScreen)
+
+                                }
                             )
                         }
 
@@ -235,6 +238,12 @@ fun AppNavigation(
                                     navBackStack.add(VibePlayerGraph.NowPlayingScreen(it.id))
                                 }
                             )
+                        }
+
+                        entry<VibePlayerGraph.AddSongsScreen>{
+                            AddSongsRoot(songsViewModel = songsViewModel,onBackPressed = {
+                                navBackStack.removeLast()
+                            })
                         }
 
                         entry<VibePlayerGraph.NowPlayingScreen>(

@@ -1,15 +1,13 @@
 package zed.rainxch.vibeplayer.feature.playlist.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -31,7 +28,6 @@ import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_heart
 import vibeplayer.composeapp.generated.resources.ic_menu_dots
 import vibeplayer.composeapp.generated.resources.playlists_songs_count
-import vibeplayer.composeapp.generated.resources.songs_screen_songs_count
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistCardUi
 
@@ -39,11 +35,12 @@ import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistCardUi
 fun PlaylistCard(
     state: PlaylistCardUi,
     defaultImage: DrawableResource,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.padding(vertical = 12.dp),
+        modifier = modifier.padding(vertical = 12.dp).clickable{ onClick()},
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Box(
@@ -110,7 +107,8 @@ private fun Preview() {
                     title = "Favourites",
                     songsCount = 10,
                 ),
-                defaultImage = Res.drawable.ic_heart
+                defaultImage = Res.drawable.ic_heart,
+                onClick = {}
             )
         }
     }

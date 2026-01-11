@@ -1,21 +1,11 @@
 package zed.rainxch.vibeplayer.feature.playlist.presentation
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,15 +21,13 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -54,8 +42,6 @@ import vibeplayer.composeapp.generated.resources.playlists_create_playlist_butto
 import vibeplayer.composeapp.generated.resources.playlists_favourites_title
 import vibeplayer.composeapp.generated.resources.playlists_my_playlists_title
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
-import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
-import zed.rainxch.vibeplayer.core.presentation.components.textFields.PrimaryTextField
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.CreateNewPlaylistBottomSheet
@@ -65,11 +51,12 @@ import zed.rainxch.vibeplayer.feature.playlist.presentation.components.Playlists
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistRoot(
+    onNavigateToAddSongs: () -> Unit,
     onShowSnackbar: (message: String) -> Unit,
-    viewModel: PlaylistViewModel = koinViewModel()
+    viewModel: PlaylistViewModel = koinViewModel(),
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
 
     ObserveAsEvents(events = viewModel.events) { event ->
         when (event) {
@@ -81,7 +68,8 @@ fun PlaylistRoot(
 
     PlaylistScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        onNavigateToAddSongs = onNavigateToAddSongs
     )
 }
 
@@ -90,6 +78,7 @@ fun PlaylistRoot(
 fun PlaylistScreen(
     state: PlaylistState,
     onAction: (PlaylistAction) -> Unit,
+    onNavigateToAddSongs: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -167,7 +156,8 @@ fun PlaylistScreen(
                         title = stringResource(Res.string.playlists_favourites_title),
                         songsCount = state.favouritesCount,
                     ),
-                    defaultImage = Res.drawable.ic_heart
+                    defaultImage = Res.drawable.ic_heart,
+                    onClick = {}
                 )
                 Text(
                     modifier = Modifier
@@ -218,7 +208,8 @@ fun PlaylistScreen(
             items(state.userPlaylists) {
                 PlaylistCard(
                     state = it,
-                    defaultImage = Res.drawable.ic_playlist
+                    defaultImage = Res.drawable.ic_playlist,
+                    onClick = onNavigateToAddSongs
                 )
             }
         }
@@ -251,7 +242,8 @@ private fun Preview() {
 
                         )
                 ),
-                onAction = {}
+                onAction = {},
+                onNavigateToAddSongs = {}
             )
         }
 
