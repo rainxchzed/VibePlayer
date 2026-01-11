@@ -8,4 +8,7 @@ interface PlaylistsRepository {
     suspend fun createPlaylist(name: String): Result<Unit>
     fun getPlaylists(): Flow<List<Playlist>>
     fun getPlaylistsInfo(): Flow<List<PlaylistInfo>>
+
+    suspend fun addSongsToPlaylist(playlistId: Int, songIds: List<Int>): Result<Unit>
+
 }

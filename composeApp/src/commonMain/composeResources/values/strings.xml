@@ -30,4 +30,9 @@
     <string name="playlists_my_playlists_title">My Playlists (%1$d)</string>
     <string name="playlists_create_playlist_button">Create playlist</string>
 
+    <plurals name="songs_added_to_playlist">
+        <item quantity="one">%1$d song added to playlist</item>
+        <item quantity="other">%1$d songs added to playlist</item>
+    </plurals>
+
 </resources>

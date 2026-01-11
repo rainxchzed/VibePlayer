@@ -15,6 +15,7 @@ fun PlaylistWithMusics.toDomain(): Playlist =
 
 fun PlaylistWithCount.toDomain(): PlaylistInfo =
     PlaylistInfo(
+        id = playlist.id,
         title = playlist.title,
         musicCount = musicCount,
         coverImage = playlist.coverImage

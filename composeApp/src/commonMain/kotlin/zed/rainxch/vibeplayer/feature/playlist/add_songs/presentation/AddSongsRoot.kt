@@ -27,12 +27,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.getPluralString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -40,6 +42,7 @@ import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.add_songs
 import vibeplayer.composeapp.generated.resources.ic_arrow_left
 import vibeplayer.composeapp.generated.resources.ok
+import vibeplayer.composeapp.generated.resources.songs_added_to_playlist
 import zed.rainxch.vibeplayer.feature.playlist.add_songs.presentation.components.CheckBoxMusicItem
 import zed.rainxch.vibeplayer.feature.playlist.add_songs.presentation.components.SelectAllCheckBox
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsState
@@ -50,12 +53,34 @@ import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
 fun AddSongsRoot(
     songsViewModel: SongsViewModel,
     addSongsViewModel: AddSongsViewModel = koinViewModel(),
+    playlistId: Int,
+    onShowSnackBar: (message: String) -> Unit,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
     val state by songsViewModel.state.collectAsStateWithLifecycle()
     val addSongsState by addSongsViewModel.state.collectAsStateWithLifecycle()
+
+
+    LaunchedEffect(Unit) {
+        addSongsViewModel.events.collect { event ->
+            when (event) {
+                is AddSongsEvent.NavigateBack -> {
+                    onBackPressed()
+
+                    val songsCount = addSongsState.selectedMusicIds.size
+                    val snackBarMessage = getPluralString(resource = Res.plurals.songs_added_to_playlist, quantity = songsCount, songsCount )
+
+                    onShowSnackBar(snackBarMessage)
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(addSongsViewModel) {
+        addSongsViewModel.onAction(AddSongsAction.OnClearSelection)
+    }
 
     Box(
         modifier = modifier
@@ -93,6 +118,7 @@ fun AddSongsRoot(
 
             AddSongsScreen(
                 state = state,
+                playlistId = playlistId,
                 addSongsState = addSongsState,
                 onAction = addSongsViewModel::onAction
             )
@@ -106,6 +132,7 @@ fun AddSongsRoot(
 @Composable
 fun AddSongsScreen(
     state: SongsState,
+    playlistId: Int,
     addSongsState: AddSongsState,
     onAction: (AddSongsAction) -> Unit,
     modifier: Modifier = Modifier
@@ -159,7 +186,12 @@ fun AddSongsScreen(
 
         if (addSongsState.selectedMusicIds.isNotEmpty()) {
             Button(
-                onClick = {},
+                onClick = {
+
+                    if (!addSongsState.isAddingSongs)
+                        onAction(AddSongsAction.OnConfirm(playlistId))
+
+                },
                 modifier = Modifier.fillMaxWidth()
                     .wrapContentHeight()
                     .padding(12.dp)

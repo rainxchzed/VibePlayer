@@ -23,6 +23,7 @@ data class Playlist(
  * @param coverImage is used for representing the cover of playlist (nullable)
  */
 data class PlaylistInfo(
+    val id: Int,
     val title: String,
     val musicCount: Int,
     val coverImage: String? = null

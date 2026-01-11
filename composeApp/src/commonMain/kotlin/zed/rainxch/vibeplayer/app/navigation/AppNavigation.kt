@@ -52,6 +52,7 @@ import zed.rainxch.vibeplayer.AppViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.MainTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.NowPlayingTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.ScanTopbar
+import zed.rainxch.vibeplayer.core.presentation.utils.showSnackBar
 import zed.rainxch.vibeplayer.feature.main_controller.presentation.MainControllerRoot
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.NowPlayingRoot
@@ -206,8 +207,8 @@ fun AppNavigation(
                                 onExpandPlayer = {
                                     navBackStack.add(VibePlayerGraph.NowPlayingScreen())
                                 },
-                                onNavigateToAddSongs = {
-                                    navBackStack.add(VibePlayerGraph.AddSongsScreen)
+                                onNavigateToAddSongs = { playListId ->
+                                    navBackStack.add(VibePlayerGraph.AddSongsScreen(playListId = playListId))
 
                                 }
                             )
@@ -240,10 +241,13 @@ fun AppNavigation(
                             )
                         }
 
-                        entry<VibePlayerGraph.AddSongsScreen>{
+                        entry<VibePlayerGraph.AddSongsScreen>{ route ->
                             AddSongsRoot(songsViewModel = songsViewModel,onBackPressed = {
                                 navBackStack.removeLast()
-                            })
+                            }, playlistId = route.playListId,
+                                onShowSnackBar = { message ->
+                                    coroutineScope.showSnackBar(snackBarHostState = snackBarHostState, message = message)
+                                })
                         }
 
                         entry<VibePlayerGraph.NowPlayingScreen>(

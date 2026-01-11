@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 private const val MAX_PLAYLIST_NAME_LENGTH = 40
 
@@ -44,8 +43,8 @@ class PlaylistViewModel(
     private fun loadPlaylists() {
         viewModelScope.launch {
             repository.getPlaylistsInfo().collect { playlists ->
-                _state.update {
-                    it.copy(
+                _state.update { currentState ->
+                    currentState.copy(
                         totalCount = playlists.size + 1,
                         userPlaylists = playlists.map { it.toUi() }
                     )

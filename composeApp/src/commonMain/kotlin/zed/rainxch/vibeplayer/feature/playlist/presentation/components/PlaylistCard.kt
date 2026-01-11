@@ -106,6 +106,7 @@ private fun Preview() {
                 state = PlaylistCardUi(
                     title = "Favourites",
                     songsCount = 10,
+                    id = 0
                 ),
                 defaultImage = Res.drawable.ic_heart,
                 onClick = {}

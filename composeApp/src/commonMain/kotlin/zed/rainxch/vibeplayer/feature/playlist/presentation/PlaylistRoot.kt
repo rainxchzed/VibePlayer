@@ -51,7 +51,7 @@ import zed.rainxch.vibeplayer.feature.playlist.presentation.components.Playlists
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistRoot(
-    onNavigateToAddSongs: () -> Unit,
+    onNavigateToAddSongs: (playListId: Int) -> Unit,
     onShowSnackbar: (message: String) -> Unit,
     viewModel: PlaylistViewModel = koinViewModel(),
     modifier: Modifier = Modifier
@@ -78,7 +78,7 @@ fun PlaylistRoot(
 fun PlaylistScreen(
     state: PlaylistState,
     onAction: (PlaylistAction) -> Unit,
-    onNavigateToAddSongs: () -> Unit,
+    onNavigateToAddSongs: (playListId: Int) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -155,6 +155,7 @@ fun PlaylistScreen(
                     state = PlaylistCardUi(
                         title = stringResource(Res.string.playlists_favourites_title),
                         songsCount = state.favouritesCount,
+                        id = 0
                     ),
                     defaultImage = Res.drawable.ic_heart,
                     onClick = {}
@@ -205,11 +206,13 @@ fun PlaylistScreen(
                 }
             }
 
-            items(state.userPlaylists) {
+            items(items = state.userPlaylists, key = { playlist -> playlist.id} ) { playList ->
                 PlaylistCard(
-                    state = it,
+                    state = playList,
                     defaultImage = Res.drawable.ic_playlist,
-                    onClick = onNavigateToAddSongs
+                    onClick = {
+                        onNavigateToAddSongs(playList.id)
+                    }
                 )
             }
         }
@@ -230,14 +233,17 @@ private fun Preview() {
                         PlaylistCardUi(
                             title = "Test1",
                             songsCount = 10,
+                            id = 0
                         ),
                         PlaylistCardUi(
                             title = "Test1",
                             songsCount = 10,
+                            id = 0
                         ),
                         PlaylistCardUi(
                             title = "Test1",
                             songsCount = 10,
+                            id = 0
                         ),
 
                         )

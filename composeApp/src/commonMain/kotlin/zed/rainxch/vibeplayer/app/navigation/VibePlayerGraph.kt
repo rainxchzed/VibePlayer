@@ -20,6 +20,6 @@ sealed interface VibePlayerGraph {
     data class NowPlayingScreen(val id: Int? = null) : VibePlayerGraph
 
     @Serializable
-    data object AddSongsScreen: VibePlayerGraph
+    data class AddSongsScreen(val playListId: Int): VibePlayerGraph
 
 }
