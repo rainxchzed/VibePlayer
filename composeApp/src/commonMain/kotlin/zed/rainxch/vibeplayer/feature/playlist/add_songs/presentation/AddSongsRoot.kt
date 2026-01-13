@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -32,6 +35,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.getPluralString
@@ -41,8 +46,11 @@ import org.koin.compose.viewmodel.koinViewModel
 import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.add_songs
 import vibeplayer.composeapp.generated.resources.ic_arrow_left
+import vibeplayer.composeapp.generated.resources.no_results_found
 import vibeplayer.composeapp.generated.resources.ok
+import vibeplayer.composeapp.generated.resources.search
 import vibeplayer.composeapp.generated.resources.songs_added_to_playlist
+import zed.rainxch.vibeplayer.core.presentation.components.textFields.PrimaryTextField
 import zed.rainxch.vibeplayer.feature.playlist.add_songs.presentation.components.CheckBoxMusicItem
 import zed.rainxch.vibeplayer.feature.playlist.add_songs.presentation.components.SelectAllCheckBox
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsState
@@ -70,7 +78,11 @@ fun AddSongsRoot(
                     onBackPressed()
 
                     val songsCount = addSongsState.selectedMusicIds.size
-                    val snackBarMessage = getPluralString(resource = Res.plurals.songs_added_to_playlist, quantity = songsCount, songsCount )
+                    val snackBarMessage = getPluralString(
+                        resource = Res.plurals.songs_added_to_playlist,
+                        quantity = songsCount,
+                        songsCount
+                    )
 
                     onShowSnackBar(snackBarMessage)
                 }
@@ -90,7 +102,8 @@ fun AddSongsRoot(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            CenterAlignedTopAppBar(navigationIcon = {
+            CenterAlignedTopAppBar(
+                navigationIcon = {
                 IconButton(
                     onClick = onBackPressed,
                     colors = IconButtonDefaults.iconButtonColors(
@@ -106,7 +119,7 @@ fun AddSongsRoot(
                 }
             }, title = {
                 Text(
-                    text = if (addSongsState.selectedMusicIds.isEmpty())stringResource(Res.string.add_songs) else "${addSongsState.selectedMusicIds.size} Selected",
+                    text = if (addSongsState.selectedMusicIds.isEmpty()) stringResource(Res.string.add_songs) else "${addSongsState.selectedMusicIds.size} Selected",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
@@ -114,7 +127,8 @@ fun AddSongsRoot(
             },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.onSecondary
-                ))
+                )
+            )
 
             AddSongsScreen(
                 state = state,
@@ -122,6 +136,7 @@ fun AddSongsRoot(
                 addSongsState = addSongsState,
                 onAction = addSongsViewModel::onAction
             )
+
 
         }
     }
@@ -146,17 +161,65 @@ fun AddSongsScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            SelectAllCheckBox(
-                checkedState = state.musics.isNotEmpty() && addSongsState.selectedMusicIds.size == state.musics.size,
-                onCheckedChanged = { isSelected ->
-                    onAction(AddSongsAction.OnSelectedAllSongs(state.musics, isSelected))
+
+            PrimaryTextField(
+                value = addSongsState.searchQuery,
+                onValueChange = { query ->
+                    onAction(AddSongsAction.OnSearchQueryChange(query))
                 },
-                modifier = Modifier.fillMaxWidth().padding(all = 12.dp)
+                startIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                },
+                endIcon = {
+                    if (addSongsState.searchQuery.isNotBlank()) {
+                        IconButton(
+                            onClick = {
+                                onAction(AddSongsAction.OnSearchQueryClearClick)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                },
+                placeholder = stringResource(Res.string.search),
+                modifier = Modifier.fillMaxWidth().padding(all = 12.dp),
+                imeAction = ImeAction.Done
+
             )
 
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outline
-            )
+            if (addSongsState.filteredMusic.isEmpty() && addSongsState.searchQuery.isNotBlank()) {
+                Text(
+                    text = stringResource(Res.string.no_results_found),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                SelectAllCheckBox(
+                    checkedState = state.musics.isNotEmpty() && addSongsState.selectedMusicIds.size == state.musics.size,
+                    onCheckedChanged = { isSelected ->
+                        onAction(AddSongsAction.OnSelectedAllSongs(state.musics, isSelected))
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(all = 12.dp)
+                )
+
+                HorizontalDivider(
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
@@ -170,7 +233,7 @@ fun AddSongsScreen(
                 )
             ) {
                 items(
-                    items = state.musics,
+                    items = addSongsState.filteredMusic,
                     key = { music -> music.id }
                 ) { music ->
                     CheckBoxMusicItem(

@@ -52,16 +52,15 @@ import zed.rainxch.vibeplayer.feature.playlist.presentation.components.Playlists
 @Composable
 fun PlaylistRoot(
     onNavigateToAddSongs: (playListId: Int) -> Unit,
-    onShowSnackbar: (message: String) -> Unit,
-    viewModel: PlaylistViewModel = koinViewModel(),
-    modifier: Modifier = Modifier
+    onShowSnackBar: (message: String) -> Unit,
+    viewModel: PlaylistViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ObserveAsEvents(events = viewModel.events) { event ->
         when (event) {
             is PlaylistEvent.ShowSnackbar -> {
-                onShowSnackbar(event.message)
+                onShowSnackBar(event.message)
             }
         }
     }
@@ -127,6 +126,7 @@ fun PlaylistScreen(
                 },
                 onCreate = {
                     onAction(PlaylistAction.OnConfirmCreatePlaylist)
+                    onNavigateToAddSongs((state.totalCount))
                 }
             )
         },

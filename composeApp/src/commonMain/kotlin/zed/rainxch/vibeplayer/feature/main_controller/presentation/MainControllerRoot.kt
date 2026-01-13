@@ -111,7 +111,7 @@ fun SharedTransitionScope.MainControllerScreen(
             MainControllerTabs.Playlist -> {
                 PlaylistRoot(
                     onNavigateToAddSongs = onNavigateToAddSongs,
-                    onShowSnackbar = onShowSnackbar
+                    onShowSnackBar = onShowSnackbar
                 )
             }
         }
