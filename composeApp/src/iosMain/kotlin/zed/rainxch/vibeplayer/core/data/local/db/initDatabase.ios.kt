@@ -5,6 +5,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
+import zed.rainxch.vibeplayer.core.data.local.db.migrations.MIGRATION_2_3
 
 fun initDatabase(): AppDatabase {
     val dbFilePath = documentDirectory() + "/my_room.db"
@@ -12,6 +13,7 @@ fun initDatabase(): AppDatabase {
         name = dbFilePath,
         factory = { AppDatabaseConstructor.initialize() }
     )
+        .addMigrations(MIGRATION_2_3)
         .setDriver(androidx.sqlite.driver.bundled.BundledSQLiteDriver())
         .build()
 }

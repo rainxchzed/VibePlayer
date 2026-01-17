@@ -1,0 +1,42 @@
+<resources>
+    <string name="cd_shuffle_button">Shuffle button</string>
+    <string name="cd_repeat_button">Repeat button</string>
+    <string name="cd_next_track_button">Next track</string>
+    <string name="cd_play_pause_button">Play/pause</string>
+    <string name="cd_previous_track_button">Previous track</string>
+    <string name="cd_minimize">Minimize</string>
+
+    <plurals name="songs_screen_songs_count">
+        <item quantity="one">%1$d song</item>
+        <item quantity="other">%1$d songs</item>
+    </plurals>
+    <string name="main_screen_shuffle_button">Shuffle</string>
+    <string name="main_screen_play_button">Play</string>
+
+    <plurals name="playlists_total_count_title">
+        <item quantity="one">%1$d Playlist</item>
+        <item quantity="other">%1$d Playlists</item>
+    </plurals>
+
+    <plurals name="playlists_songs_count">
+        <item quantity="one">%1$d song</item>
+        <item quantity="other">%1$d songs</item>
+    </plurals>
+
+    <string name="playlists_favourites_title">Favourites</string>
+    <string name="add_songs">Add Songs</string>
+    <string name="select_all">Select All</string>
+    <string name="ok">Ok</string>
+    <string name="playlists_my_playlists_title">My Playlists (%1$d)</string>
+    <string name="playlists_create_playlist_button">Create playlist</string>
+
+    <plurals name="songs_added_to_playlist">
+        <item quantity="one">%1$d song added to playlist</item>
+        <item quantity="other">%1$d songs added to playlist</item>
+    </plurals>
+
+    <string name="no_results_found">No results found</string>
+    <string name="search">Search</string>
+
+
+</resources>

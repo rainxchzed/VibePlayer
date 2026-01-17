@@ -2,7 +2,6 @@ package zed.rainxch.vibeplayer.core.data.local.db.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
-import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
@@ -15,6 +14,16 @@ interface MusicsDao {
 
     @Query("SELECT * FROM musics ORDER BY title ASC")
     suspend fun getMusics(): List<MusicEntity>
+
+
+    @Query(
+        """
+    SELECT * FROM musics
+    WHERE title LIKE '%' || :query || '%' COLLATE NOCASE
+       OR artist LIKE '%' || :query || '%' COLLATE NOCASE
+       """
+    )
+    suspend fun searchMusics(query: String): List<MusicEntity>
 
     @Query("SELECT * FROM musics WHERE id = :id")
     suspend fun getMusic(id: Int): MusicEntity?

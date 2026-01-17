@@ -15,6 +15,10 @@ class CacheMusicsDataSource(
         return musicsDao.getMusics()
     }
 
+    suspend fun searchMusics(query: String): List<MusicEntity> {
+        return musicsDao.searchMusics(query)
+    }
+
     fun getMusicCountFlow(): Flow<Int> {
         return musicsDao.getMusicCountFlow()
     }

@@ -2,6 +2,7 @@ package zed.rainxch.vibeplayer
 
 import android.content.Context
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import zed.rainxch.vibeplayer.core.domain.MediaPlayerController
 
@@ -14,7 +15,6 @@ class AndroidAudioPlayer(context: Context) : MediaPlayerController {
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
         exoPlayer.play()
-
     }
 
     override fun pause() {
@@ -36,5 +36,19 @@ class AndroidAudioPlayer(context: Context) : MediaPlayerController {
     override fun getDuration(): Long {
         val duration = exoPlayer.duration
         return if (duration < 0) 0L else duration
+    }
+
+    override fun seekTo(positionMs: Long) {
+        return exoPlayer.seekTo(positionMs)
+    }
+
+    override fun setOnCompletionListener(callback: () -> Unit) {
+        exoPlayer.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                if (state == Player.STATE_ENDED) {
+                    callback()
+                }
+            }
+        })
     }
 }

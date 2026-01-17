@@ -24,6 +24,8 @@ data class MusicEntity @OptIn(ExperimentalTime::class) constructor(
     val bannerUrl: String?,
     @ColumnInfo(name = "musicUrl")
     val musicUrl: String,
+    @ColumnInfo(name = "isFavourite")
+    val isFavourite: Boolean = false,
     @ColumnInfo(name = "addedAt")
-    val addedAt: Long = Clock.System.now().toEpochMilliseconds()
+    val addedAt: Long = Clock.System.now().toEpochMilliseconds(),
 )

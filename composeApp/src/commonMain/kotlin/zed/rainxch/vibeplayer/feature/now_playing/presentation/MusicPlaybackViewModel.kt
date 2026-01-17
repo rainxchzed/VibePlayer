@@ -18,12 +18,20 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
     val state = _state.asStateFlow()
 
     private val _playlist = MutableStateFlow<List<Music>>(emptyList())
-
+    private val _shuffledPlaylist = MutableStateFlow<List<Music>>(emptyList())
     private var progressJob: Job? = null
 
+    init {
+        playerController.setOnCompletionListener {
+            handleTrackCompletion()
+        }
+    }
 
     fun createPlayList(musicsList: List<Music>) {
         _playlist.value = musicsList
+        if (_state.value.shuffleMode == ShuffleMode.ACTIVE) {
+            _shuffledPlaylist.value = musicsList.shuffled()
+        }
     }
 
     fun loadSelectedMusic(selectedMusic: Music?) {
@@ -44,6 +52,11 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
         startProgressTracking()
     }
 
+    fun resumeMusic() {
+        playerController.resume()
+        startProgressTracking()
+    }
+
     fun pauseMusic() {
         playerController.pause()
     }
@@ -59,15 +72,15 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
 
             while (isActive) {
                 val currentPosition = playerController.getCurrentPosition()
-                _state.update {
-                    it.copy(currentProgress = currentPosition)
-                }
-
                 val duration = playerController.getDuration()
+
                 _state.update {
-                    it.copy(duration = duration)
+                    it.copy(
+                        currentProgress = currentPosition,
+                        duration = duration
+                    )
                 }
-                delay(1000L)
+                delay(500L) // Smoother updates than 1000L
             }
         }
     }
@@ -76,36 +89,93 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
         progressJob?.cancel()
     }
 
-
     fun skipToNext() {
-        val currentIndex = _playlist.value.indexOfFirst { it.id == _state.value.selectedMusic?.id }
-        if (currentIndex < _playlist.value.lastIndex) {
-            val nextMusic = _playlist.value[currentIndex + 1]
-            loadSelectedMusic(nextMusic)
+
+        val currentPlaylist = if (_state.value.shuffleMode == ShuffleMode.ACTIVE) {
+            _shuffledPlaylist.value
+        } else {
+            _playlist.value
         }
+
+        if (currentPlaylist.isEmpty()) return
+
+        val currentIndex = currentPlaylist.indexOfFirst { it.id == _state.value.selectedMusic?.id }
+        val nextIndex = (currentIndex + 1) % currentPlaylist.size
+        val nextMusic = currentPlaylist[nextIndex]
+        loadSelectedMusic(nextMusic)
     }
 
     fun skipToPrevious() {
-        val currentIndex = _playlist.value.indexOfFirst { it.id == _state.value.selectedMusic?.id }
-        if (currentIndex > 0) {
-            val prevMusic = _playlist.value[currentIndex - 1]
-            loadSelectedMusic(prevMusic)
+
+        val currentPlaylist = if (_state.value.shuffleMode == ShuffleMode.ACTIVE) {
+            _shuffledPlaylist.value
+        } else {
+            _playlist.value
+        }
+
+        if (currentPlaylist.isEmpty()) return
+
+        val currentIndex = currentPlaylist.indexOfFirst { it.id == _state.value.selectedMusic?.id }
+        val previousIndex = if (currentIndex <= 0) currentPlaylist.lastIndex else currentIndex - 1
+        val prevMusic = currentPlaylist[previousIndex]
+        loadSelectedMusic(prevMusic)
+    }
+
+    fun seekTo(positionMs: Long) {
+        playerController.seekTo(positionMs)
+    }
+
+    fun handleTrackCompletion() {
+
+        val currentList = if (_state.value.shuffleMode == ShuffleMode.ACTIVE) _shuffledPlaylist.value else _playlist.value
+
+        val currentMusic = _state.value.selectedMusic ?: return
+        val currentIndex = currentList.indexOfFirst { it.id == currentMusic.id }
+
+        when (_state.value.repeatMode) {
+            RepeatMode.REPEAT_ONE -> {
+                loadSelectedMusic(currentMusic)
+            }
+
+            RepeatMode.REPEAT_ALL -> {
+                skipToNext()
+            }
+
+            RepeatMode.NONE -> {
+                // Off: Play next if available, otherwise STOP
+                if (currentIndex < currentList.lastIndex) {
+                    skipToNext()
+                } else {
+                    // Last track reached: Stop and reset progress
+                    pauseMusic()
+                    _state.update {
+                        it.copy(isPlaying = false, currentProgress = 0L)
+                    }
+                }
+            }
         }
     }
 
+
     fun onAction(musicPlaybackAction: MusicPlaybackAction) {
         when (musicPlaybackAction) {
-            MusicPlaybackAction.onPlayClick -> {
+            MusicPlaybackAction.OnPlayClick -> {
 
-                _state.value.selectedMusic?.let {
-                    playMusic(it.musicUrl)
+                if (_state.value.selectedMusic != null) {
+                    resumeMusic()
+                    _state.update {
+                        it.copy(isPlaying = true)
+                    }
+                } else {
+                    val currentPlaylist = if (_state.value.shuffleMode == ShuffleMode.ACTIVE)
+                        _shuffledPlaylist.value else _playlist.value
+                    currentPlaylist.firstOrNull()?.let { loadSelectedMusic(it) }
                 }
-                _state.update {
-                    it.copy(isPlaying = true)
-                }
+
+
             }
 
-            MusicPlaybackAction.onPauseClick -> {
+            MusicPlaybackAction.OnPauseClick -> {
                 pauseMusic()
                 _state.update {
                     it.copy(isPlaying = false)
@@ -113,15 +183,71 @@ class MusicPlaybackViewModel(private val playerController: MediaPlayerController
                 stopProgressTracking()
             }
 
-            MusicPlaybackAction.onNextClick -> {
+            MusicPlaybackAction.OnNextClick -> {
                 skipToNext()
             }
 
-            MusicPlaybackAction.onPreviousClick -> {
+            MusicPlaybackAction.OnPreviousClick -> {
                 skipToPrevious()
+            }
+
+            is MusicPlaybackAction.OnSeek -> {
+                seekTo(musicPlaybackAction.positionMs)
+                _state.update {
+                    it.copy(currentProgress = musicPlaybackAction.positionMs)
+                }
+
+            }
+
+            MusicPlaybackAction.OnRepeatClick -> {
+                val nextRepeatMode = when (_state.value.repeatMode) {
+                    RepeatMode.NONE -> RepeatMode.REPEAT_ALL
+                    RepeatMode.REPEAT_ALL -> RepeatMode.REPEAT_ONE
+                    RepeatMode.REPEAT_ONE -> RepeatMode.NONE
+                }
+                _state.update {
+                    it.copy(repeatMode = nextRepeatMode)
+                }
+            }
+
+            MusicPlaybackAction.OnShuffleClick -> {
+                val nextShuffleMode = when (_state.value.shuffleMode) {
+                    ShuffleMode.INACTIVE -> {
+                        _shuffledPlaylist.value = _playlist.value.shuffled()
+                        ShuffleMode.ACTIVE
+                    }
+                    ShuffleMode.ACTIVE -> ShuffleMode.INACTIVE
+                }
+                _state.update {
+                    it.copy(shuffleMode = nextShuffleMode)
+                }
+
+            }
+
+            MusicPlaybackAction.OnPlayAllClick -> {
+                // Ensure shuffle is disabled
+                _state.update {
+                    it.copy(shuffleMode = ShuffleMode.INACTIVE)
+                }
+
+                // Start playing first track from normal playlist
+                _playlist.value.firstOrNull()?.let { firstTrack ->
+                    loadSelectedMusic(firstTrack)
+                }
+            }
+
+            MusicPlaybackAction.OnShuffleAndPlayClick -> {
+                // Enable shuffle and regenerate shuffled playlist
+                _shuffledPlaylist.value = _playlist.value.shuffled()
+                _state.update {
+                    it.copy(shuffleMode = ShuffleMode.ACTIVE)
+                }
+
+                // Start playing first track from shuffled playlist
+                _shuffledPlaylist.value.firstOrNull()?.let { firstTrack ->
+                    loadSelectedMusic(firstTrack)
+                }
             }
         }
     }
-
-
 }
