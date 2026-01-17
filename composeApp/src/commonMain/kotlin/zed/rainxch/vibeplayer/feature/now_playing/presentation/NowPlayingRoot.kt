@@ -64,13 +64,6 @@ fun NowPlayingRoot(
         musicPlaybackViewModel.createPlayList(state.musics)
     }
 
-    /*  DisposableEffect(Unit) {
-          onDispose {
-              musicPlaybackViewModel.stopProgressTracking()
-              musicPlaybackViewModel.stopMusic()
-          }
-      }*/
-
     NowPlayingScreen(
         state = musicPlaybackState,
         onAction = musicPlaybackViewModel::onAction,
@@ -137,7 +130,9 @@ fun NowPlayingScreen(
 
         with(sharedTransitionScope) {
             Column(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
                     .padding(start = 20.dp, end = 20.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -147,42 +142,64 @@ fun NowPlayingScreen(
                     state = state,
                     modifier = Modifier
                         .sharedElement(
-                            sharedTransitionScope.rememberSharedContentState(key = "progress-bar-${state.selectedMusic?.id}"),
-                            animatedContentScope
+                            sharedContentState = sharedTransitionScope.rememberSharedContentState(
+                                key = "progress-bar-${state.selectedMusic?.id}"
+                            ),
+                            animatedVisibilityScope = animatedContentScope
                         )
-                        .fillMaxWidth().wrapContentHeight().padding(bottom = 8.dp),
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(bottom = 8.dp),
                     onSeek = { positionMs ->
                         onAction(MusicPlaybackAction.OnSeek(positionMs))
                     }
                 )
 
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 16.dp, start = 10.dp, end = 10.dp, bottom = 16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = 16.dp,
+                            start = 10.dp,
+                            end = 10.dp,
+                            bottom = 16.dp
+                        ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
                         IconButton(
-                            onClick = { onAction(MusicPlaybackAction.OnShuffleClick) },
+                            onClick = {
+                                onAction(MusicPlaybackAction.OnShuffleClick)
+                            },
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = shuffleContainerColor,
                                 contentColor = shuffleContentColor
-                            )
+                            ),
+                            modifier = Modifier.size(44.dp)
                         ) {
                             Icon(
                                 painter = painterResource(Res.drawable.shuffle),
                                 contentDescription = stringResource(Res.string.cd_shuffle_button),
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }
+
                     Row(
-                        modifier = Modifier.weight(3f),
+                        modifier = Modifier.weight(1f),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(
+                            space = 10.dp,
+                            alignment = Alignment.CenterHorizontally
+                        )
                     ) {
                         IconButton(
-                            onClick = { onAction(MusicPlaybackAction.OnPreviousClick) },
+                            onClick = {
+                                onAction(MusicPlaybackAction.OnPreviousClick)
+                            },
                             shape = CircleShape,
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryFixed,
@@ -210,16 +227,18 @@ fun NowPlayingScreen(
                             ),
                             modifier = Modifier
                                 .sharedElement(
-                                    sharedTransitionScope.rememberSharedContentState(key = "play-pause-button-${state.selectedMusic?.id}"),
-                                    animatedContentScope,
+                                    sharedContentState = sharedTransitionScope.rememberSharedContentState(
+                                        key = "play-pause-button-${state.selectedMusic?.id}"
+                                    ),
+                                    animatedVisibilityScope = animatedContentScope,
                                 )
                                 .size(60.dp)
                         ) {
                             Icon(
                                 modifier = Modifier.size(24.dp),
-                                painter = if (state.isPlaying) painterResource(Res.drawable.pause) else painterResource(
-                                    Res.drawable.play
-                                ),
+                                painter = if (state.isPlaying) {
+                                    painterResource(Res.drawable.pause)
+                                } else painterResource(Res.drawable.play),
                                 contentDescription = stringResource(Res.string.cd_play_pause_button)
                             )
                         }
@@ -246,23 +265,27 @@ fun NowPlayingScreen(
                                 contentDescription = stringResource(Res.string.cd_next_track_button)
                             )
                         }
+                    }
 
-                        Box(
-                            modifier = Modifier.weight(1f),
-                            contentAlignment = Alignment.CenterEnd
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        IconButton(
+                            onClick = {
+                                onAction(MusicPlaybackAction.OnRepeatClick)
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = repeatContainerColor,
+                                contentColor = repeatContentColor
+                            ),
+                            modifier = Modifier.size(44.dp)
                         ) {
-                            IconButton(
-                                onClick = { onAction(MusicPlaybackAction.OnRepeatClick) },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = repeatContainerColor,
-                                    contentColor = repeatContentColor
-                                )
-                            ) {
-                                Icon(
-                                    painter = repeatIcon,
-                                    contentDescription = stringResource(Res.string.cd_repeat_button)
-                                )
-                            }
+                            Icon(
+                                painter = repeatIcon,
+                                contentDescription = stringResource(Res.string.cd_repeat_button),
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                 }
