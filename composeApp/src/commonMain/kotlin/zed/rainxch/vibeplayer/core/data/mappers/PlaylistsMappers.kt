@@ -8,6 +8,7 @@ import zed.rainxch.vibeplayer.core.domain.model.PlaylistInfo
 
 fun PlaylistWithMusics.toDomain(): Playlist =
     Playlist(
+        id = this.playlist.id,
         title = playlist.title,
         musics = musics.map { it.id }.toImmutableList(),
         coverImage = playlist.coverImage

@@ -50,7 +50,6 @@ import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_scan
 import zed.rainxch.vibeplayer.AppViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.MainTopbar
-import zed.rainxch.vibeplayer.core.presentation.components.topbars.NowPlayingTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.ScanTopbar
 import zed.rainxch.vibeplayer.core.presentation.utils.showSnackBar
 import zed.rainxch.vibeplayer.feature.main_controller.presentation.MainControllerRoot
@@ -160,14 +159,14 @@ fun AppNavigation(
                         )
                     }
 
-                    is VibePlayerGraph.NowPlayingScreen -> {
-                        NowPlayingTopbar(
-                            onMinimizeClick = {
-                                songsViewModel.onAction(zed.rainxch.vibeplayer.feature.songs.presentation.SongsAction.OnMinimizeNowPlaying)
-                                navBackStack.removeLastOrNull()
-                            }
-                        )
-                    }
+//                    is VibePlayerGraph.NowPlayingScreen -> {
+//                        NowPlayingTopbar(
+//                            onMinimizeClick = {
+//
+//                                navBackStack.removeLastOrNull()
+//                            }
+//                        )
+//                    }
 
                     else -> {}
                 }
@@ -283,7 +282,10 @@ fun AppNavigation(
                             NowPlayingRoot(
                                 musicPlaybackViewModel = musicPlaybackViewModel,
                                 sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedContentScope = LocalNavAnimatedContentScope.current
+                                animatedContentScope = LocalNavAnimatedContentScope.current,
+                                onNavigateBack = {
+                                    navBackStack.removeLastOrNull()
+                                },
                             )
                         }
                     },

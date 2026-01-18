@@ -46,7 +46,7 @@ import vibeplayer.composeapp.generated.resources.playlists_my_playlists_title
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
-import zed.rainxch.vibeplayer.feature.playlist.presentation.components.CreateNewPlaylistBottomSheet
+import zed.rainxch.vibeplayer.core.presentation.components.CreateNewPlaylistBottomSheet
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistCard
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistsHeader
 
@@ -210,7 +210,10 @@ fun PlaylistScreen(
                 }
             }
 
-            items(items = state.userPlaylists, key = { playlist -> playlist.id} ) { playList ->
+            items(
+                items = state.userPlaylists,
+                key = { playlist -> playlist.id }
+            ) { playList ->
                 PlaylistCard(
                     state = playList,
                     defaultImage = Res.drawable.ic_playlist,

@@ -16,6 +16,10 @@ interface MusicsDao {
     suspend fun getMusics(): List<MusicEntity>
 
 
+    @Query("SELECT * FROM musics WHERE isFavourite = 1 ORDER BY title ASC")
+    fun getFavouriteMusicsFlow(): Flow<List<MusicEntity>>
+
+
     @Query(
         """
     SELECT * FROM musics
@@ -45,6 +49,9 @@ interface MusicsDao {
 
     @Upsert
     suspend fun insertMusic(musicEntity: MusicEntity)
+
+    @Query("UPDATE musics SET isFavourite = :isFavourite WHERE id = :musicId")
+    suspend fun updateFavouriteStatus(musicId: Int, isFavourite: Boolean)
 
     @Upsert
     suspend fun insertMusics(musics: List<MusicEntity>)

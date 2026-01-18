@@ -11,6 +11,7 @@ typealias MusicId = Int
  * @param coverImage is used for representing the cover main of playlist (nullable)
  */
 data class Playlist(
+    val id: Int,
     val title: String,
     val musics: ImmutableList<MusicId>,
     val coverImage: String? = null

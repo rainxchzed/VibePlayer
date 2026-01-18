@@ -9,6 +9,8 @@ import zed.rainxch.vibeplayer.core.data.local.db.dao.MusicsDao
 import zed.rainxch.vibeplayer.core.data.local.db.dao.PlaylistDao
 import zed.rainxch.vibeplayer.core.data.repository.DefaultMusicRepository
 import zed.rainxch.vibeplayer.core.domain.repository.MusicRepository
+import zed.rainxch.vibeplayer.feature.now_playing.data.repository.NowPlayingRepositoryImpl
+import zed.rainxch.vibeplayer.feature.now_playing.domain.repository.NowPlayingRepository
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
 import zed.rainxch.vibeplayer.feature.playlist.add_songs.presentation.AddSongsViewModel
 import zed.rainxch.vibeplayer.feature.playlist.data.DefaultPlaylistsRepository
@@ -28,7 +30,12 @@ val sharedModule = module {
     viewModelOf(::PlaylistViewModel)
     viewModelOf(::AddSongsViewModel)
 
-    single {  MusicPlaybackViewModel(get()) }
+    single {
+        MusicPlaybackViewModel(
+            playerController = get(),
+            nowPlayingRepository = get()
+        )
+    }
 
     single<MusicRepository> {
         DefaultMusicRepository(
@@ -46,6 +53,13 @@ val sharedModule = module {
     single<PlaylistsRepository> {
         DefaultPlaylistsRepository(
             dao = get()
+        )
+    }
+
+    single<NowPlayingRepository> {
+        NowPlayingRepositoryImpl(
+            musicsDao = get(),
+            playlistDao = get()
         )
     }
 
