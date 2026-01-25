@@ -16,6 +16,7 @@ import zed.rainxch.vibeplayer.feature.playlist.add_songs.presentation.AddSongsVi
 import zed.rainxch.vibeplayer.feature.playlist.data.DefaultPlaylistsRepository
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
 import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistViewModel
+import zed.rainxch.vibeplayer.feature.playlistPlayback.PlaylistPlaybackViewModel
 import zed.rainxch.vibeplayer.feature.scan.presentation.ScanViewModel
 import zed.rainxch.vibeplayer.feature.search.data.repository.SearchRepositoryImpl
 import zed.rainxch.vibeplayer.feature.search.domain.repository.SearchRepository
@@ -29,6 +30,7 @@ val sharedModule = module {
     viewModelOf(::SearchViewModel)
     viewModelOf(::PlaylistViewModel)
     viewModelOf(::AddSongsViewModel)
+    viewModelOf(::PlaylistPlaybackViewModel)
 
     single {
         MusicPlaybackViewModel(
