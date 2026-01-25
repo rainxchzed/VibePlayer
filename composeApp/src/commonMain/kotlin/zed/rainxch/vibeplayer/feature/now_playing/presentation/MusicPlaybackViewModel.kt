@@ -3,6 +3,8 @@ package zed.rainxch.vibeplayer.feature.now_playing.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import zed.rainxch.vibeplayer.core.domain.MediaPlayerController
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.feature.now_playing.domain.repository.NowPlayingRepository
@@ -51,16 +54,6 @@ class MusicPlaybackViewModel(
                     }
                 }
             }
-
-            launch {
-                nowPlayingRepository.getFavouriteSongsCount().collect { count ->
-                    _state.update {
-                        it.copy(
-                            favouriteSongsCount = count
-                        )
-                    }
-                }
-            }
         }
     }
 
@@ -72,17 +65,29 @@ class MusicPlaybackViewModel(
     }
 
     fun loadSelectedMusic(selectedMusic: Music?) {
-        _state.update {
-            it.copy(
-                selectedMusic = selectedMusic,
-                isFavourite = selectedMusic?.isFavourite == true
-            )
-        }
-        if (selectedMusic?.musicUrl != null) {
-            playMusic(selectedMusic.musicUrl)
-
+        viewModelScope.launch(Dispatchers.IO) {
             _state.update {
-                it.copy(isPlaying = true)
+                it.copy(
+                    selectedMusic = selectedMusic,
+                )
+            }
+
+            selectedMusic?.id?.let { id ->
+                _state.update {
+                    it.copy(
+                        isFavourite = nowPlayingRepository.isMusicFavourite(id)
+                    )
+                }
+            }
+
+            selectedMusic?.musicUrl?.let {
+                withContext(Dispatchers.Main) {
+                    playMusic(selectedMusic.musicUrl)
+
+                    _state.update {
+                        it.copy(isPlaying = true)
+                    }
+                }
             }
         }
     }
@@ -100,11 +105,6 @@ class MusicPlaybackViewModel(
     fun pauseMusic() {
         playerController.pause()
     }
-
-    fun stopMusic() {
-        playerController.stop()
-    }
-
 
     fun startProgressTracking() {
         progressJob?.cancel()
@@ -323,6 +323,8 @@ class MusicPlaybackViewModel(
             is MusicPlaybackAction.OnPlaylistSelected -> {
                 viewModelScope.launch {
                     _state.value.selectedMusic?.let { music ->
+                        val wasAlreadyFavourite = music.isFavourite
+
                         _state.update {
                             it.copy(
                                 isSelectPlaylistBottomSheetVisible = false,
@@ -330,14 +332,25 @@ class MusicPlaybackViewModel(
                             )
                         }
 
-                        nowPlayingRepository.addSongToPlaylist(
-                            music = music,
-                            playlist = action.playlist
-                        )
+                        if (wasAlreadyFavourite) {
+                            nowPlayingRepository.removeSongFromPlaylist(
+                                musicId = music.id,
+                                playlistId = action.playlist.id
+                            )
+                        } else {
+                            nowPlayingRepository.addSongToPlaylist(
+                                musicId = music.id,
+                                playlistId = action.playlist.id
+                            )
+                        }
 
                         _events.send(
                             OnMessage(
-                                message = "Added to playlist ${action.playlist.title}"
+                                message = if (wasAlreadyFavourite) {
+                                    "Removed from the ${action.playlist.title} playlist"
+                                } else {
+                                    "Added to the playlist ${action.playlist.title}"
+                                }
                             )
                         )
                     }
@@ -347,7 +360,13 @@ class MusicPlaybackViewModel(
 
             is MusicPlaybackAction.OnToggleFavouriteMusic -> {
                 viewModelScope.launch {
-                    nowPlayingRepository.toggleMusicFavourite(action.music)
+                    val wasAlreadyFavourite = _state.value.isFavourite
+                    if (wasAlreadyFavourite) {
+                        nowPlayingRepository.removeFavouriteSong(action.music.id)
+                    } else {
+                        nowPlayingRepository.addFavouriteSong(action.music.id)
+                    }
+
                     _state.update {
                         it.copy(
                             isFavourite = !it.isFavourite,
@@ -361,7 +380,13 @@ class MusicPlaybackViewModel(
                             )
                         }
 
-                        _events.send(OnMessage("Added to playlist Favourites"))
+                        val message = if (wasAlreadyFavourite) {
+                            "Removed from Favourites"
+                        } else {
+                            "Added to Favourites"
+                        }
+                        _events.send(OnMessage(message))
+
                     }
                 }
             }
@@ -386,12 +411,17 @@ class MusicPlaybackViewModel(
             MusicPlaybackAction.OnCreateNewPlaylistClick -> {
                 viewModelScope.launch {
                     val newPlaylistName = _state.value.newPlaylistName
+                    if (newPlaylistName.isBlank()) {
+                        _events.send(OnMessage("Playlist name cannot be empty"))
+                        return@launch
+                    }
+
                     val newPlaylist = nowPlayingRepository.createNewPlaylist(newPlaylistName)
 
                     _state.value.selectedMusic?.let { music ->
                         nowPlayingRepository.addSongToPlaylist(
-                            music = music,
-                            playlist = newPlaylist
+                            musicId = music.id,
+                            playlistId = newPlaylist.id
                         )
                     }
 

@@ -58,7 +58,6 @@ val sharedModule = module {
 
     single<NowPlayingRepository> {
         NowPlayingRepositoryImpl(
-            musicsDao = get(),
             playlistDao = get()
         )
     }

@@ -125,7 +125,6 @@ fun NowPlayingRoot(
                 musicPlaybackViewModel.onAction(MusicPlaybackAction.OnCloseAddToPlaylistDialog)
             },
             playlists = musicPlaybackState.playlists,
-            favouriteSongsCount = musicPlaybackState.favouriteSongsCount,
             onCreatePlaylistClick = {
                 musicPlaybackViewModel.onAction(MusicPlaybackAction.OnCreatePlaylistClick)
             },
@@ -218,12 +217,33 @@ fun NowPlayingScreen(
                 .background(MaterialTheme.colorScheme.onSecondary)
                 .windowInsetsPadding(WindowInsets.safeDrawing) // Handle system bars
         ) {
-            with(sharedTransitionScope) {
-                TopAppBar(
-                    navigationIcon = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            onAction(MusicPlaybackAction.OnMinimizeClick)
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryFixed,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = stringResource(Res.string.cd_minimize),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                },
+                actions = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         IconButton(
                             onClick = {
-                                onAction(MusicPlaybackAction.OnMinimizeClick)
+                                onAction(MusicPlaybackAction.OnAddToPlaylistClick)
                             },
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryFixed,
@@ -232,20 +252,15 @@ fun NowPlayingScreen(
                             modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = stringResource(Res.string.cd_minimize),
+                                painter = painterResource(Res.drawable.ic_playlist),
+                                contentDescription = null,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
-                    },
-                    actions = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
+                        state.selectedMusic?.let { music ->
                             IconButton(
                                 onClick = {
-                                    onAction(MusicPlaybackAction.OnAddToPlaylistClick)
+                                    onAction(MusicPlaybackAction.OnToggleFavouriteMusic(music))
                                 },
                                 colors = IconButtonDefaults.iconButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primaryFixed,
@@ -254,42 +269,24 @@ fun NowPlayingScreen(
                                 modifier = Modifier.size(36.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(Res.drawable.ic_playlist),
+                                    imageVector = if (state.isFavourite) {
+                                        Icons.Default.Favorite
+                                    } else Icons.Default.FavoriteBorder,
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
-                            state.selectedMusic?.let { music ->
-                                IconButton(
-                                    onClick = {
-                                        onAction(MusicPlaybackAction.OnToggleFavouriteMusic(music))
-                                    },
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryFixed,
-                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                    ),
-                                    modifier = Modifier.size(36.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = if (state.isFavourite) {
-                                            Icons.Default.Favorite
-                                        } else Icons.Default.FavoriteBorder,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.onSecondary
-                    ),
-                    title = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                )
-            }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.onSecondary
+                ),
+                title = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            )
 
             Box(
                 modifier = Modifier

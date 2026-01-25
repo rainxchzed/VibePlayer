@@ -15,7 +15,6 @@ data class MusicPlaybackState(
     val isSelectPlaylistBottomSheetVisible: Boolean = false,
     val isCreateNewPlaylistBottomSheetVisible: Boolean = false,
     val playlists: ImmutableList<Playlist> = persistentListOf(),
-    val favouriteSongsCount: Int = 0,
     val repeatMode: RepeatMode = RepeatMode.NONE,
     val shuffleMode: ShuffleMode = ShuffleMode.INACTIVE
 )

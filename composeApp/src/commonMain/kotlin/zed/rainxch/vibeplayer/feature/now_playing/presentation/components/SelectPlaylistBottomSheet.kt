@@ -31,6 +31,7 @@ import org.jetbrains.compose.resources.painterResource
 import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_heart
 import vibeplayer.composeapp.generated.resources.ic_playlist
+import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
 import zed.rainxch.vibeplayer.core.domain.model.Playlist
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +39,6 @@ import zed.rainxch.vibeplayer.core.domain.model.Playlist
 fun SelectPlaylistBottomSheet(
     onDismissRequest: () -> Unit,
     playlists: ImmutableList<Playlist>,
-    favouriteSongsCount: Int,
     onCreatePlaylistClick: () -> Unit,
     onFavouritePlaylistClick: () -> Unit,
     onPlaylistSelected: (Playlist) -> Unit,
@@ -80,37 +80,13 @@ fun SelectPlaylistBottomSheet(
                 onClick = onCreatePlaylistClick
             )
 
-            NowPlayingPlaylistItem(
-                icon = {
-                    Image(
-                        painter = painterResource(Res.drawable.ic_heart),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        Color(0xffDE84FF),
-                                        Color(0xffDE84FF).copy(alpha = .2f),
-                                    )
-                                )
-                            )
-                            .padding(14.dp),
-                    )
-                },
-                name = "Favourites",
-                songsCount = favouriteSongsCount,
-                onClick = {
-                    onFavouritePlaylistClick()
-                }
-            )
-
             playlists.forEach { playlist ->
                 NowPlayingPlaylistItem(
                     icon = {
                         Image(
-                            painter = painterResource(Res.drawable.ic_playlist),
+                            painter = painterResource(if(playlist.id == AppDatabase.FAVOURITES_PLAYLIST_ID) {
+                                Res.drawable.ic_heart
+                            } else Res.drawable.ic_playlist),
                             contentDescription = null,
                             modifier = Modifier
                                 .size(64.dp)
@@ -130,7 +106,11 @@ fun SelectPlaylistBottomSheet(
                     name = playlist.title,
                     songsCount = playlist.musics.count(),
                     onClick = {
-                        onPlaylistSelected(playlist)
+                        if(playlist.id == AppDatabase.FAVOURITES_PLAYLIST_ID) {
+                            onFavouritePlaylistClick()
+                        } else {
+                            onPlaylistSelected(playlist)
+                        }
                     }
                 )
             }

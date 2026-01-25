@@ -5,11 +5,14 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -42,14 +45,22 @@ class PlaylistViewModel(
 
     private fun loadPlaylists() {
         viewModelScope.launch {
-            repository.getPlaylistsInfo().collect { playlists ->
-                _state.update { currentState ->
-                    currentState.copy(
-                        totalCount = playlists.size + 1,
-                        userPlaylists = playlists.map { it.toUi() }
-                    )
+            repository
+                .getPlaylistsInfo()
+                .collect { playlists ->
+                    _state.update { currentState ->
+                        val (system, user) = playlists.partition {
+                            it.id == AppDatabase.FAVOURITES_PLAYLIST_ID
+                        }
+
+                        currentState.copy(
+                            userPlaylistTotalCount = user.size,
+                            userPlaylists = user.map { it.toUi() },
+                            systemPlaylists = system.map { it.toUi() },
+                            totalPlaylistCount = user.size + system.size
+                        )
+                    }
                 }
-            }
         }
     }
 

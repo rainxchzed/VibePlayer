@@ -6,8 +6,10 @@ import zed.rainxch.vibeplayer.core.domain.model.Playlist
 
 interface NowPlayingRepository {
     fun getPlaylists(): Flow<List<Playlist>>
-    fun getFavouriteSongsCount(): Flow<Int>
-    suspend fun toggleMusicFavourite(music: Music)
-    suspend fun addSongToPlaylist(music: Music, playlist: Playlist)
+    suspend fun addFavouriteSong(musicId: Int)
+    suspend fun removeFavouriteSong(musicId: Int)
+    suspend fun addSongToPlaylist(musicId: Int, playlistId: Int)
+    suspend fun removeSongFromPlaylist(musicId: Int, playlistId: Int)
     suspend fun createNewPlaylist(title: String) : Playlist
+    fun isMusicFavourite(musicId: Int) : Boolean
 }

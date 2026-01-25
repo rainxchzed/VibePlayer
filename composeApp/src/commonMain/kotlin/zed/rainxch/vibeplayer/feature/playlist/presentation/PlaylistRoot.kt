@@ -43,6 +43,7 @@ import vibeplayer.composeapp.generated.resources.ic_plus
 import vibeplayer.composeapp.generated.resources.playlists_create_playlist_button
 import vibeplayer.composeapp.generated.resources.playlists_favourites_title
 import vibeplayer.composeapp.generated.resources.playlists_my_playlists_title
+import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
@@ -128,7 +129,7 @@ fun PlaylistScreen(
                 },
                 onCreate = {
                     onAction(PlaylistAction.OnConfirmCreatePlaylist)
-                    onNavigateToAddSongs((state.totalCount))
+                    onNavigateToAddSongs((state.userPlaylistTotalCount))
                 }
             )
         },
@@ -138,7 +139,7 @@ fun PlaylistScreen(
             topEnd = 12.dp
         ),
         sheetContainerColor = MaterialTheme.colorScheme.onSecondary,
-        sheetTonalElevation = 4.dp
+        sheetTonalElevation = 4.dp,
     ) { paddingValues ->
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
@@ -150,20 +151,23 @@ fun PlaylistScreen(
         ) {
             item {
                 PlaylistsHeader(
-                    totalCount = state.totalCount,
+                    totalCount = state.totalPlaylistCount,
                     onCreatePlaylistClick = {
                         onAction(PlaylistAction.OnCreatePlaylistClick)
                     }
                 )
+            }
+            items(state.systemPlaylists) { playList ->
                 PlaylistCard(
-                    state = PlaylistCardUi(
-                        title = stringResource(Res.string.playlists_favourites_title),
-                        songsCount = state.favouritesCount,
-                        id = 0
-                    ),
+                    state = playList,
                     defaultImage = Res.drawable.ic_heart,
-                    onClick = {}
+                    onClick = {
+                        onNavigateToAddSongs(playList.id)
+                    }
                 )
+            }
+
+            item {
                 Text(
                     modifier = Modifier
                         .padding(top = 16.dp, bottom = 8.dp)
@@ -171,13 +175,14 @@ fun PlaylistScreen(
                     text = stringResource(
                         Res.string.playlists_my_playlists_title,
                         state.userPlaylists.size,
-                        state.userPlaylists.size
+                        state.totalPlaylistCount
                     ),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Medium
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
                 if (state.userPlaylists.isEmpty()) {
                     AppOutlinedButton(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -234,7 +239,6 @@ private fun Preview() {
         Surface {
             PlaylistScreen(
                 state = PlaylistState(
-                    totalCount = 3,
                     favouritesCount = 0,
                     userPlaylists = listOf(
                         PlaylistCardUi(

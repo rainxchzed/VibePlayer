@@ -7,8 +7,18 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		32E6F8234191B8EADCC08357 /* .app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = .app; sourceTree = BUILT_PRODUCTS_DIR; };
+		32E6F8234191B8EADCC08357 /* VibePlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VibePlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AF292FB62F1D364700FA91B1 /* Exceptions for "iosApp" folder in "iosApp" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 37736577AE78E91C78569EE5 /* iosApp */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B7D90805B31E04EDDB82BC3E /* Configuration */ = {
@@ -18,6 +28,9 @@
 		};
 		F76D62ADCE9848EB40291429 /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AF292FB62F1D364700FA91B1 /* Exceptions for "iosApp" folder in "iosApp" target */,
+			);
 			path = iosApp;
 			sourceTree = "<group>";
 		};
@@ -37,7 +50,7 @@
 		08B50F0FD0ADF3191892B3A5 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32E6F8234191B8EADCC08357 /* .app */,
+				32E6F8234191B8EADCC08357 /* VibePlayer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,7 +87,7 @@
 			packageProductDependencies = (
 			);
 			productName = iosApp;
-			productReference = 32E6F8234191B8EADCC08357 /* .app */;
+			productReference = 32E6F8234191B8EADCC08357 /* VibePlayer.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

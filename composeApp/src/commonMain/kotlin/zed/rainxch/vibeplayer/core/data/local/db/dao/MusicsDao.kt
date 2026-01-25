@@ -16,10 +16,6 @@ interface MusicsDao {
     suspend fun getMusics(): List<MusicEntity>
 
 
-    @Query("SELECT * FROM musics WHERE isFavourite = 1 ORDER BY title ASC")
-    fun getFavouriteMusicsFlow(): Flow<List<MusicEntity>>
-
-
     @Query(
         """
     SELECT * FROM musics
