@@ -54,6 +54,7 @@ import zed.rainxch.vibeplayer.feature.playlist.presentation.components.Playlists
 @Composable
 fun PlaylistRoot(
     onNavigateToAddSongs: (playListId: Int) -> Unit,
+    onNavigateToPlaylist: (playListId: Int) -> Unit,
     onShowSnackBar: (message: String) -> Unit,
     viewModel: PlaylistViewModel = koinViewModel()
 ) {
@@ -70,7 +71,8 @@ fun PlaylistRoot(
     PlaylistScreen(
         state = state,
         onAction = viewModel::onAction,
-        onNavigateToAddSongs = onNavigateToAddSongs
+        onNavigateToAddSongs = onNavigateToAddSongs,
+        onNavigateToPlaylist = onNavigateToPlaylist,
     )
 }
 
@@ -80,6 +82,7 @@ fun PlaylistScreen(
     state: PlaylistState,
     onAction: (PlaylistAction) -> Unit,
     onNavigateToAddSongs: (playListId: Int) -> Unit,
+    onNavigateToPlaylist: (playListId: Int) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -162,7 +165,9 @@ fun PlaylistScreen(
                         id = 0
                     ),
                     defaultImage = Res.drawable.ic_heart,
-                    onClick = {}
+                    onClick = {
+
+                    }
                 )
                 Text(
                     modifier = Modifier
@@ -218,7 +223,7 @@ fun PlaylistScreen(
                     state = playList,
                     defaultImage = Res.drawable.ic_playlist,
                     onClick = {
-                        onNavigateToAddSongs(playList.id)
+                        onNavigateToPlaylist(playList.id)
                     }
                 )
             }
@@ -256,9 +261,9 @@ private fun Preview() {
                         )
                 ),
                 onAction = {},
-                onNavigateToAddSongs = {}
+                onNavigateToAddSongs = {},
+                onNavigateToPlaylist = {},
             )
         }
-
     }
 }

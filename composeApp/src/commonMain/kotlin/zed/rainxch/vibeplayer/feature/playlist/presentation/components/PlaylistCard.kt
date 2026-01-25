@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -59,11 +60,19 @@ fun PlaylistCard(
             ,
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(defaultImage),
-                contentDescription = null,
-                tint = Color.Unspecified
-            )
+            if (state.coverImage == null) {
+                Icon(
+                    painter = painterResource(defaultImage),
+                    contentDescription = null,
+                    tint = Color.Unspecified
+                )
+            } else {
+                AsyncImage(
+                    model = state.coverImage,
+                    contentDescription = null
+                )
+            }
+
         }
         Column(
             modifier = Modifier.weight(1f),

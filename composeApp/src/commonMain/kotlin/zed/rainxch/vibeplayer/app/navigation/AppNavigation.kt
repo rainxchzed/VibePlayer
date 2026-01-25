@@ -57,6 +57,7 @@ import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackView
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.NowPlayingRoot
 import zed.rainxch.vibeplayer.feature.permission.presentation.PermissionRoot
 import zed.rainxch.vibeplayer.feature.playlist.add_songs.presentation.AddSongsRoot
+import zed.rainxch.vibeplayer.feature.playlistPlayback.PlaylistPlaybackRoot
 import zed.rainxch.vibeplayer.feature.scan.presentation.ScanRoot
 import zed.rainxch.vibeplayer.feature.search.presentation.SearchRoot
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
@@ -208,7 +209,9 @@ fun AppNavigation(
                                 },
                                 onNavigateToAddSongs = { playListId ->
                                     navBackStack.add(VibePlayerGraph.AddSongsScreen(playListId = playListId))
-
+                                },
+                                onNavigateToPlaylist = {
+                                    navBackStack.add(VibePlayerGraph.PlaylistPlaybackScreen(it))
                                 }
                             )
                         }
@@ -240,13 +243,30 @@ fun AppNavigation(
                             )
                         }
 
-                        entry<VibePlayerGraph.AddSongsScreen>{ route ->
-                            AddSongsRoot(songsViewModel = songsViewModel,onBackPressed = {
-                                navBackStack.removeLast()
-                            }, playlistId = route.playListId,
+                        entry<VibePlayerGraph.AddSongsScreen> { route ->
+                            AddSongsRoot(
+                                songsViewModel = songsViewModel, onBackPressed = {
+                                    navBackStack.removeLast()
+                                },
+                                playlistId = route.playListId,
                                 onShowSnackBar = { message ->
-                                    coroutineScope.showSnackBar(snackBarHostState = snackBarHostState, message = message)
+                                    coroutineScope.showSnackBar(
+                                        snackBarHostState = snackBarHostState,
+                                        message = message
+                                    )
                                 })
+                        }
+
+                        entry<VibePlayerGraph.PlaylistPlaybackScreen> { route ->
+                            PlaylistPlaybackRoot(
+                                navigateBack = {
+                                    navBackStack.removeLastOrNull()
+                                },
+                                id = route.playListId,
+                                navigateToAddSongs = {
+                                    navBackStack.add(VibePlayerGraph.AddSongsScreen(playListId = route.playListId))
+                                }
+                            )
                         }
 
                         entry<VibePlayerGraph.NowPlayingScreen>(
@@ -259,17 +279,17 @@ fun AppNavigation(
                             } + NavDisplay.popTransitionSpec {
                                 // Slide old content down, revealing the new content in place underneath
                                 EnterTransition.None togetherWith
-                                    slideOutVertically(
-                                        targetOffsetY = { it },
-                                        animationSpec = tween(300)
-                                    )
+                                        slideOutVertically(
+                                            targetOffsetY = { it },
+                                            animationSpec = tween(300)
+                                        )
                             } + NavDisplay.predictivePopTransitionSpec {
                                 // Slide old content down, revealing the new content in place underneath
                                 EnterTransition.None togetherWith
-                                    slideOutVertically(
-                                        targetOffsetY = { it },
-                                        animationSpec = tween(300)
-                                    )
+                                        slideOutVertically(
+                                            targetOffsetY = { it },
+                                            animationSpec = tween(300)
+                                        )
                             }
                         ) { route ->
                             LaunchedEffect(route.id) {
