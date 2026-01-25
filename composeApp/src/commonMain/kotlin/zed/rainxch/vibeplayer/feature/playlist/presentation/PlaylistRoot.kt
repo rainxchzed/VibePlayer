@@ -165,7 +165,7 @@ fun PlaylistScreen(
                     state = playList,
                     defaultImage = Res.drawable.ic_heart,
                     onClick = {
-
+                        onNavigateToPlaylist(0)
                     }
                 )
             }

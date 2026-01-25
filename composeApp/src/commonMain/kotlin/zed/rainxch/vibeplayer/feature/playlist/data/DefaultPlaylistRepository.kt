@@ -8,8 +8,10 @@ import kotlinx.coroutines.withContext
 import zed.rainxch.vibeplayer.core.data.local.db.dao.PlaylistDao
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistEntity
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistMusicCrossRef
+import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistWithMusics
 import zed.rainxch.vibeplayer.core.data.mappers.toDomain
 import zed.rainxch.vibeplayer.core.domain.model.Playlist
+import zed.rainxch.vibeplayer.core.domain.model.PlaylistFull
 import zed.rainxch.vibeplayer.core.domain.model.PlaylistInfo
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
 
@@ -43,6 +45,10 @@ class DefaultPlaylistsRepository(
         return dao.getPlaylistsWithCount().map { playlists ->
             playlists.map { it.toDomain() }
         }
+    }
+
+    override fun getPlaylistWithMusics(playlistId: Int): Flow<PlaylistFull> {
+        return dao.getPlaylistWithMusics(playlistId).map { it.toDomain() }
     }
 
     override suspend fun createPlaylist(name: String): Result<Unit> {

@@ -29,3 +29,15 @@ data class PlaylistInfo(
     val musicCount: Int,
     val coverImage: String? = null
 )
+
+/**
+ * @param title is title of the playlist (max length - 40)
+ * @param musics represents the list of music data classes
+ * @param coverImage is used for representing the cover main of playlist (nullable)
+ */
+data class PlaylistFull(
+    val id: Int,
+    val title: String,
+    val musics: ImmutableList<Music>,
+    val coverImage: String? = null
+)

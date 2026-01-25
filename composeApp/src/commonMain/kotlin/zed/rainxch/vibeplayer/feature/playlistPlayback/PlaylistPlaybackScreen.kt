@@ -3,11 +3,13 @@ package zed.rainxch.vibeplayer.feature.playlistPlayback
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,20 +35,26 @@ import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_arrow_left
 import vibeplayer.composeapp.generated.resources.ic_playlist
 import vibeplayer.composeapp.generated.resources.ic_plus
+import zed.rainxch.vibeplayer.core.domain.model.Music
+import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
 import zed.rainxch.vibeplayer.core.presentation.theme.HostGroteskFontFamily
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
+import zed.rainxch.vibeplayer.feature.playlist.presentation.components.SongsCountHeader
 
 @Composable
 fun PlaylistPlaybackRoot(
     id: Int,
     navigateBack: () -> Unit,
     navigateToAddSongs: () -> Unit,
-    viewModel: PlaylistPlaybackViewModel = koinViewModel(),
+    viewModel: PlaylistPlaybackViewModel = koinViewModel(
+        key = id.toString(),
+    ) { parametersOf(id) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -96,13 +104,14 @@ fun PlaylistPlaybackScreen(
                     .padding(vertical = 10.dp)
             )
         }
-    ) {
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
-                .padding(it)
+                .padding(paddingValues)
                 .fillMaxWidth()
             ,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             item {
                 Box(
@@ -149,6 +158,20 @@ fun PlaylistPlaybackScreen(
             }
 
             if (state.songs.isNotEmpty()) {
+                item {
+                    SongsCountHeader(
+                        totalCount = state.songs.size,
+                        onAddClick = {
+                            onAction(PlaylistPlaybackAction.AddSongs)
+                        }
+                    )
+                }
+                items(state.songs) {
+                    MusicItem(
+                        music = it,
+                        onClick = {}
+                    )
+                }
             } else {
                 item {
                     Text(
@@ -202,7 +225,18 @@ private fun Preview() {
     VibePlayerTheme {
         PlaylistPlaybackScreen(
             state = PlaylistPlaybackState(
-                title = "Playlist title"
+                title = "Playlist title",
+                songs = listOf(
+                    Music(
+                        id = 1,
+                        title = "Song title",
+                        artist = "Artist name",
+                        duration = "123",
+                        bannerUrl = "",
+                        musicUrl = "",
+                        isFavourite = true,
+                    )
+                )
             ),
             onAction = {}
         )
