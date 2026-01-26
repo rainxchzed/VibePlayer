@@ -43,5 +43,8 @@
     <string name="rename">Rename</string>
     <string name="change_cover">Change cover</string>
     <string name="delete">Delete</string>
+    <string name="rename_playlist">Rename Playlist</string>
+    <string name="new_name">New name</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

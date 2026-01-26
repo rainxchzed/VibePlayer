@@ -8,7 +8,6 @@ import kotlinx.coroutines.withContext
 import zed.rainxch.vibeplayer.core.data.local.db.dao.PlaylistDao
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistEntity
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistMusicCrossRef
-import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistWithMusics
 import zed.rainxch.vibeplayer.core.data.mappers.toDomain
 import zed.rainxch.vibeplayer.core.domain.model.Playlist
 import zed.rainxch.vibeplayer.core.domain.model.PlaylistFull
@@ -49,6 +48,22 @@ class DefaultPlaylistsRepository(
 
     override fun getPlaylistWithMusics(playlistId: Int): Flow<PlaylistFull> {
         return dao.getPlaylistWithMusics(playlistId).map { it.toDomain() }
+    }
+
+    override suspend fun renamePlaylist(playlistId: Int, changedName: String): Result<Unit> {
+        return try {
+            val trimmedName = changedName.trim()
+
+            if (trimmedName.isBlank()) {
+                return Result.failure(Exception("Playlist name cannot be empty"))
+            }
+
+          dao.renamePlaylist(playlistId = playlistId, changedName = changedName)
+            Result.success(Unit)
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun createPlaylist(name: String): Result<Int> {

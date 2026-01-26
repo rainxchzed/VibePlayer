@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
+import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.CreatePlaylist
+import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.RenamePlaylist
+import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.ShowPlaylistActions
 import kotlin.time.ExperimentalTime
 
 private const val MAX_PLAYLIST_NAME_LENGTH = 40
@@ -64,13 +67,13 @@ class PlaylistViewModel(
     fun onAction(action: PlaylistAction) {
         when (action) {
             PlaylistAction.OnCreatePlaylistClick -> {
-                _state.update { it.copy(showBottomSheet = SheetContent.CreatePlaylist) }
+                _state.update { it.copy(showBottomSheet = CreatePlaylist) }
             }
 
-            is PlaylistAction.OnPlaylistMoreOptionsClick -> {
+            is PlaylistAction.OnPlaylistMoreOptions -> {
                 _state.update {
                     it.copy(
-                        showBottomSheet = SheetContent.ShowPlaylistActions(
+                        showBottomSheet = ShowPlaylistActions(
                             id = action.id,
                             title = action.title,
                             songsCount = action.songsCount,
@@ -83,25 +86,84 @@ class PlaylistViewModel(
             PlaylistAction.OnDismissBottomSheet -> onDismissBottomSheet()
             is PlaylistAction.OnPlaylistNameChange -> onPlaylistNameChange(action.name)
             PlaylistAction.OnConfirmCreatePlaylist -> onConfirmCreatePlaylist()
+
+
+            is PlaylistAction.OnCurrentPlaylistNameChange -> {
+                onCurrentPlaylistNameChange(name = action.name)
+            }
+
+            is PlaylistAction.OnChangeCoverClick -> Unit
+            is PlaylistAction.OnConfirmRenamePlaylist -> onConfirmRenamePlaylist(
+                playlistId = action.playlistId,
+            )
+
+            is PlaylistAction.OnDeletePlaylistClick -> Unit
+            is PlaylistAction.OnPlayPlaylistClick -> {
+                onNavigateToPlaylistPlayback(playlistId = action.playlistId)
+
+            }
+
+            is PlaylistAction.OnRenamePlaylistClick -> {
+                _state.update { it.copy(showBottomSheet = RenamePlaylist(playListId = action.playlistId)) }
+
+            }
         }
     }
 
-    /*
-        private fun onCreatePlaylistClick() {
-            _state.update {
-                it.copy(
-                    showBottomSheet = Clock.System.now().toEpochMilliseconds(),
-                    newPlaylistName = ""
+    fun onNavigateToPlaylistPlayback(playlistId: Int) {
+
+        viewModelScope.launch {
+            _events.send(
+                PlaylistEvent.OnNavigateToPlaylistPlayback(
+                    playlistId = playlistId,
+                    startPlaylistPlayback = true
                 )
+            )
+        }
+    }
+
+    private fun onCurrentPlaylistNameChange(name: String) {
+        if (name.length <= MAX_PLAYLIST_NAME_LENGTH) {
+            _state.update {
+                it.copy(currentPlaylistName = name)
             }
         }
-    */
+    }
+
+    fun onConfirmRenamePlaylist(playlistId: Int) {
+        viewModelScope.launch {
+            val result = repository.renamePlaylist(
+                playlistId = playlistId,
+                changedName = _state.value.currentPlaylistName
+            )
+            result.fold(onSuccess = {
+                _state.update {
+                    it.copy(
+                        showBottomSheet = null,
+                        currentPlaylistName = ""
+                    )
+                }
+
+
+            }, onFailure = { error ->
+                _events.send(
+                    PlaylistEvent.ShowSnackbar(
+                        error.message ?: "Failed to rename playlist"
+                    )
+                )
+
+            })
+
+        }
+    }
+
 
     private fun onDismissBottomSheet() {
         _state.update {
             it.copy(
                 showBottomSheet = null,
-                newPlaylistName = ""
+                newPlaylistName = "",
+                currentPlaylistName = ""
             )
         }
     }

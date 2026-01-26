@@ -8,5 +8,7 @@ sealed interface SheetContent {
         val songsCount: Int,
         val coverImage: String? = null,
     ) : SheetContent
+
+    data class RenamePlaylist(val playListId: Int) : SheetContent
 }
 

@@ -35,6 +35,7 @@ import vibeplayer.composeapp.generated.resources.playlist_play
 import vibeplayer.composeapp.generated.resources.playlist_rename
 import vibeplayer.composeapp.generated.resources.rename
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
+import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistAction
 
 @Composable
 fun PlayListOptionsBottomSheet(
@@ -42,6 +43,7 @@ fun PlayListOptionsBottomSheet(
     title: String,
     songsCount: Int,
     coverImage: String?,
+    onAction: (PlaylistAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -95,7 +97,7 @@ fun PlayListOptionsBottomSheet(
                 )
             },
             actionName = stringResource(Res.string.play),
-            onClick = {},
+            onClick = { onAction(PlaylistAction.OnPlayPlaylistClick(id)) },
             modifier = Modifier.fillMaxWidth()
                 .clip(RectangleShape)
                 .background(MaterialTheme.colorScheme.onSecondary)
@@ -112,7 +114,7 @@ fun PlayListOptionsBottomSheet(
                 )
             },
             actionName = stringResource(Res.string.rename),
-            onClick = {},
+            onClick = { onAction(PlaylistAction.OnRenamePlaylistClick(id, title)) },
             modifier = Modifier.fillMaxWidth()
                 .clip(RectangleShape)
                 .background(MaterialTheme.colorScheme.onSecondary)
@@ -129,7 +131,7 @@ fun PlayListOptionsBottomSheet(
                 )
             },
             actionName = stringResource(Res.string.change_cover),
-            onClick = {},
+            onClick = { onAction(PlaylistAction.OnChangeCoverClick(id)) },
             modifier = Modifier.fillMaxWidth()
                 .clip(RectangleShape)
                 .background(MaterialTheme.colorScheme.onSecondary)
@@ -146,59 +148,12 @@ fun PlayListOptionsBottomSheet(
                 )
             },
             actionName = stringResource(Res.string.delete),
-            onClick = {},
+            onClick = { onAction(PlaylistAction.OnDeletePlaylistClick(id, title)) },
             modifier = Modifier.fillMaxWidth()
                 .clip(RectangleShape)
                 .background(MaterialTheme.colorScheme.onSecondary)
-
         )
-        /* Text(
-             text = "Create New Playlist",
-             style = MaterialTheme.typography.titleMedium,
-             color = MaterialTheme.colorScheme.onSurface
-         )
 
-         Spacer(Modifier.height(20.dp))
-
-         PrimaryTextField(
-             value = "",
-             onValueChange = onPlaylistNameChange,
-             placeholder = "Enter playlist name",
-             endIcon = {
-                 Text(
-                     text = "/40",
-                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                     style = MaterialTheme.typography.bodySmall
-                 )
-             },
-             imeAction = ImeAction.Done,
-             modifier = Modifier.fillMaxWidth()
-         )
-
-         Spacer(Modifier.height(20.dp))
-
-         Row(
-             modifier = Modifier.fillMaxWidth(),
-             verticalAlignment = Alignment.CenterVertically,
-             horizontalArrangement = Arrangement.spacedBy(12.dp)
-         ) {
-             AppOutlinedButton(
-                 onClick = onCancel,
-                 modifier = Modifier.weight(1f)
-             ) {
-                 Text(
-                     text = "Cancel",
-                     style = MaterialTheme.typography.bodyLarge,
-                     color = MaterialTheme.colorScheme.onSurface
-                 )
-             }
-
-             PrimaryButton(
-                 text = "Create",
-                 onClick = onCreate,
-                 modifier = Modifier.weight(1f),
-             )
-         }*/
     }
 }
 
@@ -207,11 +162,10 @@ fun PlayListOptionsBottomSheet(
 fun PlaylistOptionsBottomSheetPreview() {
     VibePlayerTheme {
         PlayListOptionsBottomSheet(
-                id = 1,
-                title = "Test",
-                songsCount = 5,
-                coverImage = ""
-            ,
+            id = 1,
+            title = "Test",
+            songsCount = 5,
+            coverImage = "", onAction = {},
             modifier = Modifier
         )
 

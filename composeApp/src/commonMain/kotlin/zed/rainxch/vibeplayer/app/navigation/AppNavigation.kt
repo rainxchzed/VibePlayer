@@ -211,7 +211,20 @@ fun AppNavigation(
                                     navBackStack.add(VibePlayerGraph.AddSongsScreen(playListId = playListId))
                                 },
                                 onNavigateToPlaylist = {
-                                    navBackStack.add(VibePlayerGraph.PlaylistPlaybackScreen(it))
+                                    navBackStack.add(
+                                        VibePlayerGraph.PlaylistPlaybackScreen(
+                                            it,
+                                            false
+                                        )
+                                    )
+                                },
+                                onNavigateToPlaylistPlayback = { playlistId, startPlaylistPlayback ->
+                                    navBackStack.add(
+                                        VibePlayerGraph.PlaylistPlaybackScreen(
+                                            playlistId,
+                                            startPlaylistPlayback
+                                        )
+                                    )
                                 }
                             )
                         }

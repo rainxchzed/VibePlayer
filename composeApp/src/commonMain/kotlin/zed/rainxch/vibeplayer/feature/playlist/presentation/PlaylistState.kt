@@ -11,7 +11,8 @@ data class PlaylistState(
     val userPlaylists: List<PlaylistCardUi> = emptyList(),
     val systemPlaylists: List<PlaylistCardUi> = emptyList(),
     val showBottomSheet: SheetContent? = null,
-    val newPlaylistName: String = ""
+    val newPlaylistName: String = "",
+    val currentPlaylistName: String = ""
 )
 //    val showBottomSheet: Long? = null,
 data class PlaylistCardUi(

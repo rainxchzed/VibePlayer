@@ -51,12 +51,14 @@ import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlayListOptionsBottomSheet
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistCard
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistsHeader
+import zed.rainxch.vibeplayer.feature.playlist.presentation.components.RenamePlaylistBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistRoot(
     onNavigateToAddSongs: (playListId: Int) -> Unit,
     onNavigateToPlaylist: (playListId: Int) -> Unit,
+    onNavigateToPlaylistPlayback: (playListId: Int, startPlaylistPlayback: Boolean) -> Unit,
     onShowSnackBar: (message: String) -> Unit,
     viewModel: PlaylistViewModel = koinViewModel()
 ) {
@@ -70,6 +72,10 @@ fun PlaylistRoot(
 
             is PlaylistEvent.OnNavigateToAddSongs -> {
                 onNavigateToAddSongs(event.playlistId)
+            }
+
+            is PlaylistEvent.OnNavigateToPlaylistPlayback -> {
+                onNavigateToPlaylistPlayback(event.playlistId, event.startPlaylistPlayback)
             }
         }
     }
@@ -109,7 +115,7 @@ fun PlaylistScreen(
             if (!bottomSheetState.isVisible) {
                 bottomSheetState.expand()
             } else
-            bottomSheetState.expand()
+                bottomSheetState.expand()
         }
     }
 
@@ -128,7 +134,7 @@ fun PlaylistScreen(
         sheetDragHandle = null,
         sheetContent = {
 
-            when(val sheet = state.showBottomSheet) {
+            when (val sheet = state.showBottomSheet) {
                 SheetContent.CreatePlaylist -> {
 
                     CreateNewPlaylistBottomSheet(
@@ -146,34 +152,41 @@ fun PlaylistScreen(
                         }
                     )
                 }
-                is SheetContent.ShowPlaylistActions ->{
+
+                is SheetContent.ShowPlaylistActions -> {
                     PlayListOptionsBottomSheet(
                         id = sheet.id,
                         title = sheet.title,
                         songsCount = sheet.songsCount,
                         coverImage = sheet.coverImage,
+                        onAction = onAction
                     )
                 }
+
+                is SheetContent.RenamePlaylist -> {
+                    RenamePlaylistBottomSheet(
+                        playlistName = state.currentPlaylistName,
+                        onCurrentPlaylistNameChange = { changeName ->
+                            onAction(PlaylistAction.OnCurrentPlaylistNameChange(changeName))
+                        },
+                        onCancel = {
+                            scope.launch {
+                                bottomSheetState.hide()
+                            }
+                            keyboardController?.hide()
+                        },
+                        onRename = {
+                            onAction(PlaylistAction.OnConfirmRenamePlaylist(sheet.playListId))
+                        }
+                    )
+                }
+
                 null -> {
                     Box(modifier = Modifier.height(1.dp))
                 }
             }
 
-            /*CreateNewPlaylistBottomSheet(
-                playlistName = state.newPlaylistName,
-                onPlaylistNameChange = { name ->
-                    onAction(PlaylistAction.OnPlaylistNameChange(name))
-                },
-                onCancel = {
-                    scope.launch {
-                        bottomSheetState.hide()
-                    }
-                },
-                onCreate = {
-                    onAction(PlaylistAction.OnConfirmCreatePlaylist)
-                    onNavigateToAddSongs((state.userPlaylistTotalCount))
-                }
-            )*/
+
         },
         sheetPeekHeight = 0.dp,
         sheetShape = RoundedCornerShape(
@@ -272,12 +285,14 @@ fun PlaylistScreen(
                         onNavigateToPlaylist(playList.id)
                     },
                     onThreeDotsClick = {
-                        onAction(PlaylistAction.OnPlaylistMoreOptionsClick(
-                            playList.id,
-                            title = playList.title,
-                            songsCount = playList.songsCount,
-                            coverImage = playList.coverImage
-                        ))
+                        onAction(
+                            PlaylistAction.OnPlaylistMoreOptions(
+                                playList.id,
+                                title = playList.title,
+                                songsCount = playList.songsCount,
+                                coverImage = playList.coverImage
+                            )
+                        )
                     }
                 )
             }

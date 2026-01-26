@@ -26,6 +26,10 @@ interface PlaylistDao {
     @Delete
     suspend fun deletePlaylist(playlist: PlaylistEntity)
 
+    @Query("UPDATE playlists SET title = :changedName WHERE id = :playlistId ")
+    suspend fun renamePlaylist(playlistId: Int, changedName: String)
+
+
     @Query("SELECT * FROM playlists ORDER BY id ASC")
     fun getPlaylists(): Flow<List<PlaylistEntity>>
 

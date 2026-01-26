@@ -33,6 +33,7 @@ fun SharedTransitionScope.MainControllerRoot(
     onExpandPlayer: () -> Unit,
     onNavigateToAddSongs: (playListId: Int) -> Unit,
     onNavigateToPlaylist: (playListId: Int) -> Unit,
+    onNavigateToPlaylistPlayback: (playListId: Int, startPlaylistPlayback: Boolean) -> Unit,
     viewModel: MainControllerViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -45,6 +46,7 @@ fun SharedTransitionScope.MainControllerRoot(
         onExpandPlayer = onExpandPlayer,
         onNavigateToAddSongs = onNavigateToAddSongs,
         onNavigateToPlaylist = onNavigateToPlaylist,
+        onNavigateToPlaylistPlayback = onNavigateToPlaylistPlayback
     )
 }
 
@@ -57,6 +59,7 @@ fun SharedTransitionScope.MainControllerScreen(
     onExpandPlayer: () -> Unit,
     onNavigateToAddSongs: (playListId: Int) -> Unit,
     onNavigateToPlaylist: (playListId: Int) -> Unit,
+    onNavigateToPlaylistPlayback: (playListId: Int, startPlaylistPlayback: Boolean) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -115,7 +118,8 @@ fun SharedTransitionScope.MainControllerScreen(
                 PlaylistRoot(
                     onNavigateToAddSongs = onNavigateToAddSongs,
                     onNavigateToPlaylist = onNavigateToPlaylist,
-                    onShowSnackBar = onShowSnackbar
+                    onShowSnackBar = onShowSnackbar,
+                    onNavigateToPlaylistPlayback = onNavigateToPlaylistPlayback
                 )
             }
         }
@@ -134,7 +138,8 @@ private fun Preview() {
                 onNavigateToPlaylist = {},
                 onShowSnackbar = {},
                 onNavigateToNowPlaying = {},
-                onExpandPlayer = {}
+                onExpandPlayer = {},
+                onNavigateToPlaylistPlayback = { _, _ -> }
             )
         }
     }
