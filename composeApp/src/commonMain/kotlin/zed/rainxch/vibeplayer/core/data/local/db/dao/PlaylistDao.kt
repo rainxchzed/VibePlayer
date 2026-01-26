@@ -92,6 +92,6 @@ interface PlaylistDao {
         WHERE playlistId = :playlistId AND musicId = :musicId
     )
 """)
-    fun isMusicInPlaylist(playlistId: Int, musicId: Int): Boolean
+    suspend fun isMusicInPlaylist(playlistId: Int, musicId: Int): Boolean
 
 }

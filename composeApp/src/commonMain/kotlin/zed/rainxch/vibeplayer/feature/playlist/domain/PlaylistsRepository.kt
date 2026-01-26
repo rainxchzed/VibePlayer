@@ -7,7 +7,7 @@ import zed.rainxch.vibeplayer.core.domain.model.PlaylistFull
 import zed.rainxch.vibeplayer.core.domain.model.PlaylistInfo
 
 interface PlaylistsRepository {
-    suspend fun createPlaylist(name: String): Result<Unit>
+    suspend fun createPlaylist(name: String): Result<Int>
     fun getPlaylists(): Flow<List<Playlist>>
     fun getPlaylistsInfo(): Flow<List<PlaylistInfo>>
     fun getPlaylistWithMusics(playlistId: Int): Flow<PlaylistFull>

@@ -11,5 +11,5 @@ interface NowPlayingRepository {
     suspend fun addSongToPlaylist(musicId: Int, playlistId: Int)
     suspend fun removeSongFromPlaylist(musicId: Int, playlistId: Int)
     suspend fun createNewPlaylist(title: String) : Playlist
-    fun isMusicFavourite(musicId: Int) : Boolean
+    suspend fun isMusicFavourite(musicId: Int) : Boolean
 }

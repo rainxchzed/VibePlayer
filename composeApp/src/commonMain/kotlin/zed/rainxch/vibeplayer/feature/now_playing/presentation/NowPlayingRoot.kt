@@ -86,7 +86,7 @@ fun NowPlayingRoot(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(state) {
+    LaunchedEffect(state.musics) {
         musicPlaybackViewModel.createPlayList(state.musics)
     }
 

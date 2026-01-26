@@ -51,7 +51,7 @@ class DefaultPlaylistsRepository(
         return dao.getPlaylistWithMusics(playlistId).map { it.toDomain() }
     }
 
-    override suspend fun createPlaylist(name: String): Result<Unit> {
+    override suspend fun createPlaylist(name: String): Result<Int> {
         return try {
             val trimmedName = name.trim()
 
@@ -64,8 +64,8 @@ class DefaultPlaylistsRepository(
                 return Result.failure(Exception("Playlist with this name already exists"))
             }
 
-            dao.insertPlaylist(PlaylistEntity(title = trimmedName))
-            Result.success(Unit)
+            val generatedId = dao.insertPlaylist(PlaylistEntity(title = trimmedName))
+            Result.success(generatedId.toInt())
         } catch (e: Exception) {
             Result.failure(e)
         }

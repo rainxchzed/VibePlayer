@@ -28,6 +28,5 @@ fun initDatabase(context: Context): AppDatabase {
             }
         })
         .setQueryCoroutineContext(Dispatchers.IO)
-        .fallbackToDestructiveMigration(true)
         .build()
 }

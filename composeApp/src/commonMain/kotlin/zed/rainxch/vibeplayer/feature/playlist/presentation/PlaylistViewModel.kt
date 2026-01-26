@@ -103,13 +103,15 @@ class PlaylistViewModel(
         viewModelScope.launch {
             val result = repository.createPlaylist(_state.value.newPlaylistName)
             result.fold(
-                onSuccess = {
+                onSuccess = { playlistId ->
                     _state.update {
                         it.copy(
                             showBottomSheet = null,
                             newPlaylistName = ""
                         )
                     }
+
+                    _events.send(PlaylistEvent.OnNavigateToAddSongs(playlistId))
                 },
                 onFailure = { error ->
                     _events.send(

@@ -5,8 +5,8 @@ import zed.rainxch.vibeplayer.core.domain.model.PlaylistInfo
 
 @Stable
 data class PlaylistState(
-    val userPlaylistTotalCount: Int = 1,
-    val totalPlaylistCount: Int = 1,
+    val userPlaylistTotalCount: Int = 0,
+    val totalPlaylistCount: Int = 0,
     val favouritesCount: Int = 0,
     val userPlaylists: List<PlaylistCardUi> = emptyList(),
     val systemPlaylists: List<PlaylistCardUi> = emptyList(),

@@ -65,28 +65,28 @@ class MusicPlaybackViewModel(
     }
 
     fun loadSelectedMusic(selectedMusic: Music?) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             _state.update {
                 it.copy(
                     selectedMusic = selectedMusic,
                 )
             }
 
-            selectedMusic?.id?.let { id ->
-                _state.update {
-                    it.copy(
-                        isFavourite = nowPlayingRepository.isMusicFavourite(id)
-                    )
+            launch(Dispatchers.IO) {
+                selectedMusic?.id?.let { id ->
+                    _state.update {
+                        it.copy(
+                            isFavourite = nowPlayingRepository.isMusicFavourite(id)
+                        )
+                    }
                 }
             }
 
             selectedMusic?.musicUrl?.let {
-                withContext(Dispatchers.Main) {
-                    playMusic(selectedMusic.musicUrl)
+                playMusic(selectedMusic.musicUrl)
 
-                    _state.update {
-                        it.copy(isPlaying = true)
-                    }
+                _state.update {
+                    it.copy(isPlaying = true)
                 }
             }
         }
@@ -323,7 +323,7 @@ class MusicPlaybackViewModel(
             is MusicPlaybackAction.OnPlaylistSelected -> {
                 viewModelScope.launch {
                     _state.value.selectedMusic?.let { music ->
-                        val wasAlreadyFavourite = music.isFavourite
+                        val isInPlaylist = action.playlist.musics.contains(music.id)
 
                         _state.update {
                             it.copy(
@@ -332,7 +332,7 @@ class MusicPlaybackViewModel(
                             )
                         }
 
-                        if (wasAlreadyFavourite) {
+                        if (isInPlaylist) {
                             nowPlayingRepository.removeSongFromPlaylist(
                                 musicId = music.id,
                                 playlistId = action.playlist.id
@@ -346,7 +346,7 @@ class MusicPlaybackViewModel(
 
                         _events.send(
                             OnMessage(
-                                message = if (wasAlreadyFavourite) {
+                                message = if (isInPlaylist) {
                                     "Removed from the ${action.playlist.title} playlist"
                                 } else {
                                     "Added to the playlist ${action.playlist.title}"

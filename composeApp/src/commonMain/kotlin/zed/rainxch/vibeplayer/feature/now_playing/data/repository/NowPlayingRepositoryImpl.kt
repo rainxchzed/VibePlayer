@@ -103,7 +103,7 @@ class NowPlayingRepositoryImpl(
         )
     }
 
-    override fun isMusicFavourite(musicId: Int): Boolean {
+    override suspend fun isMusicFavourite(musicId: Int): Boolean {
         return playlistDao.isMusicInPlaylist(
             playlistId = AppDatabase.FAVOURITES_PLAYLIST_ID,
             musicId = musicId

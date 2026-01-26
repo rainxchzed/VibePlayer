@@ -66,13 +66,16 @@ fun PlaylistRoot(
             is PlaylistEvent.ShowSnackbar -> {
                 onShowSnackBar(event.message)
             }
+
+            is PlaylistEvent.OnNavigateToAddSongs -> {
+                onNavigateToAddSongs(event.playlistId)
+            }
         }
     }
 
     PlaylistScreen(
         state = state,
         onAction = viewModel::onAction,
-        onNavigateToAddSongs = onNavigateToAddSongs,
         onNavigateToPlaylist = onNavigateToPlaylist,
     )
 }
@@ -82,7 +85,6 @@ fun PlaylistRoot(
 fun PlaylistScreen(
     state: PlaylistState,
     onAction: (PlaylistAction) -> Unit,
-    onNavigateToAddSongs: (playListId: Int) -> Unit,
     onNavigateToPlaylist: (playListId: Int) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -132,7 +134,6 @@ fun PlaylistScreen(
                 },
                 onCreate = {
                     onAction(PlaylistAction.OnConfirmCreatePlaylist)
-                    onNavigateToAddSongs((state.userPlaylistTotalCount))
                 }
             )
         },
@@ -263,7 +264,6 @@ private fun Preview() {
                         )
                 ),
                 onAction = {},
-                onNavigateToAddSongs = {},
                 onNavigateToPlaylist = {},
             )
         }
