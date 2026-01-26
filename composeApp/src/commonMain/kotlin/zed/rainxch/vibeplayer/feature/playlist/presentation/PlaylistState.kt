@@ -10,10 +10,10 @@ data class PlaylistState(
     val favouritesCount: Int = 0,
     val userPlaylists: List<PlaylistCardUi> = emptyList(),
     val systemPlaylists: List<PlaylistCardUi> = emptyList(),
-    val showBottomSheet: Long? = null,
+    val showBottomSheet: SheetContent? = null,
     val newPlaylistName: String = ""
 )
-
+//    val showBottomSheet: Long? = null,
 data class PlaylistCardUi(
     val id: Int,
     val title: String,

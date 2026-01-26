@@ -37,6 +37,7 @@ fun PlaylistCard(
     state: PlaylistCardUi,
     defaultImage: DrawableResource,
     onClick: () -> Unit,
+    onThreeDotsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -94,7 +95,7 @@ fun PlaylistCard(
             )
         }
         IconButton(
-            onClick = {},
+            onClick = onThreeDotsClick,
             modifier = Modifier.size(36.dp)
         ) {
             Icon(
@@ -118,7 +119,8 @@ private fun Preview() {
                     id = 0
                 ),
                 defaultImage = Res.drawable.ic_heart,
-                onClick = {}
+                onClick = {},
+                onThreeDotsClick = {}
             )
         }
     }

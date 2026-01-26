@@ -2,11 +2,13 @@ package zed.rainxch.vibeplayer.feature.playlist.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -41,13 +43,12 @@ import vibeplayer.composeapp.generated.resources.ic_heart
 import vibeplayer.composeapp.generated.resources.ic_playlist
 import vibeplayer.composeapp.generated.resources.ic_plus
 import vibeplayer.composeapp.generated.resources.playlists_create_playlist_button
-import vibeplayer.composeapp.generated.resources.playlists_favourites_title
 import vibeplayer.composeapp.generated.resources.playlists_my_playlists_title
-import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
+import zed.rainxch.vibeplayer.core.presentation.components.CreateNewPlaylistBottomSheet
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
-import zed.rainxch.vibeplayer.core.presentation.components.CreateNewPlaylistBottomSheet
+import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlayListOptionsBottomSheet
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistCard
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistsHeader
 
@@ -104,6 +105,10 @@ fun PlaylistScreen(
                 bottomSheetState.hide()
             }
         } else {
+
+            if (!bottomSheetState.isVisible) {
+                bottomSheetState.expand()
+            } else
             bottomSheetState.expand()
         }
     }
@@ -122,7 +127,39 @@ fun PlaylistScreen(
         scaffoldState = scaffoldState,
         sheetDragHandle = null,
         sheetContent = {
-            CreateNewPlaylistBottomSheet(
+
+            when(val sheet = state.showBottomSheet) {
+                SheetContent.CreatePlaylist -> {
+
+                    CreateNewPlaylistBottomSheet(
+                        playlistName = state.newPlaylistName,
+                        onPlaylistNameChange = { name ->
+                            onAction(PlaylistAction.OnPlaylistNameChange(name))
+                        },
+                        onCancel = {
+                            scope.launch {
+                                bottomSheetState.hide()
+                            }
+                        },
+                        onCreate = {
+                            onAction(PlaylistAction.OnConfirmCreatePlaylist)
+                        }
+                    )
+                }
+                is SheetContent.ShowPlaylistActions ->{
+                    PlayListOptionsBottomSheet(
+                        id = sheet.id,
+                        title = sheet.title,
+                        songsCount = sheet.songsCount,
+                        coverImage = sheet.coverImage,
+                    )
+                }
+                null -> {
+                    Box(modifier = Modifier.height(1.dp))
+                }
+            }
+
+            /*CreateNewPlaylistBottomSheet(
                 playlistName = state.newPlaylistName,
                 onPlaylistNameChange = { name ->
                     onAction(PlaylistAction.OnPlaylistNameChange(name))
@@ -134,8 +171,9 @@ fun PlaylistScreen(
                 },
                 onCreate = {
                     onAction(PlaylistAction.OnConfirmCreatePlaylist)
+                    onNavigateToAddSongs((state.userPlaylistTotalCount))
                 }
-            )
+            )*/
         },
         sheetPeekHeight = 0.dp,
         sheetShape = RoundedCornerShape(
@@ -166,7 +204,11 @@ fun PlaylistScreen(
                     state = playList,
                     defaultImage = Res.drawable.ic_heart,
                     onClick = {
+
                         onNavigateToPlaylist(0)
+                    },
+                    onThreeDotsClick = {
+
                     }
                 )
             }
@@ -228,6 +270,14 @@ fun PlaylistScreen(
                     defaultImage = Res.drawable.ic_playlist,
                     onClick = {
                         onNavigateToPlaylist(playList.id)
+                    },
+                    onThreeDotsClick = {
+                        onAction(PlaylistAction.OnPlaylistMoreOptionsClick(
+                            playList.id,
+                            title = playList.title,
+                            songsCount = playList.songsCount,
+                            coverImage = playList.coverImage
+                        ))
                     }
                 )
             }

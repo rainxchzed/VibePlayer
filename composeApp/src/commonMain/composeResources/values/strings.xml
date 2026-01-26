@@ -39,5 +39,9 @@
     <string name="search">Search</string>
 
     <string name="navigate_back">Navigate back</string>
+    <string name="play">Play</string>
+    <string name="rename">Rename</string>
+    <string name="change_cover">Change cover</string>
+    <string name="delete">Delete</string>
 
 </resources>
