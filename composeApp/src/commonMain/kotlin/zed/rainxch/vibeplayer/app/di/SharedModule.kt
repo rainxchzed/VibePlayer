@@ -54,7 +54,8 @@ val sharedModule = module {
 
     single<PlaylistsRepository> {
         DefaultPlaylistsRepository(
-            dao = get()
+            dao = get(),
+            fileUtil = get()
         )
     }
 

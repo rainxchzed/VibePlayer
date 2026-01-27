@@ -319,6 +319,8 @@ fun PlaylistScreen(
                                 coverImage = playList.coverImage
                             )
                         )
+
+                        println("ERROR owo ${playList.coverImage}")
                     }
                 )
             }

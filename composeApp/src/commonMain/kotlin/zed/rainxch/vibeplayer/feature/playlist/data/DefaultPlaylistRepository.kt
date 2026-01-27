@@ -16,7 +16,8 @@ import zed.rainxch.vibeplayer.core.domain.model.PlaylistInfo
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
 
 class DefaultPlaylistsRepository(
-    val dao: PlaylistDao
+    val dao: PlaylistDao,
+    val fileUtil: FileUtil
 ) : PlaylistsRepository {
 
     override suspend fun addSongsToPlaylist(
@@ -80,7 +81,7 @@ class DefaultPlaylistsRepository(
     override suspend fun changePlaylistCover(playlistId: Int, imagePath: String): Result<Unit> {
         return withContext(Dispatchers.IO) {
             try {
-                dao.updatePlaylistCover(playlistId, imagePath)
+                dao.updatePlaylistCover(playlistId, fileUtil.getAbsolutePathFromUri(imagePath))
                 Result.success(Unit)
             } catch (e: Exception) {
                 Result.failure(e)

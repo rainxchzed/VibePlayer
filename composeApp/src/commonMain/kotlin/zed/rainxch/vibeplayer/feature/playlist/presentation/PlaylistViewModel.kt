@@ -105,13 +105,18 @@ class PlaylistViewModel(
 
             is PlaylistAction.OnCoverImageSelected -> {
 
-                _state.update { it.copy(showImagePickerForPlaylistId = null, showBottomSheet = null) }
+                _state.update {
+                    it.copy(
+                        showImagePickerForPlaylistId = null,
+                        showBottomSheet = null
+                    )
+                }
 
 
                 action.imagePath?.let { path ->
                     viewModelScope.launch {
                         repository.changePlaylistCover(action.playlistId, path)
-                }
+                    }
                 }
             }
 

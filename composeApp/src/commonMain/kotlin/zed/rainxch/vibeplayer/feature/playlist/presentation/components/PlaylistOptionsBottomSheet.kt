@@ -84,7 +84,10 @@ fun PlayListOptionsBottomSheet(
                             model = coverImage,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Crop,
+                            onError = {
+                                println("Coil: Error loading image: ${it.result.throwable}")
+                            }
                         )
                     }
                 }
