@@ -342,7 +342,6 @@ fun NowPlayingScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
-                            modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.CenterStart
                         ) {
                             IconButton(
@@ -364,7 +363,8 @@ fun NowPlayingScreen(
                         }
 
                         Row(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(
                                 space = 10.dp,
@@ -444,7 +444,6 @@ fun NowPlayingScreen(
                         }
 
                         Box(
-                            modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.CenterEnd
                         ) {
                             IconButton(

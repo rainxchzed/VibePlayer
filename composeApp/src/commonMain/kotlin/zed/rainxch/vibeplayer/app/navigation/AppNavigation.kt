@@ -278,7 +278,10 @@ fun AppNavigation(
                                 id = route.playListId,
                                 navigateToAddSongs = {
                                     navBackStack.add(VibePlayerGraph.AddSongsScreen(playListId = route.playListId))
-                                }
+                                },
+                                onNavigateToNowPlaying = {
+                                    navBackStack.add(VibePlayerGraph.NowPlayingScreen())
+                                },
                             )
                         }
 

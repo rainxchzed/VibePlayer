@@ -42,9 +42,13 @@ import vibeplayer.composeapp.generated.resources.ic_playlist
 import vibeplayer.composeapp.generated.resources.ic_plus
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
+import zed.rainxch.vibeplayer.core.presentation.components.QuickPlayBar
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
 import zed.rainxch.vibeplayer.core.presentation.theme.HostGroteskFontFamily
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
+import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackAction
+import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
+import zed.rainxch.vibeplayer.feature.now_playing.presentation.ShuffleMode
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.SongsCountHeader
 
 @Composable
@@ -52,6 +56,8 @@ fun PlaylistPlaybackRoot(
     id: Int,
     navigateBack: () -> Unit,
     navigateToAddSongs: () -> Unit,
+    musicPlaybackViewModel: MusicPlaybackViewModel = koinViewModel(),
+    onNavigateToNowPlaying: () -> Unit,
     viewModel: PlaylistPlaybackViewModel = koinViewModel(
         key = id.toString(),
     ) { parametersOf(id) },
@@ -64,6 +70,16 @@ fun PlaylistPlaybackRoot(
             when (it) {
                 PlaylistPlaybackAction.NavigateBack -> navigateBack()
                 PlaylistPlaybackAction.AddSongs -> navigateToAddSongs()
+                PlaylistPlaybackAction.Play -> {
+                    musicPlaybackViewModel.createPlayList(state.songs)
+                    musicPlaybackViewModel.onAction(MusicPlaybackAction.OnPlayAllClick)
+                    onNavigateToNowPlaying()
+                }
+                PlaylistPlaybackAction.Shuffle -> {
+                    musicPlaybackViewModel.createPlayList(state.songs)
+                    musicPlaybackViewModel.onAction(MusicPlaybackAction.OnShuffleAndPlayClick)
+                    onNavigateToNowPlaying()
+                }
             }
         }
     )
@@ -159,6 +175,14 @@ fun PlaylistPlaybackScreen(
 
             if (state.songs.isNotEmpty()) {
                 item {
+                    QuickPlayBar(
+                        onPlayClick = {
+                            onAction(PlaylistPlaybackAction.Play)
+                        },
+                        onShuffleClick = {
+                            onAction(PlaylistPlaybackAction.Shuffle)
+                        }
+                    )
                     SongsCountHeader(
                         totalCount = state.songs.size,
                         onAddClick = {
