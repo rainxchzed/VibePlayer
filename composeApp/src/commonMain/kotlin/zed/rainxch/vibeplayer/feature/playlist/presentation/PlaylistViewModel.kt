@@ -93,7 +93,28 @@ class PlaylistViewModel(
                 onCurrentPlaylistNameChange(name = action.name)
             }
 
-            is PlaylistAction.OnChangeCoverClick -> Unit
+            is PlaylistAction.OnChangeCoverClick -> {
+                _state.update { it.copy(showImagePickerForPlaylistId = action.playlistId) }
+
+            }
+
+            is PlaylistAction.OnImagePickerDismissed -> {
+                _state.update { it.copy(showImagePickerForPlaylistId = null) }
+            }
+
+
+            is PlaylistAction.OnCoverImageSelected -> {
+
+                _state.update { it.copy(showImagePickerForPlaylistId = null, showBottomSheet = null) }
+
+
+                action.imagePath?.let { path ->
+                    viewModelScope.launch {
+                        repository.changePlaylistCover(action.playlistId, path)
+                }
+                }
+            }
+
             is PlaylistAction.OnConfirmRenamePlaylist -> onConfirmRenamePlaylist(
                 playlistId = action.playlistId,
             )

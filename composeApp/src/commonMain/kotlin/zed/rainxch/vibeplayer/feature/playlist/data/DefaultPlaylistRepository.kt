@@ -76,6 +76,18 @@ class DefaultPlaylistsRepository(
         }
     }
 
+
+    override suspend fun changePlaylistCover(playlistId: Int, imagePath: String): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                dao.updatePlaylistCover(playlistId, imagePath)
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
     override suspend fun createPlaylist(name: String): Result<Int> {
         return try {
             val trimmedName = name.trim()

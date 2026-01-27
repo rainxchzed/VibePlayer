@@ -45,6 +45,7 @@ import vibeplayer.composeapp.generated.resources.ic_plus
 import vibeplayer.composeapp.generated.resources.playlists_create_playlist_button
 import vibeplayer.composeapp.generated.resources.playlists_my_playlists_title
 import zed.rainxch.vibeplayer.core.presentation.components.CreateNewPlaylistBottomSheet
+import zed.rainxch.vibeplayer.core.presentation.components.ImagePicker
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
@@ -103,6 +104,15 @@ fun PlaylistScreen(
     )
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = bottomSheetState
+    )
+
+    ImagePicker(
+        show = state.showImagePickerForPlaylistId != null,
+        onImageSelected = { imagePath ->
+            state.showImagePickerForPlaylistId?.let { playlistId ->
+                onAction(PlaylistAction.OnCoverImageSelected(playlistId, imagePath))
+            } ?: onAction(PlaylistAction.OnImagePickerDismissed)
+        }
     )
 
     LaunchedEffect(state.showBottomSheet) {

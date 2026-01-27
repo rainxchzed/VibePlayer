@@ -26,5 +26,8 @@ sealed interface PlaylistAction {
 
     data class OnConfirmDeletePlaylist(val playlistId: Int) : PlaylistAction
 
+    data class OnCoverImageSelected(val playlistId: Int, val imagePath: String?) : PlaylistAction
+    data object OnImagePickerDismissed : PlaylistAction
+
 
 }

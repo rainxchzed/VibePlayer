@@ -14,5 +14,7 @@ interface PlaylistsRepository {
     suspend fun addSongsToPlaylist(playlistId: Int, songIds: List<Int>): Result<Unit>
     suspend fun renamePlaylist(playlistId: Int, changedName: String): Result<Unit>
     suspend fun deletePlaylist(playlistId: Int): Result<Unit>
+    suspend fun changePlaylistCover(playlistId: Int, imagePath: String): Result<Unit>
+
 
 }

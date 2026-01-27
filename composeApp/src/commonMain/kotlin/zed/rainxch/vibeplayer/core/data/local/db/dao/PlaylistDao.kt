@@ -36,6 +36,10 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlists ORDER BY id ASC")
     fun getPlaylists(): Flow<List<PlaylistEntity>>
 
+    @Query("UPDATE playlists SET coverImage = :coverImagePath WHERE id = :playlistId")
+    suspend fun updatePlaylistCover(playlistId: Int, coverImagePath: String)
+
+
     @Query(
         """
         SELECT p.*, COUNT(pm.musicId) as musicCount
