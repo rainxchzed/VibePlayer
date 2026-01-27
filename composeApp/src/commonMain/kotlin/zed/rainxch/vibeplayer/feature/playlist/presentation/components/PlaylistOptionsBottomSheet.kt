@@ -1,5 +1,6 @@
 package zed.rainxch.vibeplayer.feature.playlist.presentation.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -64,6 +66,33 @@ fun PlayListOptionsBottomSheet(
             songsCount = songsCount,
             icon = {
 
+                // Your AsyncImage or Icon goes here
+                if (coverImage == null) {
+                    /*       Icon(
+                               painter = painterResource(Res.drawable.ic_playlist), // Example placeholder
+                               contentDescription = null,
+                               modifier = Modifier.size(32.dp)
+                           )*/
+
+                    Image(
+                        painter = painterResource(Res.drawable.ic_playlist),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        Color(0xffDE84FF),
+                                        Color(0xffDE84FF).copy(alpha = .2f),
+                                    )
+                                )
+                            )
+                            .padding(14.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+
                 Box(
                     modifier = Modifier
                         .size(64.dp)
@@ -72,14 +101,7 @@ fun PlayListOptionsBottomSheet(
                         .background(MaterialTheme.colorScheme.surfaceVariant), // Or any other color
                     contentAlignment = Alignment.Center
                 ) {
-                    // Your AsyncImage or Icon goes here
-                    if (coverImage == null) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_playlist), // Example placeholder
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    } else {
+
                         AsyncImage(
                             model = coverImage,
                             contentDescription = null,
