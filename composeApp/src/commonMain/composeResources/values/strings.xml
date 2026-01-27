@@ -46,5 +46,8 @@
     <string name="rename_playlist">Rename Playlist</string>
     <string name="new_name">New name</string>
     <string name="cancel">Cancel</string>
+    <string name="delete_playlist">Delete Playlist</string>
+    <string name="delete_playlist_confirmation">Are you sure you want to delete playlist %1$s?</string>
+
 
 </resources>

@@ -24,5 +24,7 @@ sealed interface PlaylistAction {
     data class OnCurrentPlaylistNameChange(val name: String) : PlaylistAction
     data class OnConfirmRenamePlaylist(val playlistId: Int) : PlaylistAction
 
+    data class OnConfirmDeletePlaylist(val playlistId: Int) : PlaylistAction
+
 
 }

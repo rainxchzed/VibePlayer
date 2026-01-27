@@ -15,7 +15,7 @@ private val VibeDarkColorScheme = darkColorScheme(
 
     secondary = AccentYellow,
     onSecondary = SurfaceBG,
-
+    error = Destructive,
     outline = Outline
 )
 

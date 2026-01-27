@@ -10,5 +10,6 @@ sealed interface SheetContent {
     ) : SheetContent
 
     data class RenamePlaylist(val playListId: Int) : SheetContent
+    data class DeletePlaylist(val playListId: Int, val playlistName: String) : SheetContent
 }
 

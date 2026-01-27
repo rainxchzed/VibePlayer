@@ -15,4 +15,5 @@ val TextDisabled = Color(0xFF4C647C)
 
 val SurfaceBG = Color(0xFF0A131D)
 val AccentYellow = Color(0xFFF1FF95)
+val Destructive = Color(0XFFFF5667)
 

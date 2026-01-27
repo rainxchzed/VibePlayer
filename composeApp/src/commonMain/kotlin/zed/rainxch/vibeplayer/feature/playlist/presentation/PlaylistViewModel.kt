@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
 import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.CreatePlaylist
+import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.DeletePlaylist
 import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.RenamePlaylist
 import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.ShowPlaylistActions
 import kotlin.time.ExperimentalTime
@@ -97,7 +98,22 @@ class PlaylistViewModel(
                 playlistId = action.playlistId,
             )
 
-            is PlaylistAction.OnDeletePlaylistClick -> Unit
+            is PlaylistAction.OnDeletePlaylistClick -> {
+                _state.update {
+                    it.copy(
+                        showBottomSheet = DeletePlaylist(
+                            playListId = action.playlistId,
+                            playlistName = action.playlistName
+                        )
+                    )
+                }
+
+            }
+
+            is PlaylistAction.OnConfirmDeletePlaylist -> {
+                onConfirmDeletePlaylist(playlistId = action.playlistId)
+            }
+
             is PlaylistAction.OnPlayPlaylistClick -> {
                 onNavigateToPlaylistPlayback(playlistId = action.playlistId)
 
@@ -149,6 +165,29 @@ class PlaylistViewModel(
                 _events.send(
                     PlaylistEvent.ShowSnackbar(
                         error.message ?: "Failed to rename playlist"
+                    )
+                )
+
+            })
+
+        }
+    }
+
+    fun onConfirmDeletePlaylist(playlistId: Int) {
+        viewModelScope.launch {
+            val result = repository.deletePlaylist(playlistId = playlistId)
+            result.fold(onSuccess = {
+                _state.update {
+                    it.copy(
+                        showBottomSheet = null
+                    )
+                }
+
+
+            }, onFailure = { error ->
+                _events.send(
+                    PlaylistEvent.ShowSnackbar(
+                        error.message ?: "Failed to delete playlist"
                     )
                 )
 

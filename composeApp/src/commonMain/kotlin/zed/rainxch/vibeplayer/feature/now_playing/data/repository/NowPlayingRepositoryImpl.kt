@@ -10,11 +10,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
-import zed.rainxch.vibeplayer.core.data.local.db.dao.MusicsDao
 import zed.rainxch.vibeplayer.core.data.local.db.dao.PlaylistDao
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistEntity
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistMusicCrossRef
-import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.core.domain.model.Playlist
 import zed.rainxch.vibeplayer.feature.now_playing.domain.repository.NowPlayingRepository
 
@@ -35,9 +33,9 @@ class NowPlayingRepositoryImpl(
                             Playlist(
                                 id = playlistEntity.id,
                                 title = playlistEntity.title,
-                                musics = playlistWithMusics.musics
-                                    .map { it.id }
-                                    .toImmutableList(),
+                                musics = playlistWithMusics?.musics
+                                    ?.map { it.id }
+                                    ?.toImmutableList() ?: emptyList<Int>().toImmutableList(),
                                 coverImage = playlistEntity.coverImage
                             )
                         }

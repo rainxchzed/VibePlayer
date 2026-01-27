@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
 import zed.rainxch.vibeplayer.core.data.local.db.dao.PlaylistDao
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistEntity
@@ -47,7 +48,7 @@ class DefaultPlaylistsRepository(
     }
 
     override fun getPlaylistWithMusics(playlistId: Int): Flow<PlaylistFull> {
-        return dao.getPlaylistWithMusics(playlistId).map { it.toDomain() }
+        return dao.getPlaylistWithMusics(playlistId).mapNotNull { it?.toDomain() }
     }
 
     override suspend fun renamePlaylist(playlistId: Int, changedName: String): Result<Unit> {
@@ -58,9 +59,18 @@ class DefaultPlaylistsRepository(
                 return Result.failure(Exception("Playlist name cannot be empty"))
             }
 
-          dao.renamePlaylist(playlistId = playlistId, changedName = changedName)
+            dao.renamePlaylist(playlistId = playlistId, changedName = changedName)
             Result.success(Unit)
 
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deletePlaylist(playlistId: Int): Result<Unit> {
+        return try {
+            dao.deletePlaylist(playlistId = playlistId)
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

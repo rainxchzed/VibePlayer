@@ -48,6 +48,7 @@ import zed.rainxch.vibeplayer.core.presentation.components.CreateNewPlaylistBott
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
+import zed.rainxch.vibeplayer.feature.playlist.presentation.components.DeletePlayListBottomSheet
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlayListOptionsBottomSheet
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistCard
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistsHeader
@@ -178,6 +179,21 @@ fun PlaylistScreen(
                         onRename = {
                             onAction(PlaylistAction.OnConfirmRenamePlaylist(sheet.playListId))
                         }
+                    )
+                }
+
+                is SheetContent.DeletePlaylist -> {
+                    DeletePlayListBottomSheet(
+                        playlistName = sheet.playlistName,
+                        onCancel = {
+                            scope.launch {
+                                bottomSheetState.hide()
+                            }
+                            keyboardController?.hide()
+                        },
+                        onDelete = {
+                            onAction(PlaylistAction.OnConfirmDeletePlaylist(sheet.playListId))
+                        },
                     )
                 }
 
