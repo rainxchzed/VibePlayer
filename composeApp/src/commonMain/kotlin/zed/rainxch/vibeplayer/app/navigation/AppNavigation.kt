@@ -225,7 +225,8 @@ fun AppNavigation(
                                             startPlaylistPlayback
                                         )
                                     )
-                                }
+                                },
+                                musicPlaybackViewModel = musicPlaybackViewModel
                             )
                         }
 

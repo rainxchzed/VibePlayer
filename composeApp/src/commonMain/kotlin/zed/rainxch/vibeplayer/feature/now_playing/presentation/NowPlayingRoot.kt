@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -33,7 +32,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -64,12 +62,11 @@ import vibeplayer.composeapp.generated.resources.skip_next
 import vibeplayer.composeapp.generated.resources.skip_previous
 import zed.rainxch.vibeplayer.core.presentation.components.CreateNewPlaylistBottomSheet
 import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
-import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.MusicContentItem
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.PlayerControlSlider
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.components.SelectPlaylistBottomSheet
-import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistAction
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsAction
+import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,14 +78,10 @@ fun NowPlayingRoot(
     onNavigateBack: () -> Unit,
 ) {
 
-    val state by viewModel.state.collectAsStateWithLifecycle()
     val musicPlaybackState by musicPlaybackViewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(state.musics) {
-        musicPlaybackViewModel.createPlayList(state.musics)
-    }
 
     ObserveAsEvents(musicPlaybackViewModel.events) { event ->
         when (event) {
