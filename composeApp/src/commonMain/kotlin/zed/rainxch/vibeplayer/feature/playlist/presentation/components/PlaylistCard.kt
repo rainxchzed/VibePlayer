@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -17,9 +18,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -29,13 +33,14 @@ import vibeplayer.composeapp.generated.resources.ic_heart
 import vibeplayer.composeapp.generated.resources.ic_menu_dots
 import vibeplayer.composeapp.generated.resources.playlists_songs_count
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
-import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistCardUi
+import zed.rainxch.vibeplayer.feature.playlist.presentation.model.PlaylistCardUi
 
 @Composable
 fun PlaylistCard(
     state: PlaylistCardUi,
     defaultImage: DrawableResource,
     onClick: () -> Unit,
+    onThreeDotsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -46,6 +51,7 @@ fun PlaylistCard(
         Box(
             modifier = Modifier
                 .size(64.dp)
+                .clip(CircleShape)
                 .background(
                     brush = Brush.verticalGradient(
                         listOf(
@@ -59,11 +65,21 @@ fun PlaylistCard(
             ,
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(defaultImage),
-                contentDescription = null,
-                tint = Color.Unspecified
-            )
+            if (state.coverImage == null) {
+                Icon(
+                    painter = painterResource(defaultImage),
+                    contentDescription = null,
+                    tint = Color.Unspecified
+                )
+            } else {
+                AsyncImage(
+                    model = state.coverImage,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
         }
         Column(
             modifier = Modifier.weight(1f),
@@ -85,7 +101,7 @@ fun PlaylistCard(
             )
         }
         IconButton(
-            onClick = {},
+            onClick = onThreeDotsClick,
             modifier = Modifier.size(36.dp)
         ) {
             Icon(
@@ -109,7 +125,8 @@ private fun Preview() {
                     id = 0
                 ),
                 defaultImage = Res.drawable.ic_heart,
-                onClick = {}
+                onClick = {},
+                onThreeDotsClick = {}
             )
         }
     }

@@ -10,18 +10,13 @@ import org.jaudiotagger.tag.FieldKey
 import zed.rainxch.vibeplayer.core.data.data_source.MusicsDataStore
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import java.io.File
+import java.util.Locale
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.UnsupportedAudioFileException
 
 class JvmMusicsDataStore : MusicsDataStore {
 
-    override fun scanMusics(): ImmutableList<Music> {
-        return runBlocking {
-            withContext(Dispatchers.IO) {
-                scanForAudioFiles()
-            }
-        }
-    }
+    override suspend fun scanMusics(): ImmutableList<Music> = scanForAudioFiles()
 
     override fun checkIfMusicExist(music: Music): Boolean {
         val file = File(music.musicUrl)
@@ -48,7 +43,7 @@ class JvmMusicsDataStore : MusicsDataStore {
                             file.isFile &&
                                     file.extension.lowercase() in audioExtensions &&
                                     !file.name.startsWith(".") &&
-                                    file.length() > 100_000 // > 100KB
+                                    file.length() > 100_000
                         }
                         .forEach { file ->
                             val metadata = getMetadata(file.absolutePath)
@@ -93,7 +88,6 @@ class JvmMusicsDataStore : MusicsDataStore {
             val file = File(filePath)
 
             try {
-                // Try JAudioTagger first
                 val audioFile = AudioFileIO.read(file)
                 val tag = audioFile.tag
                 val header = audioFile.audioHeader
@@ -109,7 +103,6 @@ class JvmMusicsDataStore : MusicsDataStore {
                     isFavourite = false
                 )
             } catch (audioException: Exception) {
-                // Fallback: Try Java Sound API for duration
                 val duration = try {
                     getDurationWithJavaSound(file)
                 } catch (e: Exception) {
@@ -161,6 +154,6 @@ class JvmMusicsDataStore : MusicsDataStore {
     private fun formatDuration(seconds: Int): String {
         val minutes = seconds / 60
         val secs = seconds % 60
-        return String.format("%d:%02d", minutes, secs)
+        return String.format(Locale.getDefault(), "%d:%02d", minutes, secs)
     }
 }

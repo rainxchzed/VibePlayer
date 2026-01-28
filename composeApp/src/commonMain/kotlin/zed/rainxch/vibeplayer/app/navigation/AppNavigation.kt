@@ -50,7 +50,6 @@ import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_scan
 import zed.rainxch.vibeplayer.AppViewModel
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.MainTopbar
-import zed.rainxch.vibeplayer.core.presentation.components.topbars.NowPlayingTopbar
 import zed.rainxch.vibeplayer.core.presentation.components.topbars.ScanTopbar
 import zed.rainxch.vibeplayer.core.presentation.utils.showSnackBar
 import zed.rainxch.vibeplayer.feature.main_controller.presentation.MainControllerRoot
@@ -58,6 +57,7 @@ import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackView
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.NowPlayingRoot
 import zed.rainxch.vibeplayer.feature.permission.presentation.PermissionRoot
 import zed.rainxch.vibeplayer.feature.playlist.add_songs.presentation.AddSongsRoot
+import zed.rainxch.vibeplayer.feature.playlistPlayback.PlaylistPlaybackRoot
 import zed.rainxch.vibeplayer.feature.scan.presentation.ScanRoot
 import zed.rainxch.vibeplayer.feature.search.presentation.SearchRoot
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsViewModel
@@ -160,20 +160,11 @@ fun AppNavigation(
                         )
                     }
 
-                    is VibePlayerGraph.NowPlayingScreen -> {
-                        NowPlayingTopbar(
-                            onMinimizeClick = {
-                                songsViewModel.onAction(zed.rainxch.vibeplayer.feature.songs.presentation.SongsAction.OnMinimizeNowPlaying)
-                                navBackStack.removeLastOrNull()
-                            }
-                        )
-                    }
-
                     else -> {}
                 }
             },
             containerColor = MaterialTheme.colorScheme.onSecondary,
-            contentWindowInsets = WindowInsets(0.dp)
+            contentWindowInsets = WindowInsets(0.dp),
         ) { innerPadding ->
             SharedTransitionLayout {
                 NavDisplay(
@@ -209,8 +200,24 @@ fun AppNavigation(
                                 },
                                 onNavigateToAddSongs = { playListId ->
                                     navBackStack.add(VibePlayerGraph.AddSongsScreen(playListId = playListId))
-
-                                }
+                                },
+                                onNavigateToPlaylist = {
+                                    navBackStack.add(
+                                        VibePlayerGraph.PlaylistPlaybackScreen(
+                                            it,
+                                            false
+                                        )
+                                    )
+                                },
+                                onNavigateToPlaylistPlayback = { playlistId, startPlaylistPlayback ->
+                                    navBackStack.add(
+                                        VibePlayerGraph.PlaylistPlaybackScreen(
+                                            playlistId,
+                                            startPlaylistPlayback
+                                        )
+                                    )
+                                },
+                                musicPlaybackViewModel = musicPlaybackViewModel
                             )
                         }
 
@@ -241,13 +248,38 @@ fun AppNavigation(
                             )
                         }
 
-                        entry<VibePlayerGraph.AddSongsScreen>{ route ->
-                            AddSongsRoot(songsViewModel = songsViewModel,onBackPressed = {
-                                navBackStack.removeLast()
-                            }, playlistId = route.playListId,
+                        entry<VibePlayerGraph.AddSongsScreen> { route ->
+                            AddSongsRoot(
+                                songsViewModel = songsViewModel, onBackPressed = {
+                                    navBackStack.removeLast()
+                                },
+                                playlistId = route.playListId,
                                 onShowSnackBar = { message ->
-                                    coroutineScope.showSnackBar(snackBarHostState = snackBarHostState, message = message)
+                                    coroutineScope.showSnackBar(
+                                        snackBarHostState = snackBarHostState,
+                                        message = message
+                                    )
                                 })
+                        }
+
+                        entry<VibePlayerGraph.PlaylistPlaybackScreen> { route ->
+                            PlaylistPlaybackRoot(
+                                navigateBack = {
+                                    navBackStack.removeLastOrNull()
+                                },
+                                id = route.playListId,
+                                startPlaying = route.startPlaylistPlayback,
+                                navigateToAddSongs = {
+                                    navBackStack.add(VibePlayerGraph.AddSongsScreen(playListId = route.playListId))
+                                },
+                                musicPlaybackViewModel = musicPlaybackViewModel,
+                                onNavigateToNowPlaying = { musicId ->
+                                    navBackStack[navBackStack.lastIndex] =
+                                        route.copy(startPlaylistPlayback = false)
+                                    navBackStack.add(VibePlayerGraph.NowPlayingScreen(musicId))
+                                },
+
+                            )
                         }
 
                         entry<VibePlayerGraph.NowPlayingScreen>(
@@ -260,17 +292,17 @@ fun AppNavigation(
                             } + NavDisplay.popTransitionSpec {
                                 // Slide old content down, revealing the new content in place underneath
                                 EnterTransition.None togetherWith
-                                    slideOutVertically(
-                                        targetOffsetY = { it },
-                                        animationSpec = tween(300)
-                                    )
+                                        slideOutVertically(
+                                            targetOffsetY = { it },
+                                            animationSpec = tween(300)
+                                        )
                             } + NavDisplay.predictivePopTransitionSpec {
                                 // Slide old content down, revealing the new content in place underneath
                                 EnterTransition.None togetherWith
-                                    slideOutVertically(
-                                        targetOffsetY = { it },
-                                        animationSpec = tween(300)
-                                    )
+                                        slideOutVertically(
+                                            targetOffsetY = { it },
+                                            animationSpec = tween(300)
+                                        )
                             }
                         ) { route ->
                             LaunchedEffect(route.id) {
@@ -283,7 +315,10 @@ fun AppNavigation(
                             NowPlayingRoot(
                                 musicPlaybackViewModel = musicPlaybackViewModel,
                                 sharedTransitionScope = this@SharedTransitionLayout,
-                                animatedContentScope = LocalNavAnimatedContentScope.current
+                                animatedContentScope = LocalNavAnimatedContentScope.current,
+                                onNavigateBack = {
+                                    navBackStack.removeLastOrNull()
+                                },
                             )
                         }
                     },
@@ -294,31 +329,5 @@ fun AppNavigation(
                 )
             }
         }
-
-//        AnimatedVisibility(
-//            visible = isPlayerExpanded,
-//            enter = slideInVertically(
-//                initialOffsetY = { it }, // Starts from bottom
-//                animationSpec = tween(
-//                    durationMillis = 400,
-//                    easing = FastOutSlowInEasing
-//                )
-//            ),
-//            exit = slideOutVertically(
-//                targetOffsetY = { it }, // Slides to bottom
-//                animationSpec = tween(
-//                    durationMillis = 400,
-//                    easing = FastOutSlowInEasing
-//                )
-//            )
-//        ) {
-//            currentMusicId?.let { id ->
-//                NowPlayingRoot(
-//                    musicId = id,
-//                    musicPlaybackViewModel = musicPlaybackViewModel,
-//                    onMinimize = { isPlayerExpanded = false }
-//                )
-//            }
-//        }
     }
 }

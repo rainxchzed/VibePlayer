@@ -48,17 +48,18 @@ import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.songs_screen_songs_count
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
+import zed.rainxch.vibeplayer.core.presentation.components.QuickPlayBar
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.PrimaryButton
 import zed.rainxch.vibeplayer.core.presentation.components.progressbars.ScanningProgressbar
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
-import zed.rainxch.vibeplayer.feature.songs.presentation.components.QuickPlayBar
 import zed.rainxch.vibeplayer.feature.mini_player.MiniPlayer
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackAction
+import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
 
 @Composable
 fun SongsRoot(
     viewModel: SongsViewModel = koinViewModel(),
-    musicPlaybackViewModel: zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel = koinViewModel(),
+    musicPlaybackViewModel: MusicPlaybackViewModel,
     onNavigateToNowPlaying: (musicId: Int) -> Unit,
     onExpandPlayer: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,

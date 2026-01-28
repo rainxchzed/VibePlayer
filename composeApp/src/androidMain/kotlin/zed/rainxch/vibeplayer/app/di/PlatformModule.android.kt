@@ -10,6 +10,8 @@ import zed.rainxch.vibeplayer.core.data.local.db.initDatabase
 import zed.rainxch.vibeplayer.core.domain.MediaPlayerController
 import zed.rainxch.vibeplayer.core.presentation.utils.AndroidPermissionChecker
 import zed.rainxch.vibeplayer.core.presentation.utils.PermissionChecker
+import zed.rainxch.vibeplayer.feature.playlist.data.AndroidFileUtil
+import zed.rainxch.vibeplayer.feature.playlist.data.FileUtil
 import zed.rainxch.vibeplayer.feature.songs.data.data_sources.AndroidMusicsDataStore
 
 actual val platformModule: Module = module {
@@ -23,6 +25,10 @@ actual val platformModule: Module = module {
 
     single<MusicsDataStore> {
         AndroidMusicsDataStore(androidContext())
+    }
+
+    single<FileUtil> {
+        AndroidFileUtil(context = androidContext())
     }
 
     single<MediaPlayerController>{

@@ -4,6 +4,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
@@ -21,8 +22,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.feature.main_controller.presentation.model.MainControllerTabs
+import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
 import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistRoot
 import zed.rainxch.vibeplayer.feature.songs.presentation.SongsRoot
 
@@ -32,7 +35,10 @@ fun SharedTransitionScope.MainControllerRoot(
     onNavigateToNowPlaying: (musicId: Int) -> Unit,
     onExpandPlayer: () -> Unit,
     onNavigateToAddSongs: (playListId: Int) -> Unit,
-    viewModel: MainControllerViewModel = viewModel()
+    onNavigateToPlaylist: (playListId: Int) -> Unit,
+    onNavigateToPlaylistPlayback: (playListId: Int, startPlaylistPlayback: Boolean) -> Unit,
+    viewModel: MainControllerViewModel = viewModel(),
+    musicPlaybackViewModel: MusicPlaybackViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -42,7 +48,10 @@ fun SharedTransitionScope.MainControllerRoot(
         onShowSnackbar = onShowSnackbar,
         onNavigateToNowPlaying = onNavigateToNowPlaying,
         onExpandPlayer = onExpandPlayer,
-        onNavigateToAddSongs = onNavigateToAddSongs
+        onNavigateToAddSongs = onNavigateToAddSongs,
+        onNavigateToPlaylist = onNavigateToPlaylist,
+        onNavigateToPlaylistPlayback = onNavigateToPlaylistPlayback,
+        musicPlaybackViewModel = musicPlaybackViewModel
     )
 }
 
@@ -54,11 +63,15 @@ fun SharedTransitionScope.MainControllerScreen(
     onNavigateToNowPlaying: (musicId: Int) -> Unit,
     onExpandPlayer: () -> Unit,
     onNavigateToAddSongs: (playListId: Int) -> Unit,
+    onNavigateToPlaylist: (playListId: Int) -> Unit,
+    onNavigateToPlaylistPlayback: (playListId: Int, startPlaylistPlayback: Boolean) -> Unit,
+    musicPlaybackViewModel: MusicPlaybackViewModel
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.onSecondary)
+            .navigationBarsPadding()
     ) {
         SecondaryTabRow(
             selectedTabIndex = state.selectedTab.index,
@@ -104,14 +117,17 @@ fun SharedTransitionScope.MainControllerScreen(
                     onNavigateToNowPlaying = onNavigateToNowPlaying,
                     onExpandPlayer = onExpandPlayer,
                     sharedTransitionScope = this@MainControllerScreen,
-                    animatedContentScope = LocalNavAnimatedContentScope.current
+                    animatedContentScope = LocalNavAnimatedContentScope.current,
+                    musicPlaybackViewModel = musicPlaybackViewModel
                 )
             }
 
             MainControllerTabs.Playlist -> {
                 PlaylistRoot(
                     onNavigateToAddSongs = onNavigateToAddSongs,
-                    onShowSnackBar = onShowSnackbar
+                    onNavigateToPlaylist = onNavigateToPlaylist,
+                    onShowSnackBar = onShowSnackbar,
+                    onNavigateToPlaylistPlayback = onNavigateToPlaylistPlayback
                 )
             }
         }
@@ -127,9 +143,12 @@ private fun Preview() {
                 state = MainControllerState(),
                 onAction = {},
                 onNavigateToAddSongs = {},
+                onNavigateToPlaylist = {},
                 onShowSnackbar = {},
                 onNavigateToNowPlaying = {},
-                onExpandPlayer = {}
+                onExpandPlayer = {},
+                onNavigateToPlaylistPlayback = { _, _ -> },
+                musicPlaybackViewModel = koinViewModel()
             )
         }
     }

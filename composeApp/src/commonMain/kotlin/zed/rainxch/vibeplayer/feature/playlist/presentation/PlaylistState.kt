@@ -1,35 +1,13 @@
 package zed.rainxch.vibeplayer.feature.playlist.presentation
 
-import androidx.compose.runtime.Stable
-import zed.rainxch.vibeplayer.core.domain.model.PlaylistInfo
+import zed.rainxch.vibeplayer.feature.playlist.presentation.model.PlaylistCardUi
 
-@Stable
 data class PlaylistState(
-    val totalCount: Int = 1,
-    val favouritesCount: Int = 0,
+    val userPlaylistTotalCount: Int = 0,
+    val totalPlaylistCount: Int = 0,
     val userPlaylists: List<PlaylistCardUi> = emptyList(),
-    val showBottomSheet: Long? = null,
-    val newPlaylistName: String = ""
+    val systemPlaylists: List<PlaylistCardUi> = emptyList(),
+    val newPlaylistName: String = "",
+    val currentPlaylistName: String = "",
+    val showImagePickerForPlaylistId: Int? = null
 )
-
-data class PlaylistCardUi(
-    val id: Int,
-    val title: String,
-    val songsCount: Int,
-    val coverImage: String? = null,
-)
-
-/*fun Playlist.toUi(): PlaylistCardUi =
-    PlaylistCardUi(
-        title = title,
-        songsCount = musics.size,
-        coverImage = coverImage
-    )*/
-
-fun PlaylistInfo.toUi(): PlaylistCardUi =
-    PlaylistCardUi(
-        id = id,
-        title = title,
-        songsCount = musicCount,
-        coverImage = coverImage
-    )

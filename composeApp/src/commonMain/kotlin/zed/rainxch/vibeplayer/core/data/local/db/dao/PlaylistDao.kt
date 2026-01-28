@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import zed.rainxch.vibeplayer.core.data.local.db.entity.MusicEntity
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistEntity
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistMusicCrossRef
 import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistWithCount
@@ -25,8 +26,19 @@ interface PlaylistDao {
     @Delete
     suspend fun deletePlaylist(playlist: PlaylistEntity)
 
-    @Query("SELECT * FROM playlists ORDER BY createdAt DESC")
+    @Query("UPDATE playlists SET title = :changedName WHERE id = :playlistId ")
+    suspend fun renamePlaylist(playlistId: Int, changedName: String)
+
+    @Query("DELETE FROM playlists WHERE id = :playlistId")
+    suspend fun deletePlaylist(playlistId: Int)
+
+
+    @Query("SELECT * FROM playlists ORDER BY id ASC")
     fun getPlaylists(): Flow<List<PlaylistEntity>>
+
+    @Query("UPDATE playlists SET coverImage = :coverImagePath WHERE id = :playlistId")
+    suspend fun updatePlaylistCover(playlistId: Int, coverImagePath: String)
+
 
     @Query(
         """
@@ -40,10 +52,10 @@ interface PlaylistDao {
     fun getPlaylistsWithCount(): Flow<List<PlaylistWithCount>>
 
     @Transaction
-    @Query("SELECT * FROM playlists WHERE id = :playlistId")
+    @Query("SELECT * FROM playlists WHERE id = :playlistId ORDER BY id ASC")
     fun getPlaylistWithMusics(
         playlistId: Int
-    ): Flow<PlaylistWithMusics>
+    ): Flow<PlaylistWithMusics?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addMusicToPlaylist(
@@ -75,4 +87,22 @@ interface PlaylistDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM playlists WHERE title = :title LIMIT 1)")
     suspend fun isPlaylistExists(title: String): Boolean
+
+    @Transaction
+    @Query("""
+    SELECT * FROM musics
+    INNER JOIN playlist_music pm ON musics.id = pm.musicId
+    WHERE pm.playlistId = :playlistId
+    ORDER BY pm.position ASC
+""")
+    fun getMusicsForPlaylist(playlistId: Int): Flow<List<MusicEntity>>
+
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1 FROM playlist_music
+        WHERE playlistId = :playlistId AND musicId = :musicId
+    )
+""")
+    suspend fun isMusicInPlaylist(playlistId: Int, musicId: Int): Boolean
+
 }

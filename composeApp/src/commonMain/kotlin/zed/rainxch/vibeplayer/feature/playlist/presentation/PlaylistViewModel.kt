@@ -5,13 +5,15 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
-import kotlin.time.Clock
+import zed.rainxch.vibeplayer.feature.playlist.presentation.mappers.toUi
 import kotlin.time.ExperimentalTime
 
 private const val MAX_PLAYLIST_NAME_LENGTH = 40
@@ -40,43 +42,154 @@ class PlaylistViewModel(
     private val _events = Channel<PlaylistEvent>()
     val events = _events.receiveAsFlow()
 
+    private val _bottomSheetContent = MutableStateFlow<SheetContent?>(null)
+    val bottomSheetContent = _bottomSheetContent.asStateFlow()
+
     private fun loadPlaylists() {
         viewModelScope.launch {
-            repository.getPlaylistsInfo().collect { playlists ->
-                _state.update { currentState ->
-                    currentState.copy(
-                        totalCount = playlists.size + 1,
-                        userPlaylists = playlists.map { it.toUi() }
+            repository
+                .getPlaylistsInfo()
+                .collect { playlists ->
+                    _state.update { currentState ->
+                        val (system, user) = playlists.partition {
+                            it.id == AppDatabase.FAVOURITES_PLAYLIST_ID
+                        }
+
+                        currentState.copy(
+                            userPlaylistTotalCount = user.size,
+                            userPlaylists = user.map { it.toUi() },
+                            systemPlaylists = system.map { it.toUi() },
+                            totalPlaylistCount = user.size + system.size
+                        )
+                    }
+                }
+        }
+    }
+
+    fun onAction(action: PlaylistAction) {
+        when (action) {
+            PlaylistAction.OnCreatePlaylistClick -> {
+                showBottomSheet(SheetContent.CreatePlaylist)
+            }
+
+            is PlaylistAction.OnPlaylistMoreOptions -> {
+                showBottomSheet(
+                    SheetContent.ShowPlaylistActions(
+                        id = action.id,
+                        title = action.title,
+                        songsCount = action.songsCount,
+                        coverImage = action.coverImage
+                    )
+                )
+            }
+
+            is PlaylistAction.OnSystemPlaylistMoreOptions -> {
+                showBottomSheet(
+                    SheetContent.ShowSystemPlaylistActions(
+                        id = action.id,
+                        title = action.title,
+                        songsCount = action.songsCount,
+                    )
+                )
+            }
+
+
+            PlaylistAction.OnDismissBottomSheet -> dismissBottomSheet()
+
+            is PlaylistAction.OnPlaylistNameChange -> onPlaylistNameChange(action.name)
+
+            PlaylistAction.OnConfirmCreatePlaylist -> onConfirmCreatePlaylist()
+
+            is PlaylistAction.OnCurrentPlaylistNameChange -> {
+                onCurrentPlaylistNameChange(name = action.name)
+            }
+
+            is PlaylistAction.OnChangeCoverClick -> {
+                _state.update { it.copy(showImagePickerForPlaylistId = action.playlistId) }
+            }
+
+            is PlaylistAction.OnImagePickerDismissed -> {
+                _state.update { it.copy(showImagePickerForPlaylistId = null) }
+            }
+
+            is PlaylistAction.OnCoverImageSelected -> {
+                _state.update {
+                    it.copy(showImagePickerForPlaylistId = null)
+                }
+                dismissBottomSheet()
+
+                action.imagePath?.let { path ->
+                    viewModelScope.launch {
+                        repository.changePlaylistCover(action.playlistId, path)
+                    }
+                }
+            }
+
+            is PlaylistAction.OnConfirmRenamePlaylist -> {
+                onConfirmRenamePlaylist(playlistId = action.playlistId)
+            }
+
+            is PlaylistAction.OnDeletePlaylistClick -> {
+                showBottomSheet(
+                    SheetContent.DeletePlaylist(
+                        playListId = action.playlistId,
+                        playlistName = action.playlistName
+                    )
+                )
+            }
+
+            is PlaylistAction.OnConfirmDeletePlaylist -> {
+                onConfirmDeletePlaylist(playlistId = action.playlistId)
+            }
+
+            is PlaylistAction.OnPlayPlaylistClick -> {
+                onNavigateToPlaylistPlayback(playlistId = action.playlistId)
+            }
+
+            is PlaylistAction.OnRenamePlaylistClick -> {
+                showBottomSheet(SheetContent.RenamePlaylist(playListId = action.playlistId))
+
+                _state.update {
+                    it.copy(
+                        currentPlaylistName = action.currentName
                     )
                 }
             }
         }
     }
 
-    fun onAction(action: PlaylistAction) {
-        when (action) {
-            PlaylistAction.OnCreatePlaylistClick -> onCreatePlaylistClick()
-            PlaylistAction.OnDismissBottomSheet -> onDismissBottomSheet()
-            is PlaylistAction.OnPlaylistNameChange -> onPlaylistNameChange(action.name)
-            PlaylistAction.OnConfirmCreatePlaylist -> onConfirmCreatePlaylist()
-        }
+    private fun showBottomSheet(content: SheetContent) {
+        _bottomSheetContent.update { content }
     }
 
-    private fun onCreatePlaylistClick() {
+    fun dismissBottomSheet() {
+        _bottomSheetContent.update { null }
+
         _state.update {
             it.copy(
-                showBottomSheet = Clock.System.now().toEpochMilliseconds(),
-                newPlaylistName = ""
+                newPlaylistName = "",
+                currentPlaylistName = ""
             )
         }
     }
 
-    private fun onDismissBottomSheet() {
-        _state.update {
-            it.copy(
-                showBottomSheet = null,
-                newPlaylistName = ""
+    fun onNavigateToPlaylistPlayback(playlistId: Int) {
+        viewModelScope.launch {
+            _events.send(
+                PlaylistEvent.OnNavigateToPlaylistPlayback(
+                    playlistId = playlistId,
+                    startPlaylistPlayback = true
+                )
             )
+            dismissBottomSheet()
+        }
+    }
+
+    private fun onCurrentPlaylistNameChange(name: String) {
+        if (name.length <= MAX_PLAYLIST_NAME_LENGTH) {
+            _state.update {
+                it.copy(currentPlaylistName = name)
+            }
         }
     }
 
@@ -92,13 +205,9 @@ class PlaylistViewModel(
         viewModelScope.launch {
             val result = repository.createPlaylist(_state.value.newPlaylistName)
             result.fold(
-                onSuccess = {
-                    _state.update {
-                        it.copy(
-                            showBottomSheet = null,
-                            newPlaylistName = ""
-                        )
-                    }
+                onSuccess = { playlistId ->
+                    dismissBottomSheet()
+                    _events.send(PlaylistEvent.OnNavigateToAddSongs(playlistId))
                 },
                 onFailure = { error ->
                     _events.send(
@@ -111,4 +220,42 @@ class PlaylistViewModel(
         }
     }
 
+    fun onConfirmRenamePlaylist(playlistId: Int) {
+        viewModelScope.launch {
+            val result = repository.renamePlaylist(
+                playlistId = playlistId,
+                changedName = _state.value.currentPlaylistName
+            )
+            result.fold(
+                onSuccess = {
+                    dismissBottomSheet()
+                },
+                onFailure = { error ->
+                    _events.send(
+                        PlaylistEvent.ShowSnackbar(
+                            error.message ?: "Failed to rename playlist"
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    fun onConfirmDeletePlaylist(playlistId: Int) {
+        viewModelScope.launch {
+            val result = repository.deletePlaylist(playlistId = playlistId)
+            result.fold(
+                onSuccess = {
+                    dismissBottomSheet()
+                },
+                onFailure = { error ->
+                    _events.send(
+                        PlaylistEvent.ShowSnackbar(
+                            error.message ?: "Failed to delete playlist"
+                        )
+                    )
+                }
+            )
+        }
+    }
 }

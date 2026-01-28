@@ -16,12 +16,16 @@ import zed.rainxch.vibeplayer.core.data.local.db.entity.PlaylistMusicCrossRef
         PlaylistEntity::class,
         PlaylistMusicCrossRef::class
     ],
-    version = 3
+    version = 4
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract val musicDao: MusicsDao
     abstract val playlistDao: PlaylistDao
+
+    companion object {
+        const val FAVOURITES_PLAYLIST_ID = 0
+    }
 }
 
 expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase>
