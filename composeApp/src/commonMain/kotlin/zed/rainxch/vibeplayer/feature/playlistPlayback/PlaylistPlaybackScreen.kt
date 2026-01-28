@@ -1,5 +1,6 @@
 package zed.rainxch.vibeplayer.feature.playlistPlayback
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +22,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -54,6 +59,7 @@ import zed.rainxch.vibeplayer.feature.playlist.presentation.components.SongsCoun
 @Composable
 fun PlaylistPlaybackRoot(
     id: Int,
+    startPlaying: Boolean = false,
     navigateBack: () -> Unit,
     navigateToAddSongs: () -> Unit,
     musicPlaybackViewModel: MusicPlaybackViewModel = koinViewModel(),
@@ -64,6 +70,25 @@ fun PlaylistPlaybackRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val playPlaylist: (Boolean) -> Unit = remember {
+        { isShuffled ->
+            musicPlaybackViewModel.createPlayList(state.songs)
+            if (isShuffled) {
+                musicPlaybackViewModel.onAction(MusicPlaybackAction.OnShuffleAndPlayClick)
+            } else {
+                musicPlaybackViewModel.onAction(MusicPlaybackAction.OnPlayAllClick)
+
+            }
+            onNavigateToNowPlaying()
+        }
+    }
+
+    LaunchedEffect(startPlaying, state) {
+        if (startPlaying && state.songs.isNotEmpty()) {
+            playPlaylist(false)
+        }
+    }
+
     PlaylistPlaybackScreen(
         state = state,
         onAction = {
@@ -71,14 +96,10 @@ fun PlaylistPlaybackRoot(
                 PlaylistPlaybackAction.NavigateBack -> navigateBack()
                 PlaylistPlaybackAction.AddSongs -> navigateToAddSongs()
                 PlaylistPlaybackAction.Play -> {
-                    musicPlaybackViewModel.createPlayList(state.songs)
-                    musicPlaybackViewModel.onAction(MusicPlaybackAction.OnPlayAllClick)
-                    onNavigateToNowPlaying()
+                    playPlaylist(false)
                 }
                 PlaylistPlaybackAction.Shuffle -> {
-                    musicPlaybackViewModel.createPlayList(state.songs)
-                    musicPlaybackViewModel.onAction(MusicPlaybackAction.OnShuffleAndPlayClick)
-                    onNavigateToNowPlaying()
+                    playPlaylist(true)
                 }
             }
         }
@@ -130,39 +151,41 @@ fun PlaylistPlaybackScreen(
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             item {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 30.dp)
-                        .size(200.dp)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = .2f)
-                                )
-                            ),
-                            CircleShape,
-                            alpha = .4f
-                        )
-                    ,
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (state.image == null) {
-                        Icon(
+                if (state.image == null) {
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 30.dp)
+                            .size(200.dp)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    listOf(
+                                        MaterialTheme.colorScheme.primary,
+                                        MaterialTheme.colorScheme.primary.copy(alpha = .2f)
+                                    )
+                                ),
+                                CircleShape,
+                                alpha = .4f
+                            )
+                        ,
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
                             modifier = Modifier.size(120.dp),
-                            // todo: replace with default image
-                            painter = painterResource(Res.drawable.ic_playlist),
+                            painter = painterResource(state.defaultImage),
                             contentDescription = null,
-                            tint = Color.Unspecified
-                        )
-                    } else {
-                        AsyncImage(
-                            model = state.image,
-                            contentDescription = null
                         )
                     }
 
+                } else {
+                    AsyncImage(
+                        modifier = Modifier
+                            .padding(top = 30.dp)
+                            .size(200.dp),
+                        model = state.image,
+                        contentDescription = null
+                    )
                 }
+
 
                 Text(
                     text = state.title,

@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import vibeplayer.composeapp.generated.resources.Res
+import vibeplayer.composeapp.generated.resources.ic_heart
+import vibeplayer.composeapp.generated.resources.ic_playlist
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
 
 class PlaylistPlaybackViewModel(
@@ -44,6 +47,7 @@ class PlaylistPlaybackViewModel(
             repository.getPlaylistWithMusics(id).collectLatest { playlistFull ->
                 _state.update {
                     it.copy(
+                        defaultImage = if (playlistFull.id == 0) Res.drawable.ic_heart else Res.drawable.ic_playlist,
                         title = playlistFull.title,
                         songs = playlistFull.musics,
                         image = playlistFull.coverImage
