@@ -10,6 +10,12 @@ sealed interface SheetContent {
         val coverImage: String?
     ) : SheetContent
 
+    data class ShowSystemPlaylistActions(
+        val id: Int,
+        val title: String,
+        val songsCount: Int,
+    ) : SheetContent
+
     data class RenamePlaylist(
         val playListId: Int
     ) : SheetContent

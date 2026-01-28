@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -49,11 +50,13 @@ fun SelectPlaylistBottomSheet(
         sheetMaxWidth = 480.dp,
         containerColor = MaterialTheme.colorScheme.onSecondary,
         dragHandle = null,
-        modifier = modifier
+        modifier = modifier,
     ) {
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.onSecondary)
+                .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
         ) {
             NowPlayingPlaylistItem(
@@ -83,30 +86,43 @@ fun SelectPlaylistBottomSheet(
             playlists.forEach { playlist ->
                 NowPlayingPlaylistItem(
                     icon = {
-                        Image(
-                            painter = painterResource(if(playlist.id == AppDatabase.FAVOURITES_PLAYLIST_ID) {
-                                Res.drawable.ic_heart
-                            } else Res.drawable.ic_playlist),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    Brush.linearGradient(
-                                        listOf(
-                                            Color(0xffDE84FF),
-                                            Color(0xffDE84FF).copy(alpha = .2f),
+                        if (playlist.coverImage == null) {
+                            Image(
+                                painter = painterResource(
+                                    if (playlist.id == AppDatabase.FAVOURITES_PLAYLIST_ID) {
+                                        Res.drawable.ic_heart
+                                    } else Res.drawable.ic_playlist
+                                ),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.linearGradient(
+                                            listOf(
+                                                Color(0xffDE84FF),
+                                                Color(0xffDE84FF).copy(alpha = .2f),
+                                            )
                                         )
                                     )
-                                )
-                                .padding(14.dp),
-                            contentScale = ContentScale.Crop
-                        )
+                                    .padding(14.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            AsyncImage(
+                                model = playlist.coverImage,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     },
                     name = playlist.title,
                     songsCount = playlist.musics.count(),
                     onClick = {
-                        if(playlist.id == AppDatabase.FAVOURITES_PLAYLIST_ID) {
+                        if (playlist.id == AppDatabase.FAVOURITES_PLAYLIST_ID) {
                             onFavouritePlaylistClick()
                         } else {
                             onPlaylistSelected(playlist)

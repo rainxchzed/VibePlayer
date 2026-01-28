@@ -272,6 +272,7 @@ fun AppNavigation(
                                 navigateToAddSongs = {
                                     navBackStack.add(VibePlayerGraph.AddSongsScreen(playListId = route.playListId))
                                 },
+                                musicPlaybackViewModel = musicPlaybackViewModel,
                                 onNavigateToNowPlaying = { musicId ->
                                     navBackStack[navBackStack.lastIndex] =
                                         route.copy(startPlaylistPlayback = false)

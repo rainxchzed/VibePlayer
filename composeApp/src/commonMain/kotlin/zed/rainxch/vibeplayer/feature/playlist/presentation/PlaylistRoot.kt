@@ -41,11 +41,13 @@ import zed.rainxch.vibeplayer.core.presentation.components.ImagePicker
 import zed.rainxch.vibeplayer.core.presentation.components.buttons.AppOutlinedButton
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.core.presentation.utils.ObserveAsEvents
+import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistAction.*
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.DeletePlayListBottomSheet
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlayListOptionsBottomSheet
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistCard
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.PlaylistsHeader
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.RenamePlaylistBottomSheet
+import zed.rainxch.vibeplayer.feature.playlist.presentation.components.SystemPlayListOptionsBottomSheet
 import zed.rainxch.vibeplayer.feature.playlist.presentation.model.PlaylistCardUi
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -138,8 +140,8 @@ fun PlaylistScreen(
         show = state.showImagePickerForPlaylistId != null,
         onImageSelected = { imagePath ->
             state.showImagePickerForPlaylistId?.let { playlistId ->
-                onAction(PlaylistAction.OnCoverImageSelected(playlistId, imagePath))
-            } ?: onAction(PlaylistAction.OnImagePickerDismissed)
+                onAction(OnCoverImageSelected(playlistId, imagePath))
+            } ?: onAction(OnImagePickerDismissed)
         }
     )
 
@@ -153,7 +155,7 @@ fun PlaylistScreen(
             PlaylistsHeader(
                 totalCount = state.totalPlaylistCount,
                 onCreatePlaylistClick = {
-                    onAction(PlaylistAction.OnCreatePlaylistClick)
+                    onAction(OnCreatePlaylistClick)
                 }
             )
         }
@@ -165,7 +167,15 @@ fun PlaylistScreen(
                 onClick = {
                     onNavigateToPlaylist(0)
                 },
-                onThreeDotsClick = { }
+                onThreeDotsClick = {
+                    onAction(
+                        OnSystemPlaylistMoreOptions(
+                            id = playList.id,
+                            title = playList.title,
+                            songsCount = playList.songsCount,
+                        )
+                    )
+                }
             )
         }
 
@@ -189,7 +199,7 @@ fun PlaylistScreen(
                 AppOutlinedButton(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     onClick = {
-                        onAction(PlaylistAction.OnCreatePlaylistClick)
+                        onAction(OnCreatePlaylistClick)
                     }
                 ) {
                     Row(
@@ -228,8 +238,8 @@ fun PlaylistScreen(
                 },
                 onThreeDotsClick = {
                     onAction(
-                        PlaylistAction.OnPlaylistMoreOptions(
-                            playList.id,
+                        OnPlaylistMoreOptions(
+                            id = playList.id,
                             title = playList.title,
                             songsCount = playList.songsCount,
                             coverImage = playList.coverImage
@@ -253,11 +263,11 @@ private fun BottomSheetContentSwitch(
             CreateNewPlaylistBottomSheet(
                 playlistName = state.newPlaylistName,
                 onPlaylistNameChange = { name ->
-                    onAction(PlaylistAction.OnPlaylistNameChange(name))
+                    onAction(OnPlaylistNameChange(name))
                 },
                 onCancel = onDismiss,
                 onCreate = {
-                    onAction(PlaylistAction.OnConfirmCreatePlaylist)
+                    onAction(OnConfirmCreatePlaylist)
                 }
             )
         }
@@ -276,11 +286,11 @@ private fun BottomSheetContentSwitch(
             RenamePlaylistBottomSheet(
                 playlistName = state.currentPlaylistName,
                 onCurrentPlaylistNameChange = { changeName ->
-                    onAction(PlaylistAction.OnCurrentPlaylistNameChange(changeName))
+                    onAction(OnCurrentPlaylistNameChange(changeName))
                 },
                 onCancel = onDismiss,
                 onRename = {
-                    onAction(PlaylistAction.OnConfirmRenamePlaylist(content.playListId))
+                    onAction(OnConfirmRenamePlaylist(content.playListId))
                 }
             )
         }
@@ -290,8 +300,17 @@ private fun BottomSheetContentSwitch(
                 playlistName = content.playlistName,
                 onCancel = onDismiss,
                 onDelete = {
-                    onAction(PlaylistAction.OnConfirmDeletePlaylist(content.playListId))
+                    onAction(OnConfirmDeletePlaylist(content.playListId))
                 }
+            )
+        }
+
+        is SheetContent.ShowSystemPlaylistActions -> {
+            SystemPlayListOptionsBottomSheet(
+                id = content.id,
+                title = content.title,
+                songsCount = content.songsCount,
+                onAction = onAction
             )
         }
     }

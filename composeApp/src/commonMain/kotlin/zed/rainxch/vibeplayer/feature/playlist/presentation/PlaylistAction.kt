@@ -14,6 +14,12 @@ sealed interface PlaylistAction {
         val coverImage: String? = null,
     ) : PlaylistAction
 
+    data class OnSystemPlaylistMoreOptions(
+        val id: Int,
+        val title: String,
+        val songsCount: Int,
+    ) : PlaylistAction
+
     // Actions for the Options Sheet
     data class OnPlayPlaylistClick(val playlistId: Int) : PlaylistAction
     data class OnRenamePlaylistClick(val playlistId: Int, val currentName: String) : PlaylistAction // Triggers rename UI

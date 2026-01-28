@@ -83,6 +83,17 @@ class PlaylistViewModel(
                 )
             }
 
+            is PlaylistAction.OnSystemPlaylistMoreOptions -> {
+                showBottomSheet(
+                    SheetContent.ShowSystemPlaylistActions(
+                        id = action.id,
+                        title = action.title,
+                        songsCount = action.songsCount,
+                    )
+                )
+            }
+
+
             PlaylistAction.OnDismissBottomSheet -> dismissBottomSheet()
 
             is PlaylistAction.OnPlaylistNameChange -> onPlaylistNameChange(action.name)
@@ -137,16 +148,23 @@ class PlaylistViewModel(
 
             is PlaylistAction.OnRenamePlaylistClick -> {
                 showBottomSheet(SheetContent.RenamePlaylist(playListId = action.playlistId))
+
+                _state.update {
+                    it.copy(
+                        currentPlaylistName = action.currentName
+                    )
+                }
             }
         }
     }
 
     private fun showBottomSheet(content: SheetContent) {
-        _bottomSheetContent.value = content
+        _bottomSheetContent.update { content }
     }
 
     fun dismissBottomSheet() {
-        _bottomSheetContent.value = null
+        _bottomSheetContent.update { null }
+
         _state.update {
             it.copy(
                 newPlaylistName = "",
