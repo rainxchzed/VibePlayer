@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -104,27 +105,27 @@ fun AddSongsRoot(
 
             CenterAlignedTopAppBar(
                 navigationIcon = {
-                IconButton(
-                    onClick = onBackPressed,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryFixed,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    IconButton(
+                        onClick = onBackPressed,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryFixed,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_arrow_left),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }, title = {
+                    Text(
+                        text = if (addSongsState.selectedMusicIds.isEmpty()) stringResource(Res.string.add_songs) else "${addSongsState.selectedMusicIds.size} Selected",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_arrow_left),
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }, title = {
-                Text(
-                    text = if (addSongsState.selectedMusicIds.isEmpty()) stringResource(Res.string.add_songs) else "${addSongsState.selectedMusicIds.size} Selected",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            },
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.onSecondary
                 )
@@ -257,11 +258,14 @@ fun AddSongsScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
                     .wrapContentHeight()
+                    .width(480.dp)
                     .padding(12.dp)
                     .align(Alignment.BottomCenter),
                 colors = ButtonDefaults.buttonColors(contentColor = MaterialTheme.colorScheme.onSurface)
             ) {
-                Text(text = stringResource(Res.string.ok).uppercase())
+                Text(
+                    text = stringResource(Res.string.ok).uppercase()
+                )
             }
         }
     }

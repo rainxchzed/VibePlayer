@@ -4,6 +4,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
@@ -70,6 +71,7 @@ fun SharedTransitionScope.MainControllerScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.onSecondary)
+            .navigationBarsPadding()
     ) {
         SecondaryTabRow(
             selectedTabIndex = state.selectedTab.index,

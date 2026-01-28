@@ -24,13 +24,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,7 +42,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import vibeplayer.composeapp.generated.resources.Res
 import vibeplayer.composeapp.generated.resources.ic_arrow_left
-import vibeplayer.composeapp.generated.resources.ic_playlist
 import vibeplayer.composeapp.generated.resources.ic_plus
 import zed.rainxch.vibeplayer.core.domain.model.Music
 import zed.rainxch.vibeplayer.core.presentation.components.MusicItem
@@ -53,7 +51,6 @@ import zed.rainxch.vibeplayer.core.presentation.theme.HostGroteskFontFamily
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackAction
 import zed.rainxch.vibeplayer.feature.now_playing.presentation.MusicPlaybackViewModel
-import zed.rainxch.vibeplayer.feature.now_playing.presentation.ShuffleMode
 import zed.rainxch.vibeplayer.feature.playlist.presentation.components.SongsCountHeader
 
 @Composable
@@ -63,24 +60,21 @@ fun PlaylistPlaybackRoot(
     navigateBack: () -> Unit,
     navigateToAddSongs: () -> Unit,
     musicPlaybackViewModel: MusicPlaybackViewModel = koinViewModel(),
-    onNavigateToNowPlaying: () -> Unit,
+    onNavigateToNowPlaying: (id: Int?) -> Unit,
     viewModel: PlaylistPlaybackViewModel = koinViewModel(
         key = id.toString(),
     ) { parametersOf(id) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val playPlaylist: (Boolean) -> Unit = remember {
-        { isShuffled ->
-            musicPlaybackViewModel.createPlayList(state.songs)
-            if (isShuffled) {
-                musicPlaybackViewModel.onAction(MusicPlaybackAction.OnShuffleAndPlayClick)
-            } else {
-                musicPlaybackViewModel.onAction(MusicPlaybackAction.OnPlayAllClick)
-
-            }
-            onNavigateToNowPlaying()
+    val playPlaylist: (Boolean) -> Unit = { isShuffled ->
+        musicPlaybackViewModel.createPlayList(state.songs)
+        if (isShuffled) {
+            musicPlaybackViewModel.onAction(MusicPlaybackAction.OnShuffleAndPlayClick)
+        } else {
+            musicPlaybackViewModel.onAction(MusicPlaybackAction.OnPlayAllClick)
         }
+        onNavigateToNowPlaying(null)
     }
 
     LaunchedEffect(startPlaying, state) {
@@ -98,8 +92,13 @@ fun PlaylistPlaybackRoot(
                 PlaylistPlaybackAction.Play -> {
                     playPlaylist(false)
                 }
+
                 PlaylistPlaybackAction.Shuffle -> {
                     playPlaylist(true)
+                }
+
+                is PlaylistPlaybackAction.PlayMusicWithId -> {
+                    onNavigateToNowPlaying(it.musicId)
                 }
             }
         }
@@ -140,13 +139,13 @@ fun PlaylistPlaybackScreen(
                     .fillMaxWidth()
                     .padding(vertical = 10.dp)
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.onSecondary
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)
-                .fillMaxWidth()
-            ,
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
@@ -166,7 +165,7 @@ fun PlaylistPlaybackScreen(
                                 CircleShape,
                                 alpha = .4f
                             )
-                        ,
+                            .clip(CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
@@ -180,9 +179,11 @@ fun PlaylistPlaybackScreen(
                     AsyncImage(
                         modifier = Modifier
                             .padding(top = 30.dp)
-                            .size(200.dp),
+                            .size(200.dp)
+                            .clip(CircleShape),
                         model = state.image,
-                        contentDescription = null
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
                     )
                 }
 
@@ -190,7 +191,8 @@ fun PlaylistPlaybackScreen(
                 Text(
                     text = state.title,
                     style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
                     ),
                     modifier = Modifier.padding(top = 28.dp, bottom = 30.dp)
                 )
@@ -206,6 +208,7 @@ fun PlaylistPlaybackScreen(
                             onAction(PlaylistPlaybackAction.Shuffle)
                         }
                     )
+
                     SongsCountHeader(
                         totalCount = state.songs.size,
                         onAddClick = {
@@ -213,12 +216,16 @@ fun PlaylistPlaybackScreen(
                         }
                     )
                 }
-                items(state.songs) {
+
+                items(state.songs) { music ->
                     MusicItem(
-                        music = it,
-                        onClick = {}
+                        music = music,
+                        onClick = {
+                            PlaylistPlaybackAction.PlayMusicWithId(music.id)
+                        }
                     )
                 }
+
             } else {
                 item {
                     Text(
@@ -232,6 +239,7 @@ fun PlaylistPlaybackScreen(
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
                     AppOutlinedButton(
                         modifier = Modifier.padding(top = 8.dp),
                         onClick = {

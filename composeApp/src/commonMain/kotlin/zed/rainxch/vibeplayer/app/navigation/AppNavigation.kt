@@ -160,20 +160,11 @@ fun AppNavigation(
                         )
                     }
 
-//                    is VibePlayerGraph.NowPlayingScreen -> {
-//                        NowPlayingTopbar(
-//                            onMinimizeClick = {
-//
-//                                navBackStack.removeLastOrNull()
-//                            }
-//                        )
-//                    }
-
                     else -> {}
                 }
             },
             containerColor = MaterialTheme.colorScheme.onSecondary,
-            contentWindowInsets = WindowInsets(0.dp)
+            contentWindowInsets = WindowInsets(0.dp),
         ) { innerPadding ->
             SharedTransitionLayout {
                 NavDisplay(
@@ -281,10 +272,12 @@ fun AppNavigation(
                                 navigateToAddSongs = {
                                     navBackStack.add(VibePlayerGraph.AddSongsScreen(playListId = route.playListId))
                                 },
-                                onNavigateToNowPlaying = {
-                                    navBackStack[navBackStack.lastIndex] = route.copy(startPlaylistPlayback = false)
-                                    navBackStack.add(VibePlayerGraph.NowPlayingScreen())
+                                onNavigateToNowPlaying = { musicId ->
+                                    navBackStack[navBackStack.lastIndex] =
+                                        route.copy(startPlaylistPlayback = false)
+                                    navBackStack.add(VibePlayerGraph.NowPlayingScreen(musicId))
                                 },
+
                             )
                         }
 

@@ -1,6 +1,9 @@
 package zed.rainxch.vibeplayer.feature.playlist.presentation
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,10 +28,12 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -139,6 +144,14 @@ fun PlaylistScreen(
                 }
             }
     }
+
+    val isExpanded = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
+    val targetValue = scaffoldState.bottomSheetState.targetValue
+
+    val scrimAlpha by animateFloatAsState(
+        targetValue = if (targetValue == SheetValue.Expanded) 0.6f else 0f,
+        label = "scrimAlpha"
+    )
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -324,6 +337,22 @@ fun PlaylistScreen(
                     }
                 )
             }
+        }
+
+        if (scrimAlpha > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = scrimAlpha))
+                    .clickable(
+                        enabled = isExpanded,
+                        onClick = {
+                            scope.launch { scaffoldState.bottomSheetState.partialExpand() }
+                        },
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    )
+            )
         }
     }
 }

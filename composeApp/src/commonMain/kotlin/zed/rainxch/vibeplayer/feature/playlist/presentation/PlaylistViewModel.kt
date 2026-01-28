@@ -161,6 +161,10 @@ class PlaylistViewModel(
                     startPlaylistPlayback = true
                 )
             )
+
+            _state.update { it.copy(
+                showBottomSheet = null
+            ) }
         }
     }
 
