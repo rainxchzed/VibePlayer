@@ -16,17 +16,15 @@ import zed.rainxch.vibeplayer.core.presentation.utils.formatMilliseconds
 
 class IOSMusicsDataStore : MusicsDataStore {
 
-    override fun scanMusics(): ImmutableList<Music> {
-        return runBlocking {
-            withContext(Dispatchers.Default) {
-                scanForAudioFiles()
-            }
-        }
-    }
+    override suspend fun scanMusics(): ImmutableList<Music> = scanForAudioFiles()
 
     override fun checkIfMusicExist(music: Music): Boolean {
-        val fileManager = NSFileManager.defaultManager
-        return fileManager.fileExistsAtPath(music.musicUrl)
+        val url = NSURL.URLWithString(music.musicUrl) ?: return false
+        return if (url.isFileURL()) {
+            NSFileManager.defaultManager.fileExistsAtPath(url.path ?: return false)
+        } else {
+            true
+        }
     }
 
     private suspend fun scanForAudioFiles(): ImmutableList<Music> =
@@ -38,11 +36,11 @@ class IOSMusicsDataStore : MusicsDataStore {
 
             items.forEach { item ->
                 val mediaItem = item as? MPMediaItem ?: return@forEach
-                
+
                 // Get asset URL
                 val assetURL = mediaItem.assetURL ?: return@forEach
                 val urlString = assetURL.absoluteString ?: return@forEach
-                
+
                 // Filter by duration (30+ seconds) and valid URL
                 val duration = mediaItem.playbackDuration
                 if (duration > 30.0) {
@@ -60,7 +58,7 @@ class IOSMusicsDataStore : MusicsDataStore {
             val artist = mediaItem.artist ?: "Unknown Artist"
             val durationSeconds = mediaItem.playbackDuration.toInt()
             val duration = formatDuration(durationSeconds)
-            
+
             // Extract album art
             val bannerUrl = extractAlbumArt(mediaItem, urlString)
 
@@ -82,21 +80,21 @@ class IOSMusicsDataStore : MusicsDataStore {
     private fun extractAlbumArt(mediaItem: MPMediaItem, urlString: String): String? {
         return try {
             val artwork = mediaItem.artwork ?: return null
-            
+
             // Get the image from artwork
             val image = artwork.imageWithSize(CGSizeMake(300.0, 300.0)) ?: return null
-            
+
             // Convert to JPEG data
             val imageData = UIImageJPEGRepresentation(image, 0.8) ?: return null
-            
+
             // Save to cache directory
             val cacheDir = NSFileManager.defaultManager.URLsForDirectory(
                 NSCachesDirectory,
                 NSUserDomainMask
             ).firstOrNull() as? NSURL ?: return null
-            
+
             val albumArtDir = cacheDir.URLByAppendingPathComponent("album_art", true)
-            
+
             // Create directory if needed
             NSFileManager.defaultManager.createDirectoryAtURL(
                 albumArtDir!!,
@@ -104,14 +102,13 @@ class IOSMusicsDataStore : MusicsDataStore {
                 null,
                 null
             )
-            
+
             // Create unique filename
             val fileName = "${urlString.hashCode()}_art.jpg"
             val fileURL = albumArtDir.URLByAppendingPathComponent(fileName, false)
-            
-            // Write image data to file
-            imageData.writeToURL(fileURL!!, true)
-            
+
+            val success = imageData.writeToURL(fileURL!!, true)
+            if (!success) return null
             fileURL.path
         } catch (e: Exception) {
             println("Error extracting album art: ${e.message}")

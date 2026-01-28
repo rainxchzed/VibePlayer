@@ -65,15 +65,7 @@ fun PlayListOptionsBottomSheet(
             title = title,
             songsCount = songsCount,
             icon = {
-
-                // Your AsyncImage or Icon goes here
                 if (coverImage == null) {
-                    /*       Icon(
-                               painter = painterResource(Res.drawable.ic_playlist), // Example placeholder
-                               contentDescription = null,
-                               modifier = Modifier.size(32.dp)
-                           )*/
-
                     Image(
                         painter = painterResource(Res.drawable.ic_playlist),
                         contentDescription = null,
@@ -92,16 +84,13 @@ fun PlayListOptionsBottomSheet(
                         contentScale = ContentScale.Crop
                     )
                 } else {
-
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        // ADD THIS MODIFIER:
-                        .background(MaterialTheme.colorScheme.surfaceVariant), // Or any other color
-                    contentAlignment = Alignment.Center
-                ) {
-
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
                         AsyncImage(
                             model = coverImage,
                             contentDescription = null,
@@ -113,44 +102,6 @@ fun PlayListOptionsBottomSheet(
                         )
                     }
                 }
-
-           /*     if (coverImage == null) {
-                    Image(
-                        painter = painterResource(Res.drawable.ic_playlist),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        Color(0xffDE84FF),
-                                        Color(0xffDE84FF).copy(alpha = .2f),
-                                    )
-                                )
-                            )
-                            .padding(14.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    AsyncImage(
-                        model = coverImage,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        Color(0xffDE84FF),
-                                        Color(0xffDE84FF).copy(alpha = .2f),
-                                    )
-                                )
-                            )
-                            .padding(14.dp),
-                        contentScale = ContentScale.Crop
-                    )
-                }*/
             },
         )
 

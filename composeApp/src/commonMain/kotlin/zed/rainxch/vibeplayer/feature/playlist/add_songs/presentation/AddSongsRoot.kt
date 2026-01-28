@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -256,9 +257,10 @@ fun AddSongsScreen(
                         onAction(AddSongsAction.OnConfirm(playlistId))
 
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .widthIn(max = 480.dp)
+                    .fillMaxWidth()
                     .wrapContentHeight()
-                    .width(480.dp)
                     .padding(12.dp)
                     .align(Alignment.BottomCenter),
                 colors = ButtonDefaults.buttonColors(contentColor = MaterialTheme.colorScheme.onSurface)

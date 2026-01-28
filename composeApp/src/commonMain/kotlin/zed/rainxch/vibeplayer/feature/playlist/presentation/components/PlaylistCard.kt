@@ -33,7 +33,7 @@ import vibeplayer.composeapp.generated.resources.ic_heart
 import vibeplayer.composeapp.generated.resources.ic_menu_dots
 import vibeplayer.composeapp.generated.resources.playlists_songs_count
 import zed.rainxch.vibeplayer.core.presentation.theme.VibePlayerTheme
-import zed.rainxch.vibeplayer.feature.playlist.presentation.PlaylistCardUi
+import zed.rainxch.vibeplayer.feature.playlist.presentation.model.PlaylistCardUi
 
 @Composable
 fun PlaylistCard(

@@ -77,7 +77,7 @@ fun PlaylistPlaybackRoot(
         onNavigateToNowPlaying(null)
     }
 
-    LaunchedEffect(startPlaying, state) {
+    LaunchedEffect(startPlaying, state.songs.isNotEmpty()) {
         if (startPlaying && state.songs.isNotEmpty()) {
             playPlaylist(false)
         }
@@ -221,7 +221,7 @@ fun PlaylistPlaybackScreen(
                     MusicItem(
                         music = music,
                         onClick = {
-                            PlaylistPlaybackAction.PlayMusicWithId(music.id)
+                            onAction(PlaylistPlaybackAction.PlayMusicWithId(music.id))
                         }
                     )
                 }

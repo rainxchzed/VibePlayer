@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -12,10 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import zed.rainxch.vibeplayer.core.data.local.db.AppDatabase
 import zed.rainxch.vibeplayer.feature.playlist.domain.PlaylistsRepository
-import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.CreatePlaylist
-import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.DeletePlaylist
-import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.RenamePlaylist
-import zed.rainxch.vibeplayer.feature.playlist.presentation.SheetContent.ShowPlaylistActions
+import zed.rainxch.vibeplayer.feature.playlist.presentation.mappers.toUi
 import kotlin.time.ExperimentalTime
 
 private const val MAX_PLAYLIST_NAME_LENGTH = 40
@@ -44,6 +42,9 @@ class PlaylistViewModel(
     private val _events = Channel<PlaylistEvent>()
     val events = _events.receiveAsFlow()
 
+    private val _bottomSheetContent = MutableStateFlow<SheetContent?>(null)
+    val bottomSheetContent = _bottomSheetContent.asStateFlow()
+
     private fun loadPlaylists() {
         viewModelScope.launch {
             repository
@@ -68,26 +69,25 @@ class PlaylistViewModel(
     fun onAction(action: PlaylistAction) {
         when (action) {
             PlaylistAction.OnCreatePlaylistClick -> {
-                _state.update { it.copy(showBottomSheet = CreatePlaylist) }
+                showBottomSheet(SheetContent.CreatePlaylist)
             }
 
             is PlaylistAction.OnPlaylistMoreOptions -> {
-                _state.update {
-                    it.copy(
-                        showBottomSheet = ShowPlaylistActions(
-                            id = action.id,
-                            title = action.title,
-                            songsCount = action.songsCount,
-                            coverImage = action.coverImage
-                        )
+                showBottomSheet(
+                    SheetContent.ShowPlaylistActions(
+                        id = action.id,
+                        title = action.title,
+                        songsCount = action.songsCount,
+                        coverImage = action.coverImage
                     )
-                }
+                )
             }
 
-            PlaylistAction.OnDismissBottomSheet -> onDismissBottomSheet()
-            is PlaylistAction.OnPlaylistNameChange -> onPlaylistNameChange(action.name)
-            PlaylistAction.OnConfirmCreatePlaylist -> onConfirmCreatePlaylist()
+            PlaylistAction.OnDismissBottomSheet -> dismissBottomSheet()
 
+            is PlaylistAction.OnPlaylistNameChange -> onPlaylistNameChange(action.name)
+
+            PlaylistAction.OnConfirmCreatePlaylist -> onConfirmCreatePlaylist()
 
             is PlaylistAction.OnCurrentPlaylistNameChange -> {
                 onCurrentPlaylistNameChange(name = action.name)
@@ -95,23 +95,17 @@ class PlaylistViewModel(
 
             is PlaylistAction.OnChangeCoverClick -> {
                 _state.update { it.copy(showImagePickerForPlaylistId = action.playlistId) }
-
             }
 
             is PlaylistAction.OnImagePickerDismissed -> {
                 _state.update { it.copy(showImagePickerForPlaylistId = null) }
             }
 
-
             is PlaylistAction.OnCoverImageSelected -> {
-
                 _state.update {
-                    it.copy(
-                        showImagePickerForPlaylistId = null,
-                        showBottomSheet = null
-                    )
+                    it.copy(showImagePickerForPlaylistId = null)
                 }
-
+                dismissBottomSheet()
 
                 action.imagePath?.let { path ->
                     viewModelScope.launch {
@@ -120,20 +114,17 @@ class PlaylistViewModel(
                 }
             }
 
-            is PlaylistAction.OnConfirmRenamePlaylist -> onConfirmRenamePlaylist(
-                playlistId = action.playlistId,
-            )
+            is PlaylistAction.OnConfirmRenamePlaylist -> {
+                onConfirmRenamePlaylist(playlistId = action.playlistId)
+            }
 
             is PlaylistAction.OnDeletePlaylistClick -> {
-                _state.update {
-                    it.copy(
-                        showBottomSheet = DeletePlaylist(
-                            playListId = action.playlistId,
-                            playlistName = action.playlistName
-                        )
+                showBottomSheet(
+                    SheetContent.DeletePlaylist(
+                        playListId = action.playlistId,
+                        playlistName = action.playlistName
                     )
-                }
-
+                )
             }
 
             is PlaylistAction.OnConfirmDeletePlaylist -> {
@@ -142,18 +133,29 @@ class PlaylistViewModel(
 
             is PlaylistAction.OnPlayPlaylistClick -> {
                 onNavigateToPlaylistPlayback(playlistId = action.playlistId)
-
             }
 
             is PlaylistAction.OnRenamePlaylistClick -> {
-                _state.update { it.copy(showBottomSheet = RenamePlaylist(playListId = action.playlistId)) }
-
+                showBottomSheet(SheetContent.RenamePlaylist(playListId = action.playlistId))
             }
         }
     }
 
-    fun onNavigateToPlaylistPlayback(playlistId: Int) {
+    private fun showBottomSheet(content: SheetContent) {
+        _bottomSheetContent.value = content
+    }
 
+    fun dismissBottomSheet() {
+        _bottomSheetContent.value = null
+        _state.update {
+            it.copy(
+                newPlaylistName = "",
+                currentPlaylistName = ""
+            )
+        }
+    }
+
+    fun onNavigateToPlaylistPlayback(playlistId: Int) {
         viewModelScope.launch {
             _events.send(
                 PlaylistEvent.OnNavigateToPlaylistPlayback(
@@ -161,10 +163,7 @@ class PlaylistViewModel(
                     startPlaylistPlayback = true
                 )
             )
-
-            _state.update { it.copy(
-                showBottomSheet = null
-            ) }
+            dismissBottomSheet()
         }
     }
 
@@ -173,67 +172,6 @@ class PlaylistViewModel(
             _state.update {
                 it.copy(currentPlaylistName = name)
             }
-        }
-    }
-
-    fun onConfirmRenamePlaylist(playlistId: Int) {
-        viewModelScope.launch {
-            val result = repository.renamePlaylist(
-                playlistId = playlistId,
-                changedName = _state.value.currentPlaylistName
-            )
-            result.fold(onSuccess = {
-                _state.update {
-                    it.copy(
-                        showBottomSheet = null,
-                        currentPlaylistName = ""
-                    )
-                }
-
-
-            }, onFailure = { error ->
-                _events.send(
-                    PlaylistEvent.ShowSnackbar(
-                        error.message ?: "Failed to rename playlist"
-                    )
-                )
-
-            })
-
-        }
-    }
-
-    fun onConfirmDeletePlaylist(playlistId: Int) {
-        viewModelScope.launch {
-            val result = repository.deletePlaylist(playlistId = playlistId)
-            result.fold(onSuccess = {
-                _state.update {
-                    it.copy(
-                        showBottomSheet = null
-                    )
-                }
-
-
-            }, onFailure = { error ->
-                _events.send(
-                    PlaylistEvent.ShowSnackbar(
-                        error.message ?: "Failed to delete playlist"
-                    )
-                )
-
-            })
-
-        }
-    }
-
-
-    private fun onDismissBottomSheet() {
-        _state.update {
-            it.copy(
-                showBottomSheet = null,
-                newPlaylistName = "",
-                currentPlaylistName = ""
-            )
         }
     }
 
@@ -250,13 +188,7 @@ class PlaylistViewModel(
             val result = repository.createPlaylist(_state.value.newPlaylistName)
             result.fold(
                 onSuccess = { playlistId ->
-                    _state.update {
-                        it.copy(
-                            showBottomSheet = null,
-                            newPlaylistName = ""
-                        )
-                    }
-
+                    dismissBottomSheet()
                     _events.send(PlaylistEvent.OnNavigateToAddSongs(playlistId))
                 },
                 onFailure = { error ->
@@ -270,4 +202,42 @@ class PlaylistViewModel(
         }
     }
 
+    fun onConfirmRenamePlaylist(playlistId: Int) {
+        viewModelScope.launch {
+            val result = repository.renamePlaylist(
+                playlistId = playlistId,
+                changedName = _state.value.currentPlaylistName
+            )
+            result.fold(
+                onSuccess = {
+                    dismissBottomSheet()
+                },
+                onFailure = { error ->
+                    _events.send(
+                        PlaylistEvent.ShowSnackbar(
+                            error.message ?: "Failed to rename playlist"
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    fun onConfirmDeletePlaylist(playlistId: Int) {
+        viewModelScope.launch {
+            val result = repository.deletePlaylist(playlistId = playlistId)
+            result.fold(
+                onSuccess = {
+                    dismissBottomSheet()
+                },
+                onFailure = { error ->
+                    _events.send(
+                        PlaylistEvent.ShowSnackbar(
+                            error.message ?: "Failed to delete playlist"
+                        )
+                    )
+                }
+            )
+        }
+    }
 }

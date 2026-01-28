@@ -328,31 +328,5 @@ fun AppNavigation(
                 )
             }
         }
-
-//        AnimatedVisibility(
-//            visible = isPlayerExpanded,
-//            enter = slideInVertically(
-//                initialOffsetY = { it }, // Starts from bottom
-//                animationSpec = tween(
-//                    durationMillis = 400,
-//                    easing = FastOutSlowInEasing
-//                )
-//            ),
-//            exit = slideOutVertically(
-//                targetOffsetY = { it }, // Slides to bottom
-//                animationSpec = tween(
-//                    durationMillis = 400,
-//                    easing = FastOutSlowInEasing
-//                )
-//            )
-//        ) {
-//            currentMusicId?.let { id ->
-//                NowPlayingRoot(
-//                    musicId = id,
-//                    musicPlaybackViewModel = musicPlaybackViewModel,
-//                    onMinimize = { isPlayerExpanded = false }
-//                )
-//            }
-//        }
     }
 }

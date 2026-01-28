@@ -8,7 +8,6 @@ import android.provider.MediaStore
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import zed.rainxch.vibeplayer.core.data.data_source.MusicsDataStore
 import zed.rainxch.vibeplayer.core.domain.model.Music
@@ -20,13 +19,7 @@ class AndroidMusicsDataStore(
     private val context: Context
 ) : MusicsDataStore {
 
-    override fun scanMusics(): ImmutableList<Music> {
-        return runBlocking {
-            withContext(Dispatchers.IO) {
-                scanForAudioFiles()
-            }
-        }
-    }
+    override suspend fun scanMusics(): ImmutableList<Music> = scanForAudioFiles()
 
     override fun checkIfMusicExist(music: Music): Boolean {
         val file = File(music.musicUrl)
@@ -72,7 +65,6 @@ class AndroidMusicsDataStore(
                     val fileSize = cursor.getLong(sizeColumn)
                     val duration = cursor.getLong(durationColumn)
 
-                    // Skip files smaller than 100KB or shorter than 30s
                     if (fileSize > 100_000 && duration > 30_000) {
                         val file = File(filePath)
                         if (file.exists()) {
@@ -137,7 +129,7 @@ class AndroidMusicsDataStore(
             }
 
             artFile.absolutePath
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
